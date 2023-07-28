@@ -19,7 +19,6 @@ export default class MyPlugin extends Plugin {
 		// await this.loadSettings();
 
 		// TODO 1.0 Parse and render MD
-		this.registerMarkdownCodeBlockProcessor("todotxt", todotxtProcessor);
 
 		// TODO 1.1 CSS
 
@@ -27,6 +26,8 @@ export default class MyPlugin extends Plugin {
 		this.registerEditorExtension([
 			todotxtView(),
 		]);
+
+		// this.registerMarkdownPostProcessor(todotxtMDProcessor);
 
 		// TODO 2. Generation commands / completed archive?
 
