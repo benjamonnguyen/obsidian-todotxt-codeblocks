@@ -21,7 +21,7 @@ export default function handle(source: string, el: HTMLElement, ctx: MarkdownPos
     
         // Parse todo items
         const todoList = source.split("\n")
-            .map(token => new TodoItem(token))
+            .map(line => new TodoItem(line))
             // TODO sort/filter
             // .filter(item => this.filterTodoItem(item, filterOptions))
             // .sort(this.sortTodoItems)
@@ -29,12 +29,15 @@ export default function handle(source: string, el: HTMLElement, ctx: MarkdownPos
         // Build el
         const body = el.createDiv({cls: "todotxt-md-list"});
         for (const [i, item] of todoList.entries()) {
-            console.log(item.toAnnotatedString());
-            body.innerHTML += `<input type="checkbox" id="todotxt-item-${i}"/><label for="todotxt-item-${i}">${item.toString()}</label><br>`
+            body.innerHTML += _generateTodoItemHtml(item, i);
         }
 
-        console.log(el);
+        console.debug(el);
     }
+
+function _generateTodoItemHtml(item: TodoItem, idx: number): string {
+    return `<input type="checkbox" class="todotxt-md-item" id="todotxt-item-${idx}"/><label for="todotxt-item-${idx}">${item.toString()}</label><br>`;
+}
 
 // function _filterTodoItem(item: TodoItem, filterConditions: Map<String, Field>): boolean {
 
