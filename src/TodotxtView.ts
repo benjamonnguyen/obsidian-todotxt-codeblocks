@@ -12,126 +12,103 @@ export const todotxtView = () => {
 }
 
 class TodotxtView implements PluginValue {
-    // private readonly view: EditorView;
+    private readonly view: EditorView;
     decorations: DecorationSet;
 
     constructor(view: EditorView) {
-        this.decorations = this.buildDecorations(view);
-        // this.view = view;
-
-        // this.handleClickEvent = this.handleClickEvent.bind(this);
-        // this.view.dom.addEventListener('click', this.handleClickEvent);
+        this.view = view;
+        this.handleClickEvent = this.handleClickEvent.bind(this);
+        this.view.dom.addEventListener('click', this.handleClickEvent);
+		
+		// this.getTodoItemsInVisibleRangeWithPositions()
+		// 	.forEach(o => this.updateView({from: o.from, to: o.to, insert: o.item.toString()}));
+        this.decorations = this.buildDecorations();
     }
 
     update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged) {
-          this.decorations = this.buildDecorations(update.view);
+          this.decorations = this.buildDecorations();
         }
-      }
+	}
     
-      destroy() {}
+	destroy() {}
 
-    private buildDecorations(view: EditorView): DecorationSet {
-        const builder = new RangeSetBuilder<Decoration>();
+    private buildDecorations(): DecorationSet {
+      const builder = new RangeSetBuilder<Decoration>();
+      
+      this.getTodoItemsInVisibleRangeWithPositions()
+        .forEach(({from, to, item}) => builder.add(from, to, Decoration.replace({widget: new TodoItemLine(item)})));
+
+      return builder.finish();
+    }
+
+    private handleClickEvent(event: MouseEvent): boolean {
+        const { target } = event;
+
+        // Only handle checkbox clicks.
+        if (!target || !(target instanceof HTMLInputElement) || target.type !== 'checkbox' || !target.hasClass("todotxt-md-item")) {
+            return false;
+        }
+
+		event.preventDefault();
+
+        const position = this.view.posAtDOM(target);
+        const line = this.view.state.doc.lineAt(position);
+        console.log(`Checkbox toggled - Position: ${position} Line: ${line.text}`);
+
+        const todoItem = new TodoItem(line.text);
+		todoItem.setComplete(!todoItem.complete());
+		this.updateView({from: line.from, to: line.to, insert: todoItem.toString()});
+
+        // Dirty workaround.
+        // While the code in this method properly updates the `checked` state
+        // of the target checkbox, some Obsidian internals revert the state.
+        // This means that the checkbox would remain in its original `checked`
+        // state (`true` or `false`), even though the underlying document
+        // updates correctly.
+        // As a "fix", we set the checkbox's `checked` state *again* after a
+        // timeout to revert Obsidian's wrongful reversal.
+        // const desiredCheckedStatus = target.checked;
+        // setTimeout(() => {
+        //     target.checked = desiredCheckedStatus;
+        // }, 1);
+
+        return true;
+    }
+
+    private getTodoItemsInVisibleRangeWithPositions(): {from: number, to: number, item: TodoItem}[] {
+      const res: {from: number, to: number, item: TodoItem}[] = [];
     
-        var inBlock = false;
-        for (const { from, to } of view.visibleRanges) {
-          var currIdx = view.state.doc.lineAt(from).number;
-          const endIdx = view.state.doc.lineAt(to).number;
-          while (currIdx <= endIdx) {
-            const currLine = view.state.doc.line(currIdx++);
-            if (inBlock) {
-              if (currLine.text.startsWith("\'\'\'")) {
-                inBlock = false;
-                // builder.add(currLine.from, currLine.to, Decoration.replace({widget: new HorizontalRule()}));
-              } else {
-                try {
-                  builder.add(currLine.from, currLine.to, Decoration.replace({widget: new TodoItemLine(new TodoItem(currLine.text))}));
-                } catch (e) {
-                  console.error(e);
-                }
-              }
+      var inBlock = false;
+      for (const { from, to } of this.view.visibleRanges) {
+        var currIdx = this.view.state.doc.lineAt(from).number;
+        const endIdx = this.view.state.doc.lineAt(to).number;
+        while (currIdx <= endIdx) {
+          const currLine = this.view.state.doc.line(currIdx++);
+          if (inBlock) {
+            if (currLine.text.startsWith("\'\'\'")) {
+              inBlock = false;
             } else {
-              if (currLine.text.startsWith("\'\'\'todotxt")) {
-                inBlock = true;
+              if (currLine.text.trim().length === 0) {
+                continue;
               }
+              res.push({from: currLine.from, to: currLine.to, item: new TodoItem(currLine.text)});
+            }
+          } else {
+            if (currLine.text.startsWith("\'\'\'todotxt")) {
+              inBlock = true;
             }
           }
         }
-
-        return builder.finish();
       }
 
-    // private handleClickEvent(event: MouseEvent): boolean {
-    //     const { targetNode } = event;
+      return res;
+    }
 
-    //     // Only handle checkbox clicks.
-    //     if (!targetNode || !(targetNode instanceof HTMLInputElement) || targetNode.type !== 'checkbox') {
-    //         return false;
-    //     }
-
-    //     if (!targetNode.hasClass("todotxt-md-item")) {
-    //         return false;
-    //     }
-
-    //     /* Right now Obsidian API does not give us a way to handle checkbox clicks inside rendered-widgets-in-LP such as
-    //      * callouts, tables, and transclusions because `this.view.posAtDOM` will return the beginning of the widget
-    //      * as the position for any click inside the widget.
-    //      * For callouts, this means that the task will never be found, since the `lineAt` will be the beginning of the callout.
-    //      * Therefore, produce an error message pop-up using Obsidian's "Notice" feature, log a console warning, then return.
-    //      */
-
-    //     const { state } = this.view;
-    //     const position = this.view.posAtDOM(targetNode);
-    //     const line = state.doc.lineAt(position);
-    //     console.log(`Checkbox toggled - Position: ${position} Line: ${line.text}`);
-
-    //     /* Checkbox clicks will give pos of upper or lower fence.
-    //      * Retain id for idx 
-    //      * 
-    //     */
-
-    //     const todoItem = new TodoItem(line.text);
-
-    //     /*
-    //     // Only handle checkboxes of tasks.
-    //     if (task === null) {
-    //         return false;
-    //     }
-
-    //     // We need to prevent default so that the checkbox is only handled by us and not obsidian.
-    //     event.preventDefault();
-
-    //     // Clicked on a task's checkbox. Toggle the task and set it.
-    //     const toggled = task.toggleWithRecurrenceInUsersOrder();
-    //     const toggledString = toggled.map((t) => t.toFileLineString()).join(state.lineBreak);
-
-    //     // Creates a CodeMirror transaction in order to update the document.
-    //     const transaction = state.update({
-    //         changes: {
-    //             from: line.from,
-    //             to: line.to,
-    //             insert: toggledString,
-    //         },
-    //     });
-    //     this.view.dispatch(transaction);
-
-    //     // Dirty workaround.
-    //     // While the code in this method properly updates the `checked` state
-    //     // of the target checkbox, some Obsidian internals revert the state.
-    //     // This means that the checkbox would remain in its original `checked`
-    //     // state (`true` or `false`), even though the underlying document
-    //     // updates correctly.
-    //     // As a "fix", we set the checkbox's `checked` state *again* after a
-    //     // timeout to revert Obsidian's wrongful reversal.
-    //     const desiredCheckedStatus = target.checked;
-    //     setTimeout(() => {
-    //         target.checked = desiredCheckedStatus;
-    //     }, 1);
-    //     */
-
-    //     return true;
-    // }
+	private updateView(spec: {from: number, to: number, insert: string}) {
+		const transaction = this.view.state.update({changes: [spec]});
+		this.view.dispatch(transaction);
+	}
 }
 
 class TodoItemLine extends WidgetType {
@@ -144,36 +121,8 @@ class TodoItemLine extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
       const div = document.createElement("span");
-      div.innerHTML = `<input type="checkbox" class="todotxt-md-item" id="${this.item.uuid}"/><label for="${this.item.uuid}">${this.item.toString()}</label>`;
+      div.innerHTML = `<input type="checkbox" class="todotxt-md-item" id="${this.item.uuid}" ${this.item.complete() ? "checked" : ""}/><label for="${this.item.uuid}">${this.item.toString()}</label>`;
 
       return div;
   }
 }
-
-// class TodoListHeader extends WidgetType {
-//   title: string = "Todo.txt";
-
-//   constructor(configLine: string) {
-//       super();
-//       var title = "Todo.txt";
-//       const sortStrings: string[] = [];
-//       const filterStrings: string[] = [];
-//       for (const [i, str] of configLine.split(" ").entries()) {
-//           if (str.startsWith("sort:")) {
-//               sortStrings.push(str.substring(4));
-//           } else if (str.startsWith("filter:")) {
-//               filterStrings.push(str.substring(6));
-//           } else if (i === 1) {
-//               title = str;
-//           }
-//       }
-//   }
-
-//   toDOM(view: EditorView): HTMLElement {
-//       const div = document.createElement("div");
-//       div.addClass("todotxt-md-list-header")
-//       div.innerHTML = `${this.title}`;
-
-//       return div;
-//   }
-// }
