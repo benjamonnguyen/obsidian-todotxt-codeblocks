@@ -1,63 +1,62 @@
-import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, PluginSpec, WidgetType } from '@codemirror/view';
-import { RangeSetBuilder } from "@codemirror/state";
+import { EditorView, ViewPlugin, ViewUpdate, DecorationSet, PluginSpec, WidgetType } from '@codemirror/view';
 import type { PluginValue } from '@codemirror/view';
 import { TodoItem } from "./TodoItem";
 
-const pluginSpec: PluginSpec<TodotxtView> = {
-  decorations: (value: TodotxtView) => value.decorations,
-};
-
-export const todotxtView = () => {
-    return ViewPlugin.fromClass(TodotxtView, pluginSpec);
-}
+const BLOCK_OPEN = "\`\`\`todotxt";
+const BLOCK_CLOSE = "\`\`\`";
 
 class TodotxtView implements PluginValue {
     private readonly view: EditorView;
-    decorations: DecorationSet;
 
     constructor(view: EditorView) {
         this.view = view;
-        this.handleClickEvent = this.handleClickEvent.bind(this);
-        this.view.dom.addEventListener('click', this.handleClickEvent);
+
+        this.handleTodoItemToggle = this.handleTodoItemToggle.bind(this);
+        this.view.dom.addEventListener('click', this.handleTodoItemToggle);
+		// this.handleTodoItemKeyPress = this.handleTodoItemKeyPress.bind(this);
+		// this.view.dom.addEventListener('keypress', this.handleTodoItemKeyPress);
+		// TODO ('paste', ClipboardEvent)
 		
-		// this.getTodoItemsInVisibleRangeWithPositions()
-		// 	.forEach(o => this.updateView({from: o.from, to: o.to, insert: o.item.toString()}));
-        this.decorations = this.buildDecorations();
+		// TODO importing todo.txt
+		// TODO periodic persistence of todoItemsInVisibleRange
     }
 
     update(update: ViewUpdate) {
-        if (update.docChanged || update.viewportChanged) {
-          this.decorations = this.buildDecorations();
-        }
 	}
     
-	destroy() {}
+	destroy() {
+		this.view.dom.removeEventListener('click', this.handleTodoItemToggle);
+		// this.view.dom.removeEventListener('keypress', this.handleTodoItemKeyPress);
+	}
 
-    private buildDecorations(): DecorationSet {
-      const builder = new RangeSetBuilder<Decoration>();
-      
-      this.getTodoItemsInVisibleRangeWithPositions()
-        .forEach(({from, to, item}) => builder.add(from, to, Decoration.replace({widget: new TodoItemLine(item)})));
-
-      return builder.finish();
-    }
-
-    private handleClickEvent(event: MouseEvent): boolean {
+    private handleTodoItemToggle(event: MouseEvent): boolean {
         const { target } = event;
 
-        // Only handle checkbox clicks.
-        if (!target || !(target instanceof HTMLInputElement) || target.type !== 'checkbox' || !target.hasClass("todotxt-md-item")) {
+		console.log(target);
+
+		if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
             return false;
         }
+		const span = target.parentElement;
+        if (!span || !(span instanceof HTMLSpanElement) || span.className !== "todotxt-md-item") {
+			return false;
+		}
+		console.log(span);
+
+		/* Due to an API limitation, this.view.posAtDOM(span) returns the pos
+		 * of the start of the code block.
+		*/
+        const pos = this.view.posAtDOM(span);
+		const startLine = this.view.state.doc.lineAt(pos).number;
+		
+		// Find and update todoItem.
+		const itemIdx = parseInt(span.id.match(/\d+$/)?.first()!);
+		const line = this.view.state.doc.line(startLine + 1 + itemIdx);
+        const todoItem = new TodoItem(line.text);
+		todoItem.setComplete(!todoItem.complete());
 
 		event.preventDefault();
 
-        const position = this.view.posAtDOM(target);
-        const line = this.view.state.doc.lineAt(position);
-        console.log(`Checkbox toggled - Position: ${position} Line: ${line.text}`);
-
-        const todoItem = new TodoItem(line.text);
-		todoItem.setComplete(!todoItem.complete());
 		this.updateView({from: line.from, to: line.to, insert: todoItem.toString()});
 
         // Dirty workaround.
@@ -76,34 +75,56 @@ class TodotxtView implements PluginValue {
         return true;
     }
 
-    private getTodoItemsInVisibleRangeWithPositions(): {from: number, to: number, item: TodoItem}[] {
-      const res: {from: number, to: number, item: TodoItem}[] = [];
-    
-      var inBlock = false;
-      for (const { from, to } of this.view.visibleRanges) {
-        var currIdx = this.view.state.doc.lineAt(from).number;
-        const endIdx = this.view.state.doc.lineAt(to).number;
-        while (currIdx <= endIdx) {
-          const currLine = this.view.state.doc.line(currIdx++);
-          if (inBlock) {
-            if (currLine.text.startsWith("\'\'\'")) {
-              inBlock = false;
-            } else {
-              if (currLine.text.trim().length === 0) {
-                continue;
-              }
-              res.push({from: currLine.from, to: currLine.to, item: new TodoItem(currLine.text)});
-            }
-          } else {
-            if (currLine.text.startsWith("\'\'\'todotxt")) {
-              inBlock = true;
-            }
-          }
-        }
-      }
+	// private handleTodoItemKeyPress(event: KeyboardEvent) {
+	// 	const { target } = event;
 
-      return res;
-    }
+    //     // Only handle TodoItem lines.
+    //     if (!target || !(target instanceof HTMLElement)) {
+    //         return false;
+    //     }
+	// 	const todoItemElement = target.doc.getElementsByClassName("cm-active").item(0);
+	// 	if (!todoItemElement) {
+	// 		return false;
+	// 	}
+    //     const position = this.view.posAtDOM(todoItemElement);
+	// 	if (!this.inBlock(position)) {
+	// 		return false;
+	// 	}
+    //     const line = this.view.state.doc.lineAt(position);
+    //     console.log(`Keypress - Position: ${position} Line: ${line.text}`);
+
+    //     const todoItem = new TodoItem(line.text);
+	// 	this.updateView({from: line.from, to: line.to, insert: todoItem.toString()});
+	// }
+
+    // private getTodoItemsInVisibleRangeWithPositions(): {from: number, to: number, item: TodoItem}[] {
+    //   const res: {from: number, to: number, item: TodoItem}[] = [];
+    
+    //   var inBlock = false;
+    //   for (const { from, to } of this.view.visibleRanges) {
+    //     var currIdx = this.view.state.doc.lineAt(from).number;
+    //     const endIdx = this.view.state.doc.lineAt(to).number;
+    //     while (currIdx <= endIdx) {
+    //       const currLine = this.view.state.doc.line(currIdx++);
+    //       if (inBlock) {
+    //         if (currLine.text.startsWith(BLOCK_CLOSE)) {
+    //           inBlock = false;
+    //         } else {
+    //           if (currLine.text.trim().length === 0) {
+    //             continue;
+    //           }
+    //           res.push({from: currLine.from, to: currLine.to, item: new TodoItem(currLine.text)});
+    //         }
+    //       } else {
+    //         if (currLine.text.startsWith(BLOCK_OPEN)) {
+    //           inBlock = true;
+    //         }
+    //       }
+    //     }
+    //   }
+
+    //   return res;
+    // }
 
 	private updateView(spec: {from: number, to: number, insert: string}) {
 		const transaction = this.view.state.update({changes: [spec]});
@@ -111,18 +132,20 @@ class TodotxtView implements PluginValue {
 	}
 }
 
-class TodoItemLine extends WidgetType {
-  item: TodoItem;
+// class TodoItemLine extends WidgetType {
+//   item: TodoItem;
 
-  constructor(item: TodoItem) {
-      super();
-      this.item = item;
-  }
+//   constructor(item: TodoItem) {
+//       super();
+//       this.item = item;
+//   }
 
-  toDOM(view: EditorView): HTMLElement {
-      const div = document.createElement("span");
-      div.innerHTML = `<input type="checkbox" class="todotxt-md-item" id="${this.item.uuid}" ${this.item.complete() ? "checked" : ""}/><label for="${this.item.uuid}">${this.item.toString()}</label>`;
+//   toDOM(view: EditorView): HTMLElement {
+//       const div = document.createElement("span");
+//       div.innerHTML = `<input type="checkbox" class="todotxt-md-item" id="${this.item.uuid}" ${this.item.complete() ? "checked" : ""}/><label for="${this.item.uuid}">${this.item.toString()}</label>`;
 
-      return div;
-  }
-}
+//       return div;
+//   }
+// }
+
+export const todotxtView = ViewPlugin.fromClass(TodotxtView);

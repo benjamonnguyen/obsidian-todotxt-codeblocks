@@ -1,8 +1,8 @@
 import { Item } from "jstodotxt";
-import { randomUUID } from "crypto";
+
+// const CHECKBOX_REGEX = /- \[[xX\s]\] /g;
 
 export class TodoItem extends Item {
-    uuid = randomUUID();
     constructor(line: string) {
         super(line);
         if(!this.created()) {

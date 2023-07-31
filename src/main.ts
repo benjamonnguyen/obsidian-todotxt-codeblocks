@@ -1,6 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import todotxtProcessor from './todotxtProcessor';
-import { todotxtView } from "./TodotxtView";
+import { todotxtBlockProcessor } from './todotxtBlockProcessor';
+import { todotxtView } from './todotxtView';
 
 // TODO Remember to rename these classes and interfaces!
 
@@ -19,25 +19,22 @@ export default class MyPlugin extends Plugin {
 		// await this.loadSettings();
 
 		// TODO 1.0 Parse and render MD
-
 		// TODO 1.1 CSS
-
 		// TODO 1.2 View interactivity (edit/delete,check)
-		this.registerEditorExtension([
-			todotxtView(),
-		]);
+		this.registerEditorExtension([todotxtView]);
+		this.registerMarkdownCodeBlockProcessor("todotxt", todotxtBlockProcessor);
 
-		// this.registerMarkdownPostProcessor(todotxtMDProcessor);
+		// TODO 2. Settings (defaults)
+		
+		// TODO 3. Archive file (cron?)
 
-		// TODO 2. Generation commands / completed archive?
-
-		// TODO 3. Settings (defaults)
-
-		// TODO x. Suggestor
+		// TODO x. Suggestor / natural language dates
 
 		// TODO x. Querier (by context and project)
 
 		// TODO x. Rollover
+
+		// TODO x. Import command
 
 		// TODO x. Export as *.txt
 
