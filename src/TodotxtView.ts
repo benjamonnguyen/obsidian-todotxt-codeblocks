@@ -17,7 +17,6 @@ class TodotxtView implements PluginValue {
 		// this.view.dom.addEventListener('keypress', this.handleTodoItemKeyPress);
 		// TODO ('paste', ClipboardEvent)
 		
-		// TODO importing todo.txt
 		// TODO periodic persistence of todoItemsInVisibleRange
     }
 
@@ -32,8 +31,6 @@ class TodotxtView implements PluginValue {
     private handleTodoItemToggle(event: MouseEvent): boolean {
         const { target } = event;
 
-		console.log(target);
-
 		if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
             return false;
         }
@@ -41,7 +38,6 @@ class TodotxtView implements PluginValue {
         if (!span || !(span instanceof HTMLSpanElement) || span.className !== "todotxt-md-item") {
 			return false;
 		}
-		console.log(span);
 
 		/* Due to an API limitation, this.view.posAtDOM(span) returns the pos
 		 * of the start of the code block.
@@ -131,21 +127,5 @@ class TodotxtView implements PluginValue {
 		this.view.dispatch(transaction);
 	}
 }
-
-// class TodoItemLine extends WidgetType {
-//   item: TodoItem;
-
-//   constructor(item: TodoItem) {
-//       super();
-//       this.item = item;
-//   }
-
-//   toDOM(view: EditorView): HTMLElement {
-//       const div = document.createElement("span");
-//       div.innerHTML = `<input type="checkbox" class="todotxt-md-item" id="${this.item.uuid}" ${this.item.complete() ? "checked" : ""}/><label for="${this.item.uuid}">${this.item.toString()}</label>`;
-
-//       return div;
-//   }
-// }
 
 export const todotxtView = ViewPlugin.fromClass(TodotxtView);

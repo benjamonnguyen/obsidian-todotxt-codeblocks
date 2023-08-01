@@ -1,11 +1,16 @@
 import { MarkdownPostProcessorContext } from "obsidian";
 import { TodoItem } from "./TodoItem";
+import { moment } from "obsidian";
 
 export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    console.log(ctx);
+    console.log(ctx.docId);
+    console.log(ctx.sourcePath);
+    console.log(ctx.frontmatter);
     // Parse language line
     const info = ctx.getSectionInfo(el)!;
     var languageLine = info.text.split("\n", info.lineStart + 1).last()?.split(" ")!;
-    var title = "TODO";
+    var title = `Todo.txt (${moment().format("YYYY-MM-DD")})`;
     const sortKVs: String[] = [];
     const filterKVs: String[] = [];
     for (const [i, str] of languageLine.entries()) {
