@@ -2,7 +2,6 @@ import { MarkdownPostProcessorContext } from "obsidian";
 import { TodoItem } from "./TodoItem";
 import { moment } from "obsidian";
 import { randomUUID } from "crypto";
-import { title } from "process";
 
 const TITLE_REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:)\S+))/;
 
@@ -25,10 +24,14 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     // Construct el
     // TODO handle sort/filter
     el.createEl("h1", {text: title, cls: "todotext-md-title"});
-    const list = el.createDiv({cls: "todotext-md-list"});
+
+    const spans: string[] = [];
     for (const [i, line] of source.split("\n").entries()) {
-        const item = new TodoItem(line);
-        list.innerHTML += `<span class="todotxt-md-item" id="todotxt-item-${randomUUID()}-${i}">
-        <input type="checkbox" ${item.complete() ? "checked" : "unchecked"}>${item.toString()}</span><br>`;
+        if (line.trim()) {
+            const item = new TodoItem(line);
+            spans.push(`<span class="todotxt-md-item" id="todotxt-item-${randomUUID()}-${i}">
+                <input type="checkbox" ${item.complete() ? "checked" : "unchecked"}>${item.toString()}</span>`);
+        }
     }
+    el.createDiv({cls: "todotext-md-list"}).innerHTML = spans.join("<br>");
 }
