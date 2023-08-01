@@ -1,4 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {EditorView} from "@codemirror/view";
 import { todotxtBlockProcessor } from './todotxtBlockProcessor';
 import { todotxtView } from './todotxtView';
 
@@ -23,6 +24,13 @@ export default class MyPlugin extends Plugin {
 		// TODO 1.2 View interactivity (edit/delete,check)
 		this.registerEditorExtension([todotxtView]);
 		this.registerMarkdownCodeBlockProcessor("todotxt", todotxtBlockProcessor);
+		this.registerDomEvent(document, "click", (event: MouseEvent) => {
+			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			// @ts-ignore
+			(mdView?.editor.cm as EditorView)
+				?.plugin(todotxtView)
+				?.handleCheckboxToggle(event, mdView!);
+		});
 
 		// TODO 2. Settings (defaults)
 		
@@ -43,7 +51,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onunload() {
-
 	}
 
 // 	async loadSettings() {

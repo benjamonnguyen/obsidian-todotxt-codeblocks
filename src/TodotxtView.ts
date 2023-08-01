@@ -1,6 +1,7 @@
-import { EditorView, ViewPlugin, ViewUpdate, DecorationSet, PluginSpec, WidgetType } from '@codemirror/view';
+import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import type { PluginValue } from '@codemirror/view';
 import { TodoItem } from "./TodoItem";
+import { MarkdownView, Notice } from 'obsidian';
 
 const BLOCK_OPEN = "\`\`\`todotxt";
 const BLOCK_CLOSE = "\`\`\`";
@@ -11,8 +12,8 @@ class TodotxtView implements PluginValue {
     constructor(view: EditorView) {
         this.view = view;
 
-        this.handleTodoItemToggle = this.handleTodoItemToggle.bind(this);
-        this.view.dom.addEventListener('click', this.handleTodoItemToggle);
+        // this.handleTodoItemToggle = this.handleTodoItemToggle.bind(this);
+        // this.view.dom.addEventListener('click', this.handleTodoItemToggle);
 		// this.handleTodoItemKeyPress = this.handleTodoItemKeyPress.bind(this);
 		// this.view.dom.addEventListener('keypress', this.handleTodoItemKeyPress);
 		// TODO ('paste', ClipboardEvent)
@@ -24,11 +25,11 @@ class TodotxtView implements PluginValue {
 	}
     
 	destroy() {
-		this.view.dom.removeEventListener('click', this.handleTodoItemToggle);
+		// this.view.dom.removeEventListener('click', this.handleTodoItemToggle);
 		// this.view.dom.removeEventListener('keypress', this.handleTodoItemKeyPress);
 	}
 
-    private handleTodoItemToggle(event: MouseEvent): boolean {
+    handleCheckboxToggle(event: MouseEvent, mdView: MarkdownView): boolean {
         const { target } = event;
 
 		if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
@@ -38,35 +39,32 @@ class TodotxtView implements PluginValue {
         if (!span || !(span instanceof HTMLSpanElement) || span.className !== "todotxt-md-item") {
 			return false;
 		}
+        /* State changes do not persist to EditorView in Reading mode.
+         * Create a notice and return true.
+        */
+        if (mdView.getMode() === "preview") {
+            new Notice("obsidian-inline-todotxt warning:\nCheckbox does not work in Reading View");
+            event.preventDefault();
+            return true;
+        }
 
-		/* Due to an API limitation, this.view.posAtDOM(span) returns the pos
+        // @ts-ignore
+        const view = mdView.editor.cm as EditorView;
+
+        const el = document.getElementById(span.id)!;  // TODO make unique;
+        const pos = view.posAtDOM(el);
+		const startLine = view.state.doc.lineAt(pos);
+		// console.log("pos", pos, "- line", startLine);
+		/* Workaround since view.posAtDOM(codeBlockLine) returns the position
 		 * of the start of the code block.
 		*/
-        const pos = this.view.posAtDOM(span);
-		const startLine = this.view.state.doc.lineAt(pos).number;
-		
-		// Find and update todoItem.
 		const itemIdx = parseInt(span.id.match(/\d+$/)?.first()!);
-		const line = this.view.state.doc.line(startLine + 1 + itemIdx);
+		const line = view.state.doc.line(startLine.number + 1 + itemIdx);
         const todoItem = new TodoItem(line.text);
 		todoItem.setComplete(!todoItem.complete());
 
 		event.preventDefault();
-
-		this.updateView({from: line.from, to: line.to, insert: todoItem.toString()});
-
-        // Dirty workaround.
-        // While the code in this method properly updates the `checked` state
-        // of the target checkbox, some Obsidian internals revert the state.
-        // This means that the checkbox would remain in its original `checked`
-        // state (`true` or `false`), even though the underlying document
-        // updates correctly.
-        // As a "fix", we set the checkbox's `checked` state *again* after a
-        // timeout to revert Obsidian's wrongful reversal.
-        // const desiredCheckedStatus = target.checked;
-        // setTimeout(() => {
-        //     target.checked = desiredCheckedStatus;
-        // }, 1);
+        this.updateView(view, {from: line.from, to: line.to, insert: todoItem.toString()});
 
         return true;
     }
@@ -122,9 +120,9 @@ class TodotxtView implements PluginValue {
     //   return res;
     // }
 
-	private updateView(spec: {from: number, to: number, insert: string}) {
-		const transaction = this.view.state.update({changes: [spec]});
-		this.view.dispatch(transaction);
+	private updateView(view: EditorView, spec: {from: number, to: number, insert: string}) {
+		const transaction = view.state.update({changes: [spec]});
+		view.dispatch(transaction);
 	}
 }
 
