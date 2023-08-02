@@ -1,7 +1,8 @@
 import { App, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import {EditorView} from "@codemirror/view";
-import { todotxtBlockProcessor } from './todotxtBlockProcessor';
+import { todotxtBlockProcessor, UNSAVED_TODO_ITEM_IDS } from './todotxtBlockProcessor';
 import { todotxtView } from './todotxtView';
+import { DEFAULT_ENCODING } from 'crypto';
 
 // TODO Remember to rename these classes and interfaces!
 
@@ -31,6 +32,17 @@ export default class MyPlugin extends Plugin {
 				?.plugin(todotxtView)
 				?.handleCheckboxToggle(event, mdView!);
 		});
+		this.registerInterval(window.setInterval(() => {
+			if (UNSAVED_TODO_ITEM_IDS.length) {
+				const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				const copy = [...UNSAVED_TODO_ITEM_IDS];
+				UNSAVED_TODO_ITEM_IDS.length = 0; // TODO race condition?
+				// @ts-ignore
+				(mdView?.editor.cm as EditorView)
+					?.plugin(todotxtView)
+					?.save(copy, mdView!);
+			}
+		}, 2000));
 
 		// TODO 2. Settings (defaults)
 		

@@ -5,6 +5,8 @@ import { randomUUID } from "crypto";
 
 const TITLE_REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:)\S+))/;
 
+export const UNSAVED_TODO_ITEM_IDS: string[] = [];
+
 export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
     // Parse language line
     const info = ctx.getSectionInfo(el)!;
@@ -29,8 +31,12 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     for (const [i, line] of source.split("\n").entries()) {
         if (line.trim()) {
             const item = new TodoItem(line);
-            spans.push(`<span class="todotxt-md-item" id="todotxt-item-${randomUUID()}-${i}">
+            const id = `todotxt-item-${randomUUID()}-${i}`;
+            spans.push(`<span class="todotxt-md-item" id="${id}">
                 <input type="checkbox" ${item.complete() ? "checked" : "unchecked"}>${item.toString()}</span>`);
+            if (line !== item.toString()) {
+                UNSAVED_TODO_ITEM_IDS.push(id);
+            }
         }
     }
     el.createDiv({cls: "todotext-md-list"}).innerHTML = spans.join("<br>");

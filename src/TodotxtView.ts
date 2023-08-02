@@ -1,32 +1,23 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
 import { TodoItem } from "./TodoItem";
 import { MarkdownView, Notice } from 'obsidian';
 
-const BLOCK_OPEN = "\`\`\`todotxt";
-const BLOCK_CLOSE = "\`\`\`";
+export const BLOCK_OPEN = "\`\`\`todotxt";
+export const BLOCK_CLOSE = "\`\`\`";
 
 class TodotxtView implements PluginValue {
     private readonly view: EditorView;
 
     constructor(view: EditorView) {
         this.view = view;
-
-        // this.handleTodoItemToggle = this.handleTodoItemToggle.bind(this);
-        // this.view.dom.addEventListener('click', this.handleTodoItemToggle);
-		// this.handleTodoItemKeyPress = this.handleTodoItemKeyPress.bind(this);
-		// this.view.dom.addEventListener('keypress', this.handleTodoItemKeyPress);
-		// TODO ('paste', ClipboardEvent)
-		
-		// TODO periodic persistence of todoItemsInVisibleRange
     }
 
     update(update: ViewUpdate) {
 	}
     
 	destroy() {
-		// this.view.dom.removeEventListener('click', this.handleTodoItemToggle);
-		// this.view.dom.removeEventListener('keypress', this.handleTodoItemKeyPress);
 	}
 
     handleCheckboxToggle(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -51,22 +42,47 @@ class TodotxtView implements PluginValue {
         // @ts-ignore
         const view = mdView.editor.cm as EditorView;
 
-        const el = document.getElementById(span.id)!;  // TODO make unique;
+        const line = this.getTodoItemLine(span.id, view);
+        const todoItem = new TodoItem(line.text);
+		todoItem.setComplete(!todoItem.complete());
+
+		event.preventDefault();
+        this.updateView(view, [{from: line.from, to: line.to, insert: todoItem.toString()}]);
+
+        return true;
+    }
+
+    save(ids: string[], mdView: MarkdownView) {
+        // State changes do not persist to EditorView in Reading mode.
+        if (mdView.getMode() === "preview") {
+            return;
+        }
+        // @ts-ignore
+        const view = mdView.editor.cm as EditorView;
+
+        const changes: {from: number, to: number, insert: string}[] = [];
+        ids.forEach(id => {
+            const line = this.getTodoItemLine(id, view);
+            const todoItem = new TodoItem(line.text);
+            changes.push({from: line.from, to: line.to, insert: todoItem.toString()});
+        });
+        this.updateView(view, changes);
+        var noticeMsg = "obsidian-inline-todotxt: Saved todos\n";
+        changes.forEach(c => noticeMsg += `- ${c.insert}\n`);
+        new Notice(noticeMsg);
+    }
+
+    private getTodoItemLine(id: string, view: EditorView): Line {
+        const el = document.getElementById(id)!;
         const pos = view.posAtDOM(el);
 		const startLine = view.state.doc.lineAt(pos);
 		// console.log("pos", pos, "- line", startLine);
 		/* Workaround since view.posAtDOM(codeBlockLine) returns the position
 		 * of the start of the code block.
 		*/
-		const itemIdx = parseInt(span.id.match(/\d+$/)?.first()!);
-		const line = view.state.doc.line(startLine.number + 1 + itemIdx);
-        const todoItem = new TodoItem(line.text);
-		todoItem.setComplete(!todoItem.complete());
-
-		event.preventDefault();
-        this.updateView(view, {from: line.from, to: line.to, insert: todoItem.toString()});
-
-        return true;
+		const itemIdx = parseInt(id.match(/\d+$/)?.first()!);
+		
+        return view.state.doc.line(startLine.number + 1 + itemIdx);
     }
 
 	// private handleTodoItemKeyPress(event: KeyboardEvent) {
@@ -120,8 +136,8 @@ class TodotxtView implements PluginValue {
     //   return res;
     // }
 
-	private updateView(view: EditorView, spec: {from: number, to: number, insert: string}) {
-		const transaction = view.state.update({changes: [spec]});
+	private updateView(view: EditorView, changes: {from: number, to: number, insert: string}[]) {
+		const transaction = view.state.update({changes: changes});
 		view.dispatch(transaction);
 	}
 }
