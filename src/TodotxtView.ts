@@ -3,6 +3,7 @@ import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
 import { TodoItem } from "./TodoItem";
 import { MarkdownView, Notice } from 'obsidian';
+import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockProcessor';
 
 export const BLOCK_OPEN = "\`\`\`todotxt";
 export const BLOCK_CLOSE = "\`\`\`";
@@ -52,14 +53,15 @@ class TodotxtView implements PluginValue {
         return true;
     }
 
-    save(ids: string[], mdView: MarkdownView) {
+    save(mdView: MarkdownView) {
+        if (!UNSAVED_TODO_ITEM_IDS.length) return;
         // State changes do not persist to EditorView in Reading mode.
-        if (mdView.getMode() === "preview") {
-            return;
-        }
+        if (mdView.getMode() === "preview") return;
         // @ts-ignore
         const view = mdView.editor.cm as EditorView;
 
+        const ids = [...UNSAVED_TODO_ITEM_IDS];
+        UNSAVED_TODO_ITEM_IDS.length = 0; // TODO race condition?
         const changes: {from: number, to: number, insert: string}[] = [];
         ids.forEach(id => {
             const line = this.getTodoItemLine(id, view);
