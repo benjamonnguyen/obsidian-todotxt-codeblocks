@@ -1,7 +1,7 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
-import { TodoItem, TodoListTitle } from "./viewModels";
+import { TodoItem, TodoList, TodoListTitle } from "./viewModels";
 import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
 
@@ -37,7 +37,7 @@ class TodotxtView implements PluginValue {
          * Create a notice and return true.
         */
         if (mdView.getMode() === "preview") {
-            new Notice("obsidian-inline-todotxt warning:\nCheckbox does not work in Reading View");
+            new Notice("obsidian-inline-todotxt WARNING\nCheckbox toggle disabled in Reading View");
             event.preventDefault();
             return true;
         }
@@ -70,15 +70,17 @@ class TodotxtView implements PluginValue {
             if (!el) return;
             const line = this.findLine(el, view);
             let newText: string;
-            if (el.hasClass("todotxt-md-item")) {
+            if (el.hasClass(TodoItem.HTML_CLS)) {
                 newText = new TodoItem(line.text).toString();
-            } else {
+            } else if (el.hasClass(TodoListTitle.HTML_CLS)) {
                 newText = new TodoListTitle(line.text).toString();
+            } else {
+                return;
             }
             changes.push({from: line.from, to: line.to, insert: newText});
         });
         this.updateView(view, changes);
-        var noticeMsg = "obsidian-inline-todotxt: Saved todos\n";
+        var noticeMsg = "obsidian-inline-todotxt SAVING\n";
         changes.forEach(c => noticeMsg += `- ${c.insert}\n`);
         new Notice(noticeMsg);
     }
@@ -93,7 +95,6 @@ class TodotxtView implements PluginValue {
              * of the start of the code block.
             */
             const itemIdx = parseInt(el.id.match(/\d+$/)?.first()!);
-            console.log(itemIdx);
 
             return view.state.doc.line(line.number + 1 + itemIdx);
         }
