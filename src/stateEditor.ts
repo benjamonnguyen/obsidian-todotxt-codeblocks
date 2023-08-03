@@ -1,12 +1,14 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
-import { TodoItem } from "./TodoItem";
+import { TodoItem } from "./viewModels";
 import { MarkdownView, Notice } from 'obsidian';
-import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockProcessor';
+import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
 
 export const BLOCK_OPEN = "\`\`\`todotxt";
 export const BLOCK_CLOSE = "\`\`\`";
+
+// TODO refactor to not be a plugin and just collection of event handlers
 
 class TodotxtView implements PluginValue {
     private readonly view: EditorView;
@@ -21,7 +23,7 @@ class TodotxtView implements PluginValue {
 	destroy() {
 	}
 
-    handleCheckboxToggle(event: MouseEvent, mdView: MarkdownView): boolean {
+    toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
         const { target } = event;
 
 		if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
@@ -43,7 +45,7 @@ class TodotxtView implements PluginValue {
         // @ts-ignore
         const view = mdView.editor.cm as EditorView;
 
-        const line = this.getTodoItemLine(span.id, view);
+        const line = this.findLine(span, view);
         const todoItem = new TodoItem(line.text);
 		todoItem.setComplete(!todoItem.complete());
 
@@ -54,7 +56,7 @@ class TodotxtView implements PluginValue {
     }
 
     save(mdView: MarkdownView) {
-        if (!UNSAVED_TODO_ITEM_IDS.length) return;
+        if (!UNSAVED_TODO_ITEM_IDS || !UNSAVED_TODO_ITEM_IDS.length) return;
         // State changes do not persist to EditorView in Reading mode.
         if (mdView.getMode() === "preview") return;
         // @ts-ignore
@@ -64,9 +66,16 @@ class TodotxtView implements PluginValue {
         UNSAVED_TODO_ITEM_IDS.length = 0; // TODO race condition?
         const changes: {from: number, to: number, insert: string}[] = [];
         ids.forEach(id => {
-            const line = this.getTodoItemLine(id, view);
-            const todoItem = new TodoItem(line.text);
-            changes.push({from: line.from, to: line.to, insert: todoItem.toString()});
+            const el = document.getElementById(id);
+            if (!el) return;
+            const line = this.findLine(el, view);
+            let newText: string;
+            if (el.hasClass("todotxt-md-item")) {
+                newText = new TodoItem(line.text).toString();
+            } else {
+                newText = line.text;
+            }
+            changes.push({from: line.from, to: line.to, insert: newText});
         });
         this.updateView(view, changes);
         var noticeMsg = "obsidian-inline-todotxt: Saved todos\n";
@@ -74,17 +83,21 @@ class TodotxtView implements PluginValue {
         new Notice(noticeMsg);
     }
 
-    private getTodoItemLine(id: string, view: EditorView): Line {
-        const el = document.getElementById(id)!;
+    private findLine(el: HTMLElement, view: EditorView): Line {
         const pos = view.posAtDOM(el);
-		const startLine = view.state.doc.lineAt(pos);
-		// console.log("pos", pos, "- line", startLine);
-		/* Workaround since view.posAtDOM(codeBlockLine) returns the position
-		 * of the start of the code block.
-		*/
-		const itemIdx = parseInt(id.match(/\d+$/)?.first()!);
+        const line = view.state.doc.lineAt(pos);
+        // console.log("pos", pos, "- line", startLine);
+
+        if (el.hasClass("todotxt-md-item")) {
+            /* Workaround since view.posAtDOM(codeBlockLine) returns the position
+             * of the start of the code block.
+            */
+            const itemIdx = parseInt(el.id.match(/\d+$/)?.first()!);
+
+            return view.state.doc.line(line.number + 1 + itemIdx);
+        }
 		
-        return view.state.doc.line(startLine.number + 1 + itemIdx);
+        return view.state.doc.lineAt(pos);
     }
 
 	// private handleTodoItemKeyPress(event: KeyboardEvent) {
@@ -139,6 +152,7 @@ class TodotxtView implements PluginValue {
     // }
 
 	private updateView(view: EditorView, changes: {from: number, to: number, insert: string}[]) {
+        console.log("changes:", changes);
 		const transaction = view.state.update({changes: changes});
 		view.dispatch(transaction);
 	}

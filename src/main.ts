@@ -1,7 +1,7 @@
 import { App, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import {EditorView} from "@codemirror/view";
-import { todotxtBlockProcessor } from './todotxtBlockProcessor';
-import { todotxtView } from './todotxtView';
+import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
+import { todotxtView } from './stateEditor';
 
 // TODO Remember to rename these classes and interfaces!
 
@@ -26,7 +26,7 @@ export default class MyPlugin extends Plugin {
 			// @ts-ignore
 			(mdView?.editor.cm as EditorView)
 				?.plugin(todotxtView)
-				?.handleCheckboxToggle(event, mdView!);
+				?.toggleCheckbox(event, mdView!);
 		});
 		this.registerInterval(window.setInterval(() => {
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -36,6 +36,9 @@ export default class MyPlugin extends Plugin {
 				?.save(mdView!);
 		}, 2000));
 
+		// @context is treated as #tags
+		// +Project are treated at [[Project]]. You can ctrl click them.
+		// _ in +Projects to represent spaces. Ex +Hello_World
 
 		// TODO 1. View interactivity (edit/delete)
 
