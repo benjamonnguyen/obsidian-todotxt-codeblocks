@@ -30,7 +30,7 @@ class TodotxtView implements PluginValue {
             return false;
         }
 		const span = target.parentElement;
-        if (!span || !(span instanceof HTMLSpanElement) || span.className !== "todotxt-md-item") {
+        if (!span || !(span instanceof HTMLSpanElement) || span.className !== TodoItem.HTML_CLS) {
 			return false;
 		}
         /* State changes do not persist to EditorView in Reading mode.
@@ -86,13 +86,14 @@ class TodotxtView implements PluginValue {
     private findLine(el: HTMLElement, view: EditorView): Line {
         const pos = view.posAtDOM(el);
         const line = view.state.doc.lineAt(pos);
-        // console.log("pos", pos, "- line", startLine);
+        // console.log("pos", pos, "- line", line);
 
-        if (el.hasClass("todotxt-md-item")) {
+        if (el.hasClass(TodoItem.HTML_CLS)) {
             /* Workaround since view.posAtDOM(codeBlockLine) returns the position
              * of the start of the code block.
             */
             const itemIdx = parseInt(el.id.match(/\d+$/)?.first()!);
+            console.log(itemIdx);
 
             return view.state.doc.line(line.number + 1 + itemIdx);
         }

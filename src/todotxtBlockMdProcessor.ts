@@ -17,7 +17,7 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     const items: TodoItem[] = [];
     for (const [i, line] of source.split("\n").entries()) {
         if (line.trim()) {
-            const item = new TodoItem(line);
+            const item = new TodoItem(line, i);
             items.push(item);
             if (line !== item.toString()) {
                 UNSAVED_TODO_ITEM_IDS.push(item.getId());

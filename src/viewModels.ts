@@ -27,12 +27,25 @@ export class TodoItem extends Item implements ViewModel {
         item.addClass(this.getHtmlCls());
         item.id = this.id;
 
-        const checkbox = item.createEl("input", {type: "checkbox"});
-        checkbox.setAttr(this.complete() ? "checked" : "unchecked", true);
-        item.createSpan({
-            cls: "todotxt-item-text",
-            text: this.toString(),
+        const checkbox = item.createEl("input", {
+            type: "checkbox",
+            cls: "task-list-item-checkbox",
         });
+        checkbox.setAttr(this.complete() ? "checked" : "unchecked", true);
+
+        if (this.priority()) {
+            item.createSpan({
+                cls: this.getPriorityHtmlClasses(),
+                text: this.priority()!,
+            });
+        }
+
+        item.createSpan({
+            cls: "todotxt-item-description",
+            text: this.body(),
+        });
+
+        // TODO TodoContext/TodoProject
 
         return item;
     }
@@ -42,7 +55,26 @@ export class TodoItem extends Item implements ViewModel {
     }
 
     getHtmlCls(): string {
-        return TodoListTitle.HTML_CLS;
+        return TodoItem.HTML_CLS;
+    }
+
+    private getPriorityHtmlClasses(): string[] {
+        let letterCls;
+        switch (this.priority()?.toLowerCase()) {
+            case "a":
+                letterCls = "todotxt-priority-a";
+                break;
+            case "b":
+                letterCls = "todotxt-priority-b";
+                break;
+            case "c":
+                letterCls = "todotxt-priority-c";
+                break;
+            default:
+                letterCls = "todotxt-priority-x";
+        }
+
+        return [letterCls, "todotxt-priority"];
     }
 }
 
@@ -122,6 +154,6 @@ export class TodoList implements ViewModel {
     }
 
     getHtmlCls(): string {
-        return TodoListTitle.HTML_CLS;
+        return TodoList.HTML_CLS;
     }
 }
