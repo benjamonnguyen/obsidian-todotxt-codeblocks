@@ -1,7 +1,7 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
-import { TodoItem } from "./viewModels";
+import { TodoItem, TodoListTitle } from "./viewModels";
 import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
 
@@ -73,7 +73,7 @@ class TodotxtView implements PluginValue {
             if (el.hasClass("todotxt-md-item")) {
                 newText = new TodoItem(line.text).toString();
             } else {
-                newText = line.text;
+                newText = new TodoListTitle(line.text).toString();
             }
             changes.push({from: line.from, to: line.to, insert: newText});
         });

@@ -83,7 +83,7 @@ export class TodoListTitle implements ViewModel {
     }
 
     toString() {
-        return `\`\`\`todotxt ${this.title}`;
+        return `\`\`\`todotxt "${this.title}"`;
     }
 
     getId(): string {
