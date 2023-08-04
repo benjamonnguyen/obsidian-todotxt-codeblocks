@@ -25,4 +25,14 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
         }
     }
     el.appendChild(new TodoList(items).render());
+    // el.createDiv().outerHTML = `
+    // <div class="project-group-container">
+    //     <input type="checkbox" id="list-item-1">
+    //     <label for="list-item-1" class="first">+Serif</label>
+    //     <div class="project-group-list">
+    //         <span>test</span>
+    //         <span>test</span>
+    //     </div>
+    // </div>
+    // `;
 }

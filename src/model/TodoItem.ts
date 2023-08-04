@@ -27,9 +27,10 @@ export class TodoItem extends Item implements ViewModel {
         checkbox.setAttr(this.complete() ? "checked" : "unchecked", true);
 
         if (this.priority()) {
-            item.createSpan({
+            item.createEl("button", {
                 cls: this.getPriorityHtmlClasses(),
                 text: this.priority()!,
+                attr: {"disabled": true},
             });
         }
 

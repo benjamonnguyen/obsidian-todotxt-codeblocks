@@ -13,6 +13,7 @@ If your plugin does not need CSS, delete this file.
   --todotxt-color-blue-200: rgb(191 219 254);
   --todotxt-color-blue-300: rgb(147 197 253);
   --todotxt-color-blue-600: #2563EB;
+  --todotxt-color-gray-100: #f5f5f5;
   --todotxt-color-gray-200: rgb(229 231 235);
   --todotxt-color-gray-400: rgb(156 163 175);
   --todotxt-color-gray-600: rgb(75 85 99);
@@ -37,40 +38,50 @@ If your plugin does not need CSS, delete this file.
     background-color: var(--todotxt-color-red-300);
 } */
 
-/* .todo-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-} */
+.block-language-todotxt {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--text-faint);
+}
 
-/* .todotxt-item {} */
+.todotxt-item {
+    justify-content: center;
+}
 
-.todotxt-label {
+/* .todotxt-label {
     display: flex;
     align-items: flex-start;
-}
+} */
 
-.todotxt-priority {
+button.todotxt-priority {
     border-radius: 0.5rem;
-    padding: 0.125rem 0.375rem;
+    padding: 0rem 0.3rem;
     margin-right: 0.25rem;
+    height: 1.25rem;
+    font-size: small;
+    cursor: default;
 }
 
-.todotxt-priority-a {
+button.todotxt-priority-a {
     color: var(--todotxt-color-red-600);
     background-color: var(--todotxt-color-red-300);
 }
-.todotxt-priority-b {
+button.todotxt-priority-b {
     color: var(--todotxt-color-orange-600);
     background-color: var(--todotxt-color-orange-300);
 }
-.todotxt-priority-c {
+button.todotxt-priority-c {
     color: var(--todotxt-color-sky-600);
     background-color: var(--todotxt-color-sky-300);
 }
-.todotxt-priority-x {
+button.todotxt-priority-x {
     color: white;
     background-color: var(--todotxt-color-gray-400);
+}
+
+input[type="checkbox"]:checked ~ .todotxt-item-description {
+    color: var(--checklist-done-color);
+    text-decoration: var(--checklist-done-decoration);
 }
 
 .todotxt-description {
@@ -118,31 +129,56 @@ If your plugin does not need CSS, delete this file.
     color: var(--todotxt-color-gray-700);
     background-color: var(--todotxt-color-indigo-200);
 }
-    
-.todo-actions {
-    visibility: hidden;
-    display: flex;
-    gap: 0.125rem;
-    color: var(--todotxt-color-gray-600);
-    
-    margin-left: 0.25rem;
-    
-    button {
-        margin: 0;
-        padding: 1px;
-        
-        svg {
-            display: inline;
-            width: 1rem;
-            height: 1rem;
-            color: inherit
-        }
-    }
+
+/* PROJECT GROUP CONTAINER */
+
+.project-group-container {
+    margin-top: 0.75rem;
+}
+  
+.project-group-container label {
+    display: block;
+    cursor: default;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    font-size: large;
+    font-weight: bold;
+  }
+  
+.theme-dark .project-group-container label:hover {
+    background: var(--todotxt-color-slate-700);
+  }
+
+.theme-light .project-group-container label:hover {
+    background: var(--todotxt-color-gray-100);
+}
+  
+.project-group-container input[type="checkbox"].project-group-checkbox {
+    position: absolute;
+    left: -9999px;
 }
 
-.todo-label:hover {
-    .todo-actions {
-        visibility: visible;
-        color: var(--todotxt-color-gray-300);
-    }
+.project-group-list {
+    height: 0;
+    transform: scaleY(0);
+}
+
+input[type="checkbox"].project-group-checkbox:checked ~ .project-group-list,
+.markdown-reading-view .project-group-list {
+    height: 100%;
+    transform-origin: top;
+    transition: transform .2s ease-out;
+    transform: scaleY(1); 
+}
+
+.theme-light input[type="checkbox"].project-group-checkbox:checked + label {
+    background: var(--todotxt-color-gray-100);
+}
+  
+.theme-dark input[type="checkbox"].project-group-checkbox:checked + label {
+    background: var(--todotxt-color-slate-700);
+}
+
+.markdown-reading-view label {
+    background: none;
 }
