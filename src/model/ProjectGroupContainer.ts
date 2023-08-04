@@ -8,10 +8,12 @@ export class ProjectGroupContainer implements ViewModel {
     private id: string;
     items: TodoItem[];
     name: string;
+    isToggled: boolean;
 
-    constructor(name: string, items: TodoItem[]) {
+    constructor(name: string, items: TodoItem[], isToggled: boolean) {
         this.name = name;
         this.items = items;
+        this.isToggled = isToggled;
     }
 
     render(): HTMLElement {
@@ -19,10 +21,12 @@ export class ProjectGroupContainer implements ViewModel {
         container.addClass(this.getHtmlCls());
 
         const checkboxId = randomUUID();
-        container.createEl("input", {
+        const checkbox = container.createEl("input", {
             type: "checkbox",
             cls: "project-group-checkbox",
-        }).id = checkboxId;
+        });
+        checkbox.id = checkboxId;
+        checkbox.setAttr(this.isToggled ? "checked" : "unchecked", true);
         container.createEl("label", {
             attr: {"for": checkboxId},
         }).setText("+" + this.name);
@@ -38,7 +42,7 @@ export class ProjectGroupContainer implements ViewModel {
     getId(): string {
         return this.id;
     }
-    
+
     getHtmlCls(): string {
         return ProjectGroupContainer.HTML_CLS;
     }

@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext } from "obsidian";
-import { TodoListTitle, TodoList, TodoItem } from "./model";
+import { TodoLanguageLine, TodoList, TodoItem } from "./model";
 
 export const UNSAVED_TODO_ITEM_IDS: string[] = [];
 
@@ -8,11 +8,10 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     const info = ctx.getSectionInfo(el)!;
     let languageLine = info.text.split("\n", info.lineStart + 1).last()!;
 
-    const title = new TodoListTitle(languageLine);
-    if (languageLine !== title.toString()) {
-        UNSAVED_TODO_ITEM_IDS.push(title.getId());
+    const langLine = new TodoLanguageLine(languageLine);
+    if (languageLine !== langLine.toString()) {
+        UNSAVED_TODO_ITEM_IDS.push(langLine.getId());
     }
-    el.appendChild(title.render());
 
     const items: TodoItem[] = [];
     for (const [i, line] of source.split("\n").entries()) {
@@ -24,15 +23,5 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
             }
         }
     }
-    el.appendChild(new TodoList(items).render());
-    // el.createDiv().outerHTML = `
-    // <div class="project-group-container">
-    //     <input type="checkbox" id="list-item-1">
-    //     <label for="list-item-1" class="first">+Serif</label>
-    //     <div class="project-group-list">
-    //         <span>test</span>
-    //         <span>test</span>
-    //     </div>
-    // </div>
-    // `;
+    el.appendChild(new TodoList(langLine, items).render());
 }

@@ -1,7 +1,7 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
-import { TodoListTitle, TodoItem } from "./model";
+import { TodoLanguageLine, TodoItem } from "./model";
 import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
 
@@ -74,11 +74,12 @@ class TodotxtView implements PluginValue {
             const el = document.getElementById(id);
             if (!el) return;
             const line = this.findLine(el, view);
+            console.log(line);
             let newText: string;
             if (el.hasClass(TodoItem.HTML_CLS)) {
                 newText = new TodoItem(line.text).toString();
-            } else if (el.hasClass(TodoListTitle.HTML_CLS)) {
-                newText = new TodoListTitle(line.text).toString();
+            } else if (el.hasClass(TodoLanguageLine.HTML_CLS)) {
+                newText = new TodoLanguageLine(line.text).toString();
             } else {
                 return;
             }

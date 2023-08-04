@@ -1,3 +1,4 @@
 export { TodoItem } from "./TodoItem";
-export { TodoList, TodoListTitle } from "./TodoList";
+export { TodoList } from "./TodoList";
 export { ProjectGroupContainer } from "./ProjectGroupContainer";
+export { TodoLanguageLine } from "./TodoLanguageLine";
