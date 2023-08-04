@@ -180,5 +180,6 @@ input[type="checkbox"].project-group-checkbox:checked ~ .project-group-list,
 }
 
 .markdown-reading-view label {
-    background: none;
+    background: none !important;
+    cursor: text;
 }

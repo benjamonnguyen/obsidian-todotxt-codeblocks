@@ -7,7 +7,7 @@ export class TodoLanguageLine implements ViewModel {
 
     private id: string;
     title: string;
-    toggledProjects: string[] = [];
+    toggledProjects: Set<string> = new Set();
     sortKVs: string[] = [];
     filterKVs: string[] = [];
 
@@ -20,7 +20,7 @@ export class TodoLanguageLine implements ViewModel {
             if (str.startsWith("tog:")) {
                 const projects = str.substring(4).split(",")
                     .map(s => s.toLowerCase());
-                this.toggledProjects.push(...projects);
+                projects.forEach(proj => this.toggledProjects.add(proj));
             }
         }
         // TODO handle sort/filter
@@ -37,15 +37,11 @@ export class TodoLanguageLine implements ViewModel {
 
     toString() {
         let line = `\`\`\`todotxt "${this.title}"`;
-        if (this.toggledProjects.length) {
-            line += " tog:" + this.toggledProjects.join(",");
+        if (this.toggledProjects.size) {
+            line += " tog:" + Array.from(this.toggledProjects).join(",");
         }
 
         return line;
-    }
-
-    hasToggledProject(project: string) {
-        return this.toggledProjects.contains(project.toLowerCase());
     }
 
     getId(): string {

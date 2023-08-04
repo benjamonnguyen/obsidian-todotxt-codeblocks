@@ -26,15 +26,15 @@ export class TodoList implements ViewModel {
                     }
                 })
             } else {
-                // default group.
                 this.items.push(item);
             }
         });
         for (const [proj, items] of projToItems.entries()) {
             this.projectGroups.push(
-                new ProjectGroupContainer(proj, items, this.langLine.hasToggledProject(proj)));
+                new ProjectGroupContainer(proj, items,
+                    this.langLine.toggledProjects.has(proj.toLowerCase())));
         }
-
+        // console.log(langLine, this.projectGroups);
     }
 
     render(): HTMLElement {

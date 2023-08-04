@@ -4,6 +4,8 @@ import { TodoItem } from ".";
 export class ProjectGroupContainer implements ViewModel {
 
     static HTML_CLS = "project-group-container";
+    static LIST_CLS = "project-group-list";
+    static CHECKBOX_CLS = "project-group-checkbox";
 
     private id: string;
     items: TodoItem[];
@@ -23,7 +25,7 @@ export class ProjectGroupContainer implements ViewModel {
         const checkboxId = randomUUID();
         const checkbox = container.createEl("input", {
             type: "checkbox",
-            cls: "project-group-checkbox",
+            cls: ProjectGroupContainer.CHECKBOX_CLS,
         });
         checkbox.id = checkboxId;
         checkbox.setAttr(this.isToggled ? "checked" : "unchecked", true);
@@ -32,7 +34,7 @@ export class ProjectGroupContainer implements ViewModel {
         }).setText("+" + this.name);
 
         container.createDiv({
-            cls: "project-group-list",
+            cls: ProjectGroupContainer.LIST_CLS,
         }).innerHTML = this.items.map(item =>
             item.render().outerHTML).join("<br>");
 
