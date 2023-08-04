@@ -47,7 +47,12 @@ class TodotxtView implements PluginValue {
 
         const line = this.findLine(span, view);
         const todoItem = new TodoItem(line.text);
-		todoItem.setComplete(!todoItem.complete());
+        if (todoItem.complete()) {
+            todoItem.clearCompleted();
+            todoItem.setComplete(false);
+        } else {
+            todoItem.setCompleted(new Date());
+        }
 
 		event.preventDefault();
         this.updateView(view, [{from: line.from, to: line.to, insert: todoItem.toString()}]);

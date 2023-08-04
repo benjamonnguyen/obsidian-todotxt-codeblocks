@@ -17,7 +17,7 @@ export class TodoItem extends Item implements ViewModel {
     constructor(line: string, idx: number | undefined = undefined) {
         super(line);
         this.id = `${randomUUID()}-${idx}`;
-        if(!this.created()) {
+        if (!this.created()) {
             this.setCreated(new Date());
         }
     }
