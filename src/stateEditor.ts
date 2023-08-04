@@ -1,7 +1,7 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import type { PluginValue } from '@codemirror/view';
-import { TodoItem, TodoList, TodoListTitle } from "./viewModels";
+import { TodoListTitle, TodoItem } from "./model";
 import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
 

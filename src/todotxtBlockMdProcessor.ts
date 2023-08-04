@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext } from "obsidian";
-import { TodoItem, TodoListTitle, TodoList } from "./viewModels";
+import { TodoListTitle, TodoList, TodoItem } from "./model";
 
 export const UNSAVED_TODO_ITEM_IDS: string[] = [];
 
