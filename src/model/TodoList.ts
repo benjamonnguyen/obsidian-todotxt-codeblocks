@@ -7,32 +7,40 @@ export class TodoList implements ViewModel {
 
     private id: string;
     langLine: TodoLanguageLine;
-    items: TodoItem[] = [];
+    todos: TodoItem[] = [];
     projectGroups: ProjectGroupContainer[] = [];
 
     constructor(langLine: TodoLanguageLine, items: TodoItem[]) {
         this.id = `${randomUUID()}`;
         this.langLine = langLine;
-        // Create ProjectGroups
         const projToItems: Map<string, TodoItem[]> = new Map();
+        const completed: TodoItem[] = [];
         items.forEach(item => {
             if (item.projects().length) {
                 item.projects().forEach(proj => {
-                    const items = projToItems.get(proj);
-                    if (items) {
-                        items.push(item);
+                    const projItems = projToItems.get(proj);
+                    if (projItems) {
+                        projItems.push(item);
                     } else {
                         projToItems.set(proj, [item]);
                     }
                 })
+            } else if (item.complete()) {
+                completed.push(item);
             } else {
-                this.items.push(item);
+                this.todos.push(item);
             }
         });
         for (const [proj, items] of projToItems.entries()) {
             this.projectGroups.push(
                 new ProjectGroupContainer(proj, items,
                     this.langLine.toggledProjects.has(proj.toLowerCase())));
+        }
+        if (completed.length) {
+            this.projectGroups.push(
+                new ProjectGroupContainer("completed", completed,
+                this.langLine.toggledProjects.has("completed"))
+            );
         }
         // console.log(langLine, this.projectGroups);
     }
@@ -44,10 +52,24 @@ export class TodoList implements ViewModel {
 
         list.appendChild(this.langLine.render());
 
-        list.innerHTML += this.items.map(item =>
+        list.innerHTML += this.todos.map(item =>
             item.render().outerHTML).join("<br>");
 
-        this.projectGroups.forEach(group => list.appendChild(group.render()));
+        let completed: ProjectGroupContainer | undefined;
+        for (const group of this.projectGroups) {
+            if (group.name === "completed") {
+                // render this last.
+                completed = group;
+                continue;
+            }
+            list.appendChild(group.render())
+        }
+        this.projectGroups.forEach(group => {
+            
+        });
+        if (completed) {
+            list.appendChild(completed.render());
+        }
 
         return list;
     }
