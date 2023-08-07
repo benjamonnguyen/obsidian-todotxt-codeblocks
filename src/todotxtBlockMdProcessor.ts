@@ -26,7 +26,6 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     for (const [ i, line ] of source.split("\n").entries()) {
         const newItem = todoList.items.at(i)?.toString();
         if (newItem) {
-            console.log("newItem: ", newItem);
             if (line !== newItem) {
                 UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1, newText: newItem });
             }

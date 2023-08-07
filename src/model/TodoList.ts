@@ -99,16 +99,16 @@ export default class TodoList implements ViewModel {
     private getProjectOrder(items: TodoItem[], projSortKV: string[] | undefined): string[] {
         if (!items) throw "Invalid args!";
 
-        const projectOrder = projSortKV ? [...projSortKV] : [];
-        
-        // Get all projects
+        // Get existing projects
         const projects: Set<string> = new Set();
         items.forEach(item => item.projects().forEach(proj => projects.add(proj)));
 
-        // Remove nonexistent projects from projSortKV
-        projectOrder.filter(proj => projects.has(proj));
+        // Filter out nonexistent projects from projectOrder
+        const projectOrder = projSortKV
+            ? [...projSortKV.filter(proj => projects.has(proj))]
+            : [];
 
-        // Append remaining projects to projectOrder in alphabetical order
+        // Append projects without sort order in alphabetical order
         const remainingProjects: string[] = Array.from(projects)
             .filter(proj => !projectOrder.contains(proj))
             .sort();
