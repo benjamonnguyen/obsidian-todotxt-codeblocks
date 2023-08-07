@@ -38,9 +38,9 @@ If your plugin does not need CSS, delete this file.
     border: 1px solid var(--text-faint);
 }
 
-.todotxt-item {
+/* .todotxt-item {
     justify-content: center;
-}
+} */
 
 button.todotxt-priority {
     border-radius: 0.5rem;
@@ -73,31 +73,29 @@ input[type="checkbox"]:checked ~ .todotxt-item-description {
     text-decoration: var(--checklist-done-decoration);
 }
 
-.todotxt-description {
-    display: flex;
-    align-items: flex-start;
-    color: var(--todotxt-color-gray-200);
+/* input[type="checkbox"]:checked ~ .todotxt-item-description {
+    color: var(--checklist-done-color);
+    text-decoration: var(--checklist-done-decoration);
+} */
     
-    .todo-text span {
-        /* margin-right: 0.3em; */
-    }
-    
-    .todo-due {
-        color: var(--todotxt-color-sky-600);
-    }
-    .todo-due-soon {
-        color: var(--todotxt-color-amber-600);
-    }
-    .todo-due-past {
-        color: var(--todotxt-color-red-600);
-    }
-    
-    .todo-completed, .todo-completed span {
-        text-decoration-line: line-through;
-        color: var(--todotxt-color-gray-400);
-    }
+/* .todo-text span {
+    margin-right: 0.3em;
 }
 
+.todo-due {
+    color: var(--todotxt-color-sky-600);
+}
+.todo-due-soon {
+    color: var(--todotxt-color-amber-600);
+}
+.todo-due-past {
+    color: var(--todotxt-color-red-600);
+}
+
+.todo-completed, .todo-completed span {
+    text-decoration-line: line-through;
+    color: var(--todotxt-color-gray-400);
+} */
 
 .todo-tag {
     font-size: 0.75rem;

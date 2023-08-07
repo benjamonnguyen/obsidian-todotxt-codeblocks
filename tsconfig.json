@@ -10,7 +10,9 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "isolatedModules": true,
-	"strictNullChecks": true,
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true,
+	  "strictNullChecks": true,
     "lib": [
       "DOM",
       "ES5",
