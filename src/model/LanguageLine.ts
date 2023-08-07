@@ -79,13 +79,13 @@ export default class LanguageLine implements ViewModel {
     }
 
     private static handleSort(str: string): { field: string, order: string[] } | Error {
-        const segs = str.split(":");
+        const segs = Array.from(str.match(/(.[^:]+):(.[^:]+):?(.+)?/)?.values() || []);
         let err;
-        if (segs.length < 2) {
+        const field = segs.at(2);
+        const order = segs.at(3)?.split(",");
+        if (!field) {
             return new SyntaxError(`"${str}" does not follow syntax "sort:<field>:<order?>"`);
         }
-        const field = segs.at(1)!;
-        const order = segs.at(2)?.split(",");
         if (!LanguageLine.SORT_FIELDS.has(field)) {
             return new SyntaxError(`"${field}" is not a valid field (${Array.from(LanguageLine.SORT_FIELDS).join(", ")})`);
         }
@@ -94,7 +94,7 @@ export default class LanguageLine implements ViewModel {
                 return new SyntaxError("Provide project order (ex. \"sort:proj:work,home,gym\")");
             }
         } else if (field === "status") {
-            const orderStr = segs.at(2);
+            const orderStr = segs.at(3);
             if (orderStr && orderStr !== "asc" && orderStr !== "desc") {
                 return new SyntaxError(`${field} order must be "asc" or "desc" (defaults to "asc")`);
             }
