@@ -1,21 +1,24 @@
 import { Item } from "jstodotxt";
 import { randomUUID } from "crypto";
+import type { ViewModel } from ".";
 
 
-export class TodoItem extends Item implements ViewModel {
+export default class TodoItem extends Item implements ViewModel {
     static HTML_CLS = "todotxt-item";
 
-    private id: string;
+    private id: string | undefined;
 
-    constructor(line: string, idx: number | undefined = undefined) {
-        super(line);
-        this.id = `${randomUUID()}-${idx}`;
+    constructor(text: string, idx: number | undefined = undefined) {
+        super(text);
+        if (idx !== undefined) this.setIdx(idx);
         if (!this.created()) {
             this.setCreated(new Date());
         }
     }
 
     render(): HTMLElement {
+        if (!this.id) throw "No id!";
+
         const item = document.createElement("span");
         item.addClass(this.getHtmlCls());
         item.id = this.id;
@@ -44,12 +47,22 @@ export class TodoItem extends Item implements ViewModel {
         return item;
     }
 
-    getId(): string {
+    getId(): string | undefined {
         return this.id;
     }
 
     getHtmlCls(): string {
         return TodoItem.HTML_CLS;
+    }
+
+    setIdx(idx: number) {
+        this.id = randomUUID() + "-" + idx;
+    }
+
+    getIdx(): number | undefined {
+        if (this.id) {
+            return parseInt(this.id.match(/\d+$/)?.first()!);
+        }
     }
 
     private getPriorityHtmlClasses(): string[] {

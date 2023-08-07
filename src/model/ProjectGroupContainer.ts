@@ -1,7 +1,8 @@
 import { randomUUID } from "crypto";
 import { TodoItem } from ".";
+import type { ViewModel } from ".";
 
-export class ProjectGroupContainer implements ViewModel {
+export default class ProjectGroupContainer implements ViewModel {
 
     static HTML_CLS = "project-group-container";
     static LIST_CLS = "project-group-list";
@@ -10,12 +11,12 @@ export class ProjectGroupContainer implements ViewModel {
     private id: string;
     items: TodoItem[];
     name: string;
-    isToggled: boolean;
+    isCollapsed: boolean;
 
     constructor(name: string, items: TodoItem[], isToggled: boolean) {
         this.name = name;
         this.items = items;
-        this.isToggled = isToggled;
+        this.isCollapsed = isToggled;
     }
 
     render(): HTMLElement {
@@ -28,7 +29,7 @@ export class ProjectGroupContainer implements ViewModel {
             cls: ProjectGroupContainer.CHECKBOX_CLS,
         });
         checkbox.id = checkboxId;
-        checkbox.setAttr(this.isToggled ? "checked" : "unchecked", true);
+        checkbox.setAttr(!this.isCollapsed ? "checked" : "unchecked", true);
         container.createEl("label", {
             attr: {"for": checkboxId},
         }).setText("+" + this.name);

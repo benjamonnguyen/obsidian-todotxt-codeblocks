@@ -1,8 +1,8 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
-import { TodoLanguageLine, TodoItem, ProjectGroupContainer } from "./model";
+import { LanguageLine, TodoItem, ProjectGroupContainer } from "./model";
 import { MarkdownView, Notice } from 'obsidian';
-import { UNSAVED_TODO_ITEM_IDS } from './todotxtBlockMdProcessor';
+import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
@@ -60,14 +60,13 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     const view = mdView.editor.cm as EditorView;
     
     const line = findLine(target, view);
-    const langLine = new TodoLanguageLine(line.text);
-    const project = target.labels?.item(0).getText().substring(1).toLowerCase();
+    const { langLine } = LanguageLine.from(line.text);
+    const project = target.labels?.item(0).getText().substring(1);
     if (!project) return false;
-    target.toggleAttribute("checked");
-    if (target.toggleAttribute("checked")) {
-        langLine.toggledProjects.delete(project);
+    if (target.getAttr("checked")) {
+        langLine.collapsedProjectGroups.add(project);
     } else {
-        langLine.toggledProjects.add(project);
+        langLine.collapsedProjectGroups.delete(project);
     }
     
     updateView(view, [{from: line.from, to: line.to, insert: langLine.toString()}]);
@@ -76,32 +75,32 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
 }
 
 export function save(mdView: MarkdownView) {
-    if (!UNSAVED_TODO_ITEM_IDS || !UNSAVED_TODO_ITEM_IDS.length) return;
+    if (!UNSAVED_ITEMS || !UNSAVED_ITEMS.length) return;
     // State changes do not persist to EditorView in Reading mode.
     if (mdView.getMode() === "preview") return;
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
     
-    const ids = [...UNSAVED_TODO_ITEM_IDS];
-    UNSAVED_TODO_ITEM_IDS.length = 0; // TODO race condition?
-    const changes: {from: number, to: number, insert: string}[] = [];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const line = findLine(el, view);
-        let newText: string;
-        if (el.hasClass(TodoItem.HTML_CLS)) {
-            newText = new TodoItem(line.text).toString();
-        } else if (el.hasClass(TodoLanguageLine.HTML_CLS)) {
-            newText = new TodoLanguageLine(line.text).toString();
+    const items = [...UNSAVED_ITEMS];
+    UNSAVED_ITEMS.length = 0; // TODO race condition?
+    const changes: {from: number, to: number, insert?: string}[] = [];
+    
+    items.forEach(({ listId, line, newText }) => {
+        const list = document.getElementById(listId);
+        if (!list) return;
+        const listLine = findLine(list, view);
+
+        const itemLine = view.state.doc.line(listLine.number + line);
+        if (newText) {
+            changes.push({from: itemLine.from, to: itemLine.to, insert: newText});
         } else {
-            return;
+            changes.push({from: itemLine.from, to: itemLine.to + 1});
         }
-        changes.push({from: line.from, to: line.to, insert: newText});
     });
+
     updateView(view, changes);
     var noticeMsg = "obsidian-inline-todotxt SAVING\n";
-    changes.forEach(c => noticeMsg += `- ${c.insert}\n`);
+    changes.filter(c => c.insert).forEach(c => noticeMsg += `- ${c.insert}\n`);
     new Notice(noticeMsg);
 }
 
@@ -122,7 +121,7 @@ function findLine(el: HTMLElement, view: EditorView): Line {
     return view.state.doc.lineAt(pos);
 }
 
-function updateView(view: EditorView, changes: {from: number, to: number, insert: string}[]) {
+function updateView(view: EditorView, changes: {from: number, to: number, insert?: string}[]) {
     console.log("changes:", changes);
     const transaction = view.state.update({changes: changes});
     view.dispatch(transaction);
