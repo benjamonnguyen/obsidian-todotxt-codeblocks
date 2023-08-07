@@ -7,11 +7,12 @@ export default class LanguageLine implements ViewModel {
     static HTML_CLS = "todotxt-list-title";
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
+    static SORT_FIELDS = new Set(["proj", "status"]);
 
     private id: string;
     title: string;
     collapsedProjectGroups: Set<string> = new Set();
-    sortKVs: Map<string, string[]> = new Map();
+    sortFieldToOrder: Map<string, string[]> = new Map();
     filterKVs: string[] = [];
 
     private constructor() {}
@@ -30,13 +31,13 @@ export default class LanguageLine implements ViewModel {
                 str.substring(LanguageLine.COLLAPSE_PREFIX.length).split(",")
                     .forEach(proj => langLine.collapsedProjectGroups.add(proj));
             } else if (str.startsWith(LanguageLine.SORT_PREFIX)) {
-                const segs = str.split(":");
-                if (segs.length !== 3) {
-                    console.error("Invalid sort syntax: %s", str);
-                    errs.push(new SyntaxError("Invalid sort syntax: " + str));
-                    continue;
+                // Sort ascending by default.
+                const res = LanguageLine.handleSort(str);
+                if (res instanceof Error) {
+                    errs.push(res);
+                } else {
+                    langLine.sortFieldToOrder.set(res.field, res.order);
                 }
-                langLine.sortKVs.set(segs.at(1)!, segs.at(2)!.split(","));
             } else if (str.startsWith("filter:")) {
                 // this.filterKVs.push(...str.substring(7).split(","));
             }
@@ -56,8 +57,11 @@ export default class LanguageLine implements ViewModel {
 
     toString() {
         let line = `\`\`\`todotxt "${this.title}"`;
-        for (const [k, v] of this.sortKVs.entries()) {
-            line += ` ${LanguageLine.SORT_PREFIX}${k}:${v}`;
+        for (const [field, order] of this.sortFieldToOrder.entries()) {
+            line += " " + LanguageLine.SORT_PREFIX + field;
+            if (order.length) {
+                line += ":" + order.join(",");
+            }
         }
         if (this.collapsedProjectGroups.size) {
             line += " " + LanguageLine.COLLAPSE_PREFIX + Array.from(this.collapsedProjectGroups).join(",");
@@ -72,5 +76,30 @@ export default class LanguageLine implements ViewModel {
 
     getHtmlCls(): string {
         return LanguageLine.HTML_CLS;
+    }
+
+    private static handleSort(str: string): { field: string, order: string[] } | Error {
+        const segs = str.split(":");
+        let err;
+        if (segs.length < 2) {
+            return new SyntaxError(`"${str}" does not follow syntax "sort:<field>:<order?>"`);
+        }
+        const field = segs.at(1)!;
+        const order = segs.at(2)?.split(",");
+        if (!LanguageLine.SORT_FIELDS.has(field)) {
+            return new SyntaxError(`"${field}" is not a valid field (${Array.from(LanguageLine.SORT_FIELDS).join(", ")})`);
+        }
+        if (field === "proj") {
+            if (!order) {
+                return new SyntaxError("Provide project order (ex. \"sort:proj:work,home,gym\")");
+            }
+        } else if (field === "status") {
+            const orderStr = segs.at(2);
+            if (orderStr && orderStr !== "asc" && orderStr !== "desc") {
+                return new SyntaxError(`${field} order must be "asc" or "desc" (defaults to "asc")`);
+            }
+        }
+
+        return { field, order: order?.filter(o => o.length) || [] };
     }
 }

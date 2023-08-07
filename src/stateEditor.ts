@@ -101,7 +101,7 @@ export function save(mdView: MarkdownView) {
     updateView(view, changes);
     var noticeMsg = "obsidian-inline-todotxt SAVING\n";
     changes.filter(c => c.insert).forEach(c => noticeMsg += `- ${c.insert}\n`);
-    new Notice(noticeMsg);
+    new Notice(noticeMsg, 2500);
 }
 
 function findLine(el: HTMLElement, view: EditorView): Line {

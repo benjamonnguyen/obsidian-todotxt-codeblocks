@@ -1,4 +1,4 @@
-import { App, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, MarkdownView, Modal, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import { toggleCheckbox, toggleProjectGroup, save } from './stateEditor';
 

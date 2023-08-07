@@ -11,7 +11,7 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     const { langLine, errs } = LanguageLine.from(languageLine);
     errs.forEach(e => {
         if (e instanceof SyntaxError) {
-            new Notice(e.message);
+            new Notice(e.message, 0);
         }
     })
 

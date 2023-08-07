@@ -16,8 +16,8 @@ export default class TodoList implements ViewModel {
         this.id = `${randomUUID()}`;
         this.langLine = langLine;
         this.items = this.parseTodoItems(body);
-        this.projectOrder = this.getProjectOrder(this.items, this.langLine.sortKVs.get("proj"));
-        this.sort(this.items, this.projectOrder);
+        this.projectOrder = this.getProjectOrder(this.items, this.langLine.sortFieldToOrder.get("proj"));
+        this.sort(this.items, this.langLine.sortFieldToOrder, this.projectOrder);
     }
 
     render(): HTMLElement {
@@ -66,9 +66,10 @@ export default class TodoList implements ViewModel {
             .map(line => new TodoItem(line));
     }
 
-    private sort(items: TodoItem[], projectOrder: string[]) {
+    private sort(items: TodoItem[], sortFieldToOrder: Map<string, string[]>, projectOrder: string[]) {
         if (!items || !projectOrder) throw "Invalid args!";
-        // const KVs = this.langLine.sortKVs;
+        const ASC = "asc";
+        const DESC = "desc";
 
         // dates (creation, completion)
 
@@ -79,6 +80,17 @@ export default class TodoList implements ViewModel {
         // due
 
         // status
+        const statusSortOrder = sortFieldToOrder.get("status");
+        if (statusSortOrder) {
+            items.sort((a, b) => {
+                const aScore = a.complete() ? 1 : 0;
+                const bScore = b.complete() ? 1 : 0;
+                if (!statusSortOrder.length || statusSortOrder.first()! === ASC) {
+                    return aScore - bScore;
+                }
+                return bScore - aScore;
+            });
+        }
 
         // project
         items.sort((a, b) => {
@@ -96,7 +108,7 @@ export default class TodoList implements ViewModel {
         }
     }
 
-    private getProjectOrder(items: TodoItem[], projSortKV: string[] | undefined): string[] {
+    private getProjectOrder(items: TodoItem[], projSortOrder: string[] | undefined): string[] {
         if (!items) throw "Invalid args!";
 
         // Get existing projects
@@ -104,8 +116,8 @@ export default class TodoList implements ViewModel {
         items.forEach(item => item.projects().forEach(proj => projects.add(proj)));
 
         // Filter out nonexistent projects from projectOrder
-        const projectOrder = projSortKV
-            ? [...projSortKV.filter(proj => projects.has(proj))]
+        const projectOrder = projSortOrder
+            ? [...projSortOrder.filter(proj => projects.has(proj))]
             : [];
 
         // Append projects without sort order in alphabetical order
