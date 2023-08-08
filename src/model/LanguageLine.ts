@@ -7,7 +7,10 @@ export default class LanguageLine implements ViewModel {
     static HTML_CLS = "todotxt-list-title";
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
-    static SORT_FIELDS = new Set(["proj", "status"]);
+    static STR_ARR_SORT_FIELDS = new Set(["proj"]);
+    static ASC_DESC_SORT_FIELDS = new Set(["status", "prio"]);
+    static ALL_SORT_FIELDS = Array.from(LanguageLine.STR_ARR_SORT_FIELDS)
+        .concat(...LanguageLine.ASC_DESC_SORT_FIELDS);
 
     private id: string;
     title: string;
@@ -86,14 +89,14 @@ export default class LanguageLine implements ViewModel {
         if (!field) {
             return new SyntaxError(`"${str}" does not follow syntax "sort:<field>:<order?>"`);
         }
-        if (!LanguageLine.SORT_FIELDS.has(field)) {
-            return new SyntaxError(`"${field}" is not a valid field (${Array.from(LanguageLine.SORT_FIELDS).join(", ")})`);
+        if (!LanguageLine.ASC_DESC_SORT_FIELDS.has(field) && !LanguageLine.STR_ARR_SORT_FIELDS.has(field)) {
+            return new SyntaxError(`"${field}" is not a valid field (${LanguageLine.ALL_SORT_FIELDS.join(", ")})`);
         }
         if (field === "proj") {
             if (!order) {
                 return new SyntaxError("Provide project order (ex. \"sort:proj:work,home,gym\")");
             }
-        } else if (field === "status") {
+        } else if (LanguageLine.ASC_DESC_SORT_FIELDS.has(field)) {
             const orderStr = segs.at(3);
             if (orderStr && orderStr !== "asc" && orderStr !== "desc") {
                 return new SyntaxError(`${field} order must be "asc" or "desc" (defaults to "asc")`);

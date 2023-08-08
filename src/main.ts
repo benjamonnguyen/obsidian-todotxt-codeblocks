@@ -24,30 +24,11 @@ export default class MyPlugin extends Plugin {
 			if (mdView) {
 				toggleCheckbox(event, mdView) || toggleProjectGroup(event, mdView);
 			}
-			// TODO clickPriority();
 		});
 		this.registerInterval(window.setInterval(() => {
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			save(mdView!);
 		}, 2000));
-
-		// @context is treated as #tags
-
-		// TODO 1. View interactivity (edit/delete)
-
-		// TODO 2. Settings (defaults)
-		
-		// TODO 3. Archive file (cron?)
-
-		// TODO x. Suggestor / natural language dates
-
-		// TODO x. Querier (by context and project)
-
-		// TODO x. Rollover
-
-		// TODO x. Import command
-
-		// TODO x. Export as *.txt
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		// this.addSettingTab(new SampleSettingTab(this.app, this));

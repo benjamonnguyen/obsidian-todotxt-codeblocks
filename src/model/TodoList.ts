@@ -69,13 +69,23 @@ export default class TodoList implements ViewModel {
     private sort(items: TodoItem[], sortFieldToOrder: Map<string, string[]>, projectOrder: string[]) {
         if (!items || !projectOrder) throw "Invalid args!";
         const ASC = "asc";
-        const DESC = "desc";
 
         // dates (creation, completion)
 
         // ctx
 
         // prio
+        const prioritySortOrder = sortFieldToOrder.get("prio");
+        if (prioritySortOrder) {
+            items.sort((a, b) => {
+                const aScore = a.priority()?.charCodeAt(0) || Number.MAX_VALUE;
+                const bScore = b.priority()?.charCodeAt(0) || Number.MAX_VALUE;
+                if (!prioritySortOrder.length || prioritySortOrder.first()! === ASC) {
+                    return aScore - bScore;
+                }
+                return bScore - aScore;
+            });
+        }
 
         // due
 
