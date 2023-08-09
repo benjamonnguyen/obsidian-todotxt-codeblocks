@@ -95,6 +95,25 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     return true;
 }
 
+export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
+    const { target } = event;
+
+    if (!target || !(target instanceof SVGElement)) {
+        return false;
+    }
+    const newTarget = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
+    if (!newTarget || newTarget.getAttr("action") !== ActionType.DEL.name) {
+        return false;
+    }
+    // @ts-ignore
+    const view = mdView.editor.cm as EditorView;
+
+    const line = findLine(newTarget, view);
+    updateView(view, [{from: line.from, to: line.to + 1}]); // +1 to delete entire line
+    
+    return true;
+}
+
 export function save(mdView: MarkdownView) {
     if (!UNSAVED_ITEMS || !UNSAVED_ITEMS.length) return;
     // State changes do not persist to EditorView in Reading mode.

@@ -1,6 +1,6 @@
-import { App, MarkdownView, Modal, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, MarkdownView, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
-import { toggleCheckbox, toggleProjectGroup, save, clickEdit } from './stateEditor';
+import { toggleCheckbox, toggleProjectGroup, save, clickEdit, clickDelete } from './stateEditor';
 
 // TODO Remember to rename these classes and interfaces!
 
@@ -24,7 +24,9 @@ export default class MyPlugin extends Plugin {
 			if (mdView) {
 				toggleCheckbox(event, mdView)
 					|| toggleProjectGroup(event, mdView)
-					|| clickEdit(event, mdView, this.app);
+					|| clickEdit(event, mdView, this.app)
+					|| clickDelete(event, mdView)
+					;
 			}
 		});
 		this.registerInterval(window.setInterval(() => {
