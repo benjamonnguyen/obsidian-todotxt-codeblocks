@@ -1,5 +1,5 @@
 {
-	"name": "obsidian-inline-todotxt",
+	"name": "obsidian-todotxt-codeblock",
 	"version": "1.0.0",
 	"description": "Create todos in the markdown editor based on the Todo.txt specification.",
 	"main": "main.js",
