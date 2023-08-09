@@ -1,13 +1,21 @@
 import { App, Modal, Setting } from "obsidian";
 
-export default class EditModal extends Modal {
+export default class AddModal extends Modal {
+
+    static placeholders = [
+        "(B) Call Mom @Phone +Family rec:1m",
+        "(C) Schedule annual checkup +Health due:1yM",
+        "Pick up milk +Groceries due:Sa",
+        "Tend to herb @garden +Home rec:1w2d",
+        "(A) Fix parsing @bug +obsidian-todotxt-codeblock due:0",
+        "Ship new @feature +obsidian-todotxt-codeblock due:2040-08-06",
+    ];
+
     result: string;
-    originalText: string;
     onSubmit: (result: string) => void;
     
-    constructor(app: App, originalText: string, onSubmit: (result: string) => void) {
+    constructor(app: App, onSubmit: (result: string) => void) {
         super(app);
-        this.originalText = originalText;
         this.onSubmit = onSubmit;
     }
     
@@ -16,7 +24,7 @@ export default class EditModal extends Modal {
         
         const input = new Setting(contentEl)
         .addText((text) => {
-            text.setValue(this.originalText);
+            text.setPlaceholder(AddModal.placeholders[(Math.floor(Math.random() * AddModal.placeholders.length))]);
             text.onChange((value) => {
                 this.result = value
             });
@@ -26,7 +34,7 @@ export default class EditModal extends Modal {
         const submit = new Setting(contentEl)
         .addButton((btn) =>
         btn
-        .setButtonText("Edit")
+        .setButtonText("Submit")
         .setCta()
         .onClick(() => {
             this.close();

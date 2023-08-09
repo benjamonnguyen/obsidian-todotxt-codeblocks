@@ -1,4 +1,4 @@
-import { TodoItem, ProjectGroupContainer } from ".";
+import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from ".";
 import { randomUUID } from "crypto";
 import { LanguageLine } from ".";
 import type { ViewModel } from ".";
@@ -24,6 +24,9 @@ export default class TodoList implements ViewModel {
         const list = document.createElement("div");
         list.addClass(this.getHtmlCls());
         list.id = this.id;
+
+        const addBtn = new ActionButton(ActionType.ADD, list.id).render();
+        list.appendChild(addBtn);
 
         list.appendChild(this.langLine.render());
 

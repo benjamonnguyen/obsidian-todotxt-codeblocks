@@ -4,6 +4,7 @@ import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton
 import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditModal } from "./component";
+import AddModal from './component/AddModal';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
@@ -95,6 +96,28 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     return true;
 }
 
+export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boolean {
+    const { target } = event;
+
+    if (!target || !(target instanceof SVGElement)) {
+        return false;
+    }
+    const newTarget = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
+    const listId = newTarget?.getAttr("item-id");
+    if (!newTarget || newTarget.getAttr("action") !== ActionType.ADD.name || !listId) {
+        return false;
+    }
+    // @ts-ignore
+    const view = mdView.editor.cm as EditorView;
+    const line = findLine(document.getElementById(listId)!, view);
+
+    new AddModal(app, result => {
+        updateView(view, [{from: line.to + 1, insert: result + "\n"}])
+    }).open();
+    
+    return true;
+}
+
 export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
 
@@ -165,7 +188,7 @@ function findLine(el: Element, view: EditorView): Line {
     return view.state.doc.lineAt(pos);
 }
 
-function updateView(view: EditorView, changes: {from: number, to: number, insert?: string}[]) {
+function updateView(view: EditorView, changes: {from: number, to?: number, insert?: string}[]) {
     console.log("changes:", changes);
     const transaction = view.state.update({changes: changes});
     view.dispatch(transaction);

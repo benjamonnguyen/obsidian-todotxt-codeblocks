@@ -51,7 +51,31 @@ Simply add todos to a `todotxt` codeblock to get started!
 ## Features
 - [ ] sorting
   - sort:proj:a,b,c
-- [ ] Collapsible project groups
+  - status
+  - prio
+  - due
+  - completed
+  - created
+  - ctx?
+  - default (configurable)
+  - desc/asc (defaults to asc)
+- [x] Collapsible project groups
+- [ ] Extensions:
+  - "due:" (Due date) / "rec:" (Recurring frequency)
+    - <number><[dateUnit]> (ex. 1d)
+      - dateUnits: d, w, m, y (defaults to d)
+      - 0 = today
+    - <alias>
+      - aliases: M, Tu, W, Th, F, Sa, Su
+    - can be combined
+      - 1w2d = 9 days (1 week + 2 days)
+      - 2mM = first Monday in 2 months
+    - <YYYY-MM-DD> (ex. 1996-08-06)
+    - <MM-DD> (ex. 08-06)
+- [x] Edit, add, delete in Live Preview
+- [ ] "get:" Query for existing Todo.txt tasks and move to current codeblock
+- [ ] Archive complete todos to file
+- [ ] Daily note rollover integration
 
 ## Donations
 Feel free to support me if you enjoy the plugin!

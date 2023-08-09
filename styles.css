@@ -34,7 +34,7 @@ If your plugin does not need CSS, delete this file.
 
 .block-language-todotxt {
     padding: 0.5rem;
-    border-radius: 0.25rem;
+    border-radius: var(--radius-s);
     border: 1px solid var(--text-faint);
 }
 
@@ -43,12 +43,12 @@ If your plugin does not need CSS, delete this file.
 } */
 
 button.todotxt-priority {
-    border-radius: 0.5rem;
+    border-radius: var(--radius-m);
     padding: 0.3rem;
     margin-right: 0.25rem;
     height: 1.25rem;
     font-size: small;
-    cursor: default;
+    cursor: var(--cursor);
 }
 
 button.todotxt-priority-a {
@@ -97,7 +97,7 @@ input[type="checkbox"]:checked ~ .todotxt-item-description {
     color: var(--todotxt-color-gray-400);
 } */
 
-.todo-tag {
+/* .todo-tag {
     font-size: 0.75rem;
     line-height: 1rem;
     margin-left: 0.5rem;
@@ -105,9 +105,9 @@ input[type="checkbox"]:checked ~ .todotxt-item-description {
     border-radius: 9999px;
     color: var(--todotxt-color-gray-700);
     background-color: var(--todotxt-color-blue-200);
-}
+} */
 
-.todo-ctx {
+/* .todo-ctx {
     font-size: 0.75rem;
     line-height: 1rem;
     margin-left: 0.5rem;
@@ -115,25 +115,46 @@ input[type="checkbox"]:checked ~ .todotxt-item-description {
     border-radius: 9999px;
     color: var(--todotxt-color-gray-700);
     background-color: var(--todotxt-color-indigo-200);
-}
+} */
 
 /* BUTTONS */
 svg.todotxt-action-btn {
-    border-radius: 0.25rem;
+    display: inline;
+    cursor: var(--cursor);
+    color: transparent;
+    stroke-width: 8;
+    fill: none;
+    box-sizing: content-box;
+    border-radius: var(--radius-s);
+}
+
+svg.todotxt-action-btn[action="edit"],
+svg.todotxt-action-btn[action="delete"] {
     padding: 0.15rem;
     margin-left: 0.15rem;
     margin-right: -0.15rem;
-    display: inline;
     vertical-align: text-bottom;
-    width: 1.3rem;
-    height: 1.3rem;
-    cursor: default;
-    color: transparent;
+    height: var(--icon-s);
+    width: var(--icon-s);
+}
+
+svg.todotxt-action-btn[action="add"] {
+    padding: var(--size-2-2) var(--size-2-3);
+    position: absolute;
+    top: var(--size-2-2);
+    right: calc(var(--size-2-2) * 9);
+    display: flex;
+    height: var(--icon-size);
+    width: var(--icon-size);
 }
 
 .markdown-source-view .todotxt-item:hover svg.todotxt-action-btn {
-    color: white;
+    color: var(--text-muted);
     transition: all .15s ease;
+}
+
+.cm-preview-code-block:hover svg.todotxt-action-btn[action="add"] {
+    color: var(--text-muted);
 }
 
 .markdown-source-view svg.todotxt-action-btn:hover {
@@ -141,13 +162,17 @@ svg.todotxt-action-btn {
 }
 
 /* MODAL */
-.setting-item-control {
+.todotxt-modal-input {
     margin-top: 1.5rem;
 }
 
-.setting-item-control input[type="text"] {
+.todotxt-modal-input input[type="text"] {
     width: calc(var(--dialog-width) * 0.9);
     max-width: calc(var(--dialog-max-width) * 0.9);
+}
+
+.todotxt-modal-submit {
+    padding-bottom: 0;
 }
 
 /* PROJECT GROUP CONTAINER */
@@ -157,8 +182,8 @@ svg.todotxt-action-btn {
   
 .project-group-container label {
     display: block;
-    cursor: default;
-    border-radius: 0.5rem;
+    cursor: var(--cursor);
+    border-radius: var(--radius-m);
     padding: 0.25rem;
     font-size: large;
     font-weight: bold;
