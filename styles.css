@@ -44,7 +44,7 @@ If your plugin does not need CSS, delete this file.
 
 button.todotxt-priority {
     border-radius: 0.5rem;
-    padding: 0rem 0.3rem;
+    padding: 0.3rem;
     margin-right: 0.25rem;
     height: 1.25rem;
     font-size: small;
@@ -117,8 +117,40 @@ input[type="checkbox"]:checked ~ .todotxt-item-description {
     background-color: var(--todotxt-color-indigo-200);
 }
 
-/* PROJECT GROUP CONTAINER */
+/* BUTTONS */
+svg.todotxt-action-btn {
+    border-radius: 0.25rem;
+    padding: 0.15rem;
+    margin-left: 0.15rem;
+    margin-right: -0.15rem;
+    display: inline;
+    vertical-align: text-bottom;
+    width: 1.3rem;
+    height: 1.3rem;
+    cursor: default;
+    color: transparent;
+}
 
+.markdown-source-view .todotxt-item:hover svg.todotxt-action-btn {
+    color: white;
+    transition: all .15s ease;
+}
+
+.markdown-source-view svg.todotxt-action-btn:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+/* MODAL */
+.setting-item-control {
+    margin-top: 1.5rem;
+}
+
+.setting-item-control input[type="text"] {
+    width: calc(var(--dialog-width) * 0.9);
+    max-width: calc(var(--dialog-max-width) * 0.9);
+}
+
+/* PROJECT GROUP CONTAINER */
 .project-group-container {
     margin-top: 0.75rem;
 }

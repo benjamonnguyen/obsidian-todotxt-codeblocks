@@ -1,8 +1,9 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
-import { LanguageLine, TodoItem, ProjectGroupContainer } from "./model";
-import { MarkdownView, Notice } from 'obsidian';
+import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton } from "./model";
+import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
+import { EditModal } from "./component";
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
@@ -55,7 +56,6 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
         event.preventDefault();
         return true;
     }
-    
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
     
@@ -70,6 +70,27 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     }
     
     updateView(view, [{from: line.from, to: line.to, insert: langLine.toString()}]);
+    
+    return true;
+}
+
+export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): boolean {
+    const { target } = event;
+
+    if (!target || !(target instanceof SVGElement)) {
+        return false;
+    }
+    const newTarget = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
+    if (!newTarget || newTarget.getAttr("action") !== ActionType.EDIT.name) {
+        return false;
+    }
+    // @ts-ignore
+    const view = mdView.editor.cm as EditorView;
+
+    const line = findLine(newTarget, view);
+    new EditModal(app, line.text, result =>
+        updateView(view, [{from: line.from, to: line.to, insert: result}])
+    ).open();
     
     return true;
 }
@@ -104,7 +125,7 @@ export function save(mdView: MarkdownView) {
     new Notice(noticeMsg, 2500);
 }
 
-function findLine(el: HTMLElement, view: EditorView): Line {
+function findLine(el: Element, view: EditorView): Line {
     const pos = view.posAtDOM(el);
     const line = view.state.doc.lineAt(pos);
     // console.log("pos", pos, "- line", line);
@@ -114,6 +135,10 @@ function findLine(el: HTMLElement, view: EditorView): Line {
         * of the start of the code block.
         */
         const itemIdx = parseInt(el.id.match(/\d+$/)?.first()!);
+        
+        return view.state.doc.line(line.number + 1 + itemIdx);
+    } else if (el.hasClass(ActionButton.HTML_CLASS)) {
+        const itemIdx = parseInt(el.getAttr("item-id")?.match(/\d+$/)?.first()!);
         
         return view.state.doc.line(line.number + 1 + itemIdx);
     }
