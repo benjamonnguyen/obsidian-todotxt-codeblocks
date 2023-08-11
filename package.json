@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-inline-todotxt",
+	"name": "obsidian-todotxt-codeblocks",
 	"version": "1.0.0",
-	"description": "Create todos in the markdown editor based on the Todo.txt specification.",
+	"description": "Manage your tasks inside codeblocks according to the Todo.txt specification.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

@@ -1,13 +1,14 @@
 import { Item } from "jstodotxt";
 import { randomUUID } from "crypto";
-import type { ViewModel } from ".";
+import { ActionButton, ActionType, type ViewModel } from ".";
+import { AddModal, EditItemModal } from "src/component";
 
 
 export default class TodoItem extends Item implements ViewModel {
     static HTML_CLS = "todotxt-item";
-
+    
     private id: string | undefined;
-
+    
     constructor(text: string, idx: number | undefined = undefined) {
         super(text);
         if (idx !== undefined) this.setIdx(idx);
@@ -15,20 +16,20 @@ export default class TodoItem extends Item implements ViewModel {
             this.setCreated(new Date());
         }
     }
-
+    
     render(): HTMLElement {
         if (!this.id) throw "No id!";
-
+        
         const item = document.createElement("span");
         item.addClass(this.getHtmlCls());
         item.id = this.id;
-
+        
         const checkbox = item.createEl("input", {
             type: "checkbox",
             cls: "task-list-item-checkbox",
         });
         checkbox.setAttr(this.complete() ? "checked" : "unchecked", true);
-
+        
         if (this.priority()) {
             item.createEl("button", {
                 cls: this.getPriorityHtmlClasses(),
@@ -36,51 +37,57 @@ export default class TodoItem extends Item implements ViewModel {
                 attr: {"disabled": true},
             });
         }
-
-        item.createSpan({
+        
+        const description = item.createSpan({
             cls: "todotxt-item-description",
             text: this.body(),
         });
+        const actions = item.createSpan({
+            cls: "todotxt-item-actions"
+        });
 
+        actions.appendChild(new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render());
+        actions.appendChild(new ActionButton(ActionType.DEL, AddModal.ID, item.id).render());
+        
         // TODO TodoContext/TodoProject
-
+        
         return item;
     }
-
+    
     getId(): string | undefined {
         return this.id;
     }
-
+    
     getHtmlCls(): string {
         return TodoItem.HTML_CLS;
     }
-
+    
     setIdx(idx: number) {
         this.id = randomUUID() + "-" + idx;
     }
-
+    
     getIdx(): number | undefined {
         if (this.id) {
             return parseInt(this.id.match(/\d+$/)?.first()!);
         }
     }
-
+    
     private getPriorityHtmlClasses(): string[] {
         let letterCls;
         switch (this.priority()?.toLowerCase()) {
             case "a":
-                letterCls = "todotxt-priority-a";
-                break;
+            letterCls = "todotxt-priority-a";
+            break;
             case "b":
-                letterCls = "todotxt-priority-b";
-                break;
+            letterCls = "todotxt-priority-b";
+            break;
             case "c":
-                letterCls = "todotxt-priority-c";
-                break;
+            letterCls = "todotxt-priority-c";
+            break;
             default:
-                letterCls = "todotxt-priority-x";
+            letterCls = "todotxt-priority-x";
         }
-
+        
         return [letterCls, "todotxt-priority"];
     }
 }
