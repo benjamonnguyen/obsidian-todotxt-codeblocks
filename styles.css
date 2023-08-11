@@ -126,16 +126,26 @@ svg.todotxt-action-btn {
     fill: none;
     box-sizing: content-box;
     border-radius: var(--radius-s);
+    height: var(--icon-size);
+    width: var(--icon-size);
 }
 
 svg.todotxt-action-btn[action="edit"],
 svg.todotxt-action-btn[action="delete"] {
-    padding: 0.15rem;
+    padding: 0.1rem;
     margin-left: 0.15rem;
     margin-right: -0.15rem;
     vertical-align: text-bottom;
     height: var(--icon-s);
     width: var(--icon-s);
+}
+
+#edit-list-options-modal {
+    padding: 0.1rem;
+    margin-left: 0.25rem;
+    vertical-align: text-bottom;
+    height: calc(var(--icon-size) * 1.35);
+    width: calc(var(--icon-size) * 1.35);
 }
 
 svg.todotxt-action-btn[action="add"] {
@@ -144,11 +154,10 @@ svg.todotxt-action-btn[action="add"] {
     top: var(--size-2-2);
     right: calc(var(--size-2-2) * 9);
     display: flex;
-    height: var(--icon-size);
-    width: var(--icon-size);
 }
 
-.markdown-source-view .todotxt-item:hover svg.todotxt-action-btn {
+.markdown-source-view .todotxt-item:hover svg.todotxt-action-btn,
+.markdown-source-view .todotxt-list-title:hover svg.todotxt-action-btn {
     color: var(--text-muted);
     transition: all .15s ease;
 }
@@ -162,13 +171,22 @@ svg.todotxt-action-btn[action="add"] {
 }
 
 /* MODAL */
-.todotxt-modal-input {
+.todotxt-modal-input-begin {
     margin-top: 1.5rem;
 }
 
-.todotxt-modal-input input[type="text"] {
+/* .todotxt-modal-input {
+    margin-top: 0;
+} */
+
+.todotxt-modal-input-full input[type="text"] {
     width: calc(var(--dialog-width) * 0.9);
     max-width: calc(var(--dialog-max-width) * 0.9);
+}
+
+.todotxt-modal-input-3-4 input[type="text"] {
+    width: calc(var(--dialog-width) * 0.7);
+    max-width: calc(var(--dialog-max-width) * 0.7);
 }
 
 .todotxt-modal-submit {

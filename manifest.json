@@ -1,6 +1,6 @@
 {
-	"id": "obsidian-todotxt-codeblock",
-	"name": "Inline Todo.txt",
+	"id": "obsidian-todotxt-codeblocks",
+	"name": "Todo.txt Codeblocks",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Manage your tasks inside codeblocks according to the Todo.txt specification.",

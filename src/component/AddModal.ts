@@ -2,6 +2,7 @@ import { App, Modal, Setting } from "obsidian";
 
 export default class AddModal extends Modal {
 
+    static ID = "add-modal"
     static placeholders = [
         "(B) Call Mom @Phone +Family rec:1m",
         "(C) Schedule annual checkup +Health due:1yM",
@@ -29,12 +30,16 @@ export default class AddModal extends Modal {
                 this.result = value
             });
         });
-        input.settingEl.addClass("todotxt-modal-input");
+        input.settingEl.addClasses([
+            "todotxt-modal-input-begin",
+            "todotxt-modal-input",
+            "todotxt-modal-input-full",
+        ]);
         
         const submit = new Setting(contentEl)
         .addButton((btn) =>
         btn
-        .setButtonText("Submit")
+        .setButtonText("Add")
         .setCta()
         .onClick(() => {
             this.close();

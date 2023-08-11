@@ -1,6 +1,7 @@
 import { Item } from "jstodotxt";
 import { randomUUID } from "crypto";
 import { ActionButton, ActionType, type ViewModel } from ".";
+import { AddModal, EditItemModal } from "src/component";
 
 
 export default class TodoItem extends Item implements ViewModel {
@@ -45,8 +46,8 @@ export default class TodoItem extends Item implements ViewModel {
             cls: "todotxt-item-actions"
         });
 
-        actions.appendChild(new ActionButton(ActionType.EDIT, item.id).render());
-        actions.appendChild(new ActionButton(ActionType.DEL, item.id).render());
+        actions.appendChild(new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render());
+        actions.appendChild(new ActionButton(ActionType.DEL, AddModal.ID, item.id).render());
         
         // TODO TodoContext/TodoProject
         

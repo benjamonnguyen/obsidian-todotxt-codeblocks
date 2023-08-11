@@ -13,6 +13,8 @@ import { toggleCheckbox, toggleProjectGroup, save, clickEdit, clickDelete, click
 // }
 
 export default class MyPlugin extends Plugin {
+
+	static NAME = "obsidian-todotxt-codeblocks";
 	// settings: MyPluginSettings;
 
 	async onload() {

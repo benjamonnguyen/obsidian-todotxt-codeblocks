@@ -1,10 +1,12 @@
 import { randomUUID } from "crypto";
 import { moment } from "obsidian";
-import type { ViewModel } from ".";
+import { ActionButton, ActionType, type ViewModel } from ".";
+import { EditListOptionsModal } from "src/component";
 
 export default class LanguageLine implements ViewModel {
     private static REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:|tog:)\S+))/;
     static HTML_CLS = "todotxt-list-title";
+    static LANGUAGE_IDENTIFIER = "```todotxt";
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
     static STR_ARR_SORT_FIELDS = new Set(["proj"]);
@@ -31,8 +33,10 @@ export default class LanguageLine implements ViewModel {
 
         for (const [i, str] of line.split(" ").entries()) {
             if (str.startsWith(LanguageLine.COLLAPSE_PREFIX)) {
-                str.substring(LanguageLine.COLLAPSE_PREFIX.length).split(",")
-                    .forEach(proj => langLine.collapsedProjectGroups.add(proj));
+                const collapsedProjs = str.substring(LanguageLine.COLLAPSE_PREFIX.length).split(",");
+                if (collapsedProjs.length > 1) {
+                    collapsedProjs.forEach(proj => langLine.collapsedProjectGroups.add(proj));
+                }
             } else if (str.startsWith(LanguageLine.SORT_PREFIX)) {
                 // Sort ascending by default.
                 const res = LanguageLine.handleSort(str);
@@ -49,28 +53,49 @@ export default class LanguageLine implements ViewModel {
         return { langLine, errs };
     }
 
-    render(): HTMLElement {
+     render(): HTMLElement {
         const title = document.createElement("h2");
-        title.id = this.id;
         title.addClass(this.getHtmlCls());
+        title.id = this.id;
         title.setText(this.title);
+
+        title.appendChild(new ActionButton(
+            ActionType.EDIT, EditListOptionsModal.ID, this.id)
+            .render()
+        );
 
         return title;
     }
 
     toString() {
-        let line = `\`\`\`todotxt "${this.title}"`;
+        const parts = [
+            LanguageLine.LANGUAGE_IDENTIFIER,
+            `"${this.title}"`,
+            this.getSortOrders(),
+            this.getCollapsedProjectGroups(),
+        ];
+
+        return parts.join(" ");
+    }
+
+    getSortOrders(): string {
+        const sortOrders: string[] = [];
         for (const [field, order] of this.sortFieldToOrder.entries()) {
-            line += " " + LanguageLine.SORT_PREFIX + field;
+            let res = LanguageLine.SORT_PREFIX + field;
             if (order.length) {
-                line += ":" + order.join(",");
+                res += ":" + order.join(",");
             }
-        }
-        if (this.collapsedProjectGroups.size) {
-            line += " " + LanguageLine.COLLAPSE_PREFIX + Array.from(this.collapsedProjectGroups).join(",");
+            sortOrders.push(res);
         }
 
-        return line;
+        return sortOrders.join(" ");
+    }
+
+    getCollapsedProjectGroups(): string {
+        return this.collapsedProjectGroups.size 
+            ? LanguageLine.COLLAPSE_PREFIX + Array.from(this.collapsedProjectGroups).join(",")
+            : ""
+            ;
     }
 
     getId(): string {
@@ -81,8 +106,8 @@ export default class LanguageLine implements ViewModel {
         return LanguageLine.HTML_CLS;
     }
 
-    private static handleSort(str: string): { field: string, order: string[] } | Error {
-        const segs = Array.from(str.match(/(.[^:]+):(.[^:]+):?(.+)?/)?.values() || []);
+    static handleSort(str: string): { field: string, order: string[] } | Error {
+        const segs = Array.from(str.match(/([^:\n\s]+):([^:\n\s]+)(?::(\w+))?/)?.values() || []);
         let err;
         const field = segs.at(2);
         const order = segs.at(3)?.split(",");
@@ -90,7 +115,7 @@ export default class LanguageLine implements ViewModel {
             return new SyntaxError(`"${str}" does not follow syntax "sort:<field>:<order?>"`);
         }
         if (!LanguageLine.ASC_DESC_SORT_FIELDS.has(field) && !LanguageLine.STR_ARR_SORT_FIELDS.has(field)) {
-            return new SyntaxError(`"${field}" is not a valid field (${LanguageLine.ALL_SORT_FIELDS.join(", ")})`);
+            return new SyntaxError(`"${field}" is not a valid sort field (${LanguageLine.ALL_SORT_FIELDS.join(", ")})`);
         }
         if (field === "proj") {
             if (!order) {

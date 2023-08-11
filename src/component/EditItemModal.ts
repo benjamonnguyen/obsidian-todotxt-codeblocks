@@ -1,6 +1,9 @@
 import { App, Modal, Setting } from "obsidian";
 
-export default class EditModal extends Modal {
+export default class EditItemModal extends Modal {
+
+    static ID = "edit-item-modal";
+
     result: string;
     originalText: string;
     onSubmit: (result: string) => void;
@@ -21,7 +24,11 @@ export default class EditModal extends Modal {
                 this.result = value
             });
         });
-        input.settingEl.addClass("todotxt-modal-input");
+        input.settingEl.addClasses([
+            "todotxt-modal-input-begin",
+            "todotxt-modal-input",
+            "todotxt-modal-input-full",
+        ]);
         
         const submit = new Setting(contentEl)
         .addButton((btn) =>

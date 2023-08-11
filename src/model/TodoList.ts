@@ -2,6 +2,7 @@ import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from ".";
 import { randomUUID } from "crypto";
 import { LanguageLine } from ".";
 import type { ViewModel } from ".";
+import { AddModal } from "src/component";
 
 export default class TodoList implements ViewModel {
     static HTML_CLS = "todotxt-list";
@@ -25,7 +26,7 @@ export default class TodoList implements ViewModel {
         list.addClass(this.getHtmlCls());
         list.id = this.id;
 
-        const addBtn = new ActionButton(ActionType.ADD, list.id).render();
+        const addBtn = new ActionButton(ActionType.ADD, AddModal.ID, list.id).render();
         list.appendChild(addBtn);
 
         list.appendChild(this.langLine.render());

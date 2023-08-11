@@ -3,8 +3,8 @@ import { Line } from '@codemirror/state';
 import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton } from "./model";
 import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import { EditModal } from "./component";
-import AddModal from './component/AddModal';
+import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
+import MyPlugin from './main';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
@@ -20,7 +20,7 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     * Create a notice and return true.
     */
     if (mdView.getMode() === "preview") {
-        new Notice("obsidian-inline-todotxt WARNING\nCheckbox toggle disabled in Reading View");
+        new Notice(MyPlugin.NAME + " WARNING\nCheckbox toggle disabled in Reading View");
         event.preventDefault();
         return true;
     }
@@ -38,7 +38,7 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     }
     
     event.preventDefault();
-    updateView(view, [{from: line.from, to: line.to, insert: todoItem.toString()}]);
+    updateView(mdView, [{from: line.from, to: line.to, insert: todoItem.toString()}]);
     
     return true;
 }
@@ -70,7 +70,7 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
         langLine.collapsedProjectGroups.delete(project);
     }
     
-    updateView(view, [{from: line.from, to: line.to, insert: langLine.toString()}]);
+    updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString()}]);
     
     return true;
 }
@@ -89,9 +89,26 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     const view = mdView.editor.cm as EditorView;
 
     const line = findLine(newTarget, view);
-    new EditModal(app, line.text, result =>
-        updateView(view, [{from: line.from, to: line.to, insert: result}])
-    ).open();
+
+    if (newTarget.id === EditItemModal.ID) {
+        new EditItemModal(app, line.text, result =>
+            updateView(mdView, [{from: line.from, to: line.to, insert: result}])
+        ).open();
+    } else if (newTarget.id === EditListOptionsModal.ID) {
+        const { langLine } = LanguageLine.from(line.text);
+        new EditListOptionsModal(this.app, langLine, result => {
+            langLine.title = result.title;
+            langLine.sortFieldToOrder.clear();
+            result.sortOrders.split(" ")
+                .map(sortOrder => LanguageLine.handleSort(sortOrder))
+                .forEach(res => {
+                    if (!(res instanceof Error)) {
+                        langLine.sortFieldToOrder.set(res.field, res.order);
+                    }
+                });
+            updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString() + "\n"}]);
+        }).open();
+    }
     
     return true;
 }
@@ -112,7 +129,7 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boo
     const line = findLine(document.getElementById(listId)!, view);
 
     new AddModal(app, result => {
-        updateView(view, [{from: line.to + 1, insert: result + "\n"}])
+        updateView(mdView, [{from: line.to + 1, insert: result + "\n"}])
     }).open();
     
     return true;
@@ -132,7 +149,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
     const view = mdView.editor.cm as EditorView;
 
     const line = findLine(newTarget, view);
-    updateView(view, [{from: line.from, to: line.to + 1}]); // +1 to delete entire line
+    updateView(mdView, [{from: line.from, to: line.to + 1}]); // +1 to delete entire line
     
     return true;
 }
@@ -145,7 +162,7 @@ export function save(mdView: MarkdownView) {
     const view = mdView.editor.cm as EditorView;
     
     const items = [...UNSAVED_ITEMS];
-    UNSAVED_ITEMS.length = 0; // TODO race condition?
+    UNSAVED_ITEMS.length = 0;
     const changes: {from: number, to: number, insert?: string}[] = [];
     
     items.forEach(({ listId, line, newText }) => {
@@ -161,8 +178,8 @@ export function save(mdView: MarkdownView) {
         }
     });
 
-    updateView(view, changes);
-    var noticeMsg = "obsidian-inline-todotxt SAVING\n";
+    updateView(mdView, changes);
+    var noticeMsg = MyPlugin.NAME + " SAVING\n";
     changes.filter(c => c.insert).forEach(c => noticeMsg += `- ${c.insert}\n`);
     new Notice(noticeMsg, 2500);
 }
@@ -179,7 +196,8 @@ function findLine(el: Element, view: EditorView): Line {
         const itemIdx = parseInt(el.id.match(/\d+$/)?.first()!);
         
         return view.state.doc.line(line.number + 1 + itemIdx);
-    } else if (el.hasClass(ActionButton.HTML_CLASS)) {
+    } else if (el.hasClass(ActionButton.HTML_CLASS)
+        && el.id !== EditListOptionsModal.ID) {
         const itemIdx = parseInt(el.getAttr("item-id")?.match(/\d+$/)?.first()!);
         
         return view.state.doc.line(line.number + 1 + itemIdx);
@@ -188,8 +206,11 @@ function findLine(el: Element, view: EditorView): Line {
     return view.state.doc.lineAt(pos);
 }
 
-function updateView(view: EditorView, changes: {from: number, to?: number, insert?: string}[]) {
+function updateView(mdView: MarkdownView, changes: {from: number, to?: number, insert?: string}[]) {
     console.log("changes:", changes);
+    save(mdView); // To prevent race condition
+    // @ts-ignore
+    const view = mdView.editor.cm as EditorView;
     const transaction = view.state.update({changes: changes});
     view.dispatch(transaction);
 }

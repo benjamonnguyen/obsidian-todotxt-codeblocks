@@ -4,10 +4,12 @@ export class ActionButton implements ViewModel {
     static HTML_CLASS = "todotxt-action-btn"
 
     type: ActionType;
+    id: string;
     itemId: string;
 
-    constructor(type: ActionType, itemId: string) {
+    constructor(type: ActionType, id: string, itemId: string) {
         this.type = type;
+        this.id = id;
         this.itemId = itemId;
     }
     render(): HTMLElement {
@@ -18,6 +20,7 @@ export class ActionButton implements ViewModel {
             "viewBox": "0 0 100 100",
             "stroke": "currentColor",
             "action": this.type.name,
+            "id": this.id,
             "item-id": this.itemId,
         });
         svg.appendChild(this.type.path);
