@@ -56,7 +56,8 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - due
   - completed
   - created
-  - ctx?
+  - ctx
+    - "n/c" = no context (ex. "sort:ctx:bug,feature,n/c,nice-to-have")
   - default (configurable)
   - desc/asc (defaults to asc)
 - [x] Collapsible project groups

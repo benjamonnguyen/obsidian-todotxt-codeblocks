@@ -4,12 +4,12 @@ import { ActionButton, ActionType, type ViewModel } from ".";
 import { EditListOptionsModal } from "src/component";
 
 export default class LanguageLine implements ViewModel {
-    private static REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:|tog:)\S+))/;
+    private static REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:|collapse:)\S+))/;
     static HTML_CLS = "todotxt-list-title";
     static LANGUAGE_IDENTIFIER = "```todotxt";
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
-    static STR_ARR_SORT_FIELDS = new Set(["proj"]);
+    static STR_ARR_SORT_FIELDS = new Set(["proj", "ctx"]);
     static ASC_DESC_SORT_FIELDS = new Set(["status", "prio"]);
     static ALL_SORT_FIELDS = Array.from(LanguageLine.STR_ARR_SORT_FIELDS)
         .concat(...LanguageLine.ASC_DESC_SORT_FIELDS);
@@ -107,7 +107,7 @@ export default class LanguageLine implements ViewModel {
     }
 
     static handleSort(str: string): { field: string, order: string[] } | Error {
-        const segs = Array.from(str.match(/([^:\n\s]+):([^:\n\s]+)(?::(\w+))?/)?.values() || []);
+        const segs = Array.from(str.match(/([^:\n\s]+):([^:\n\s]+)(?::([^:\n\s]+))?/)?.values() || []);
         let err;
         const field = segs.at(2);
         const order = segs.at(3)?.split(",");
@@ -120,6 +120,10 @@ export default class LanguageLine implements ViewModel {
         if (field === "proj") {
             if (!order) {
                 return new SyntaxError("Provide project order (ex. \"sort:proj:work,home,gym\")");
+            }
+        } else if (field === "ctx") {
+            if (!order) {
+                return new SyntaxError("Provide context order (ex. \"sort:ctx:bug,feature,nice-to-have\")");
             }
         } else if (LanguageLine.ASC_DESC_SORT_FIELDS.has(field)) {
             const orderStr = segs.at(3);
