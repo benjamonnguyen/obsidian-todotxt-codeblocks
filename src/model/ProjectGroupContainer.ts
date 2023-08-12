@@ -22,6 +22,9 @@ export default class ProjectGroupContainer implements ViewModel {
     render(): HTMLElement {
         const container = document.createElement("div");
         container.addClass(this.getHtmlCls());
+        if (this.items.every((item => item.complete()))) {
+            container.setAttr("completed", true);
+        }
 
         const checkboxId = randomUUID();
         const checkbox = container.createEl("input", {
