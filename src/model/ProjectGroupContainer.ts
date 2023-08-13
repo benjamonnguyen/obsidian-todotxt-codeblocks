@@ -12,17 +12,19 @@ export default class ProjectGroupContainer implements ViewModel {
     items: TodoItem[];
     name: string;
     isCollapsed: boolean;
+    isCompleted: boolean;
 
-    constructor(name: string, items: TodoItem[], isToggled: boolean) {
+    constructor(name: string, items: TodoItem[], isCollapsed: boolean) {
         this.name = name;
         this.items = items;
-        this.isCollapsed = isToggled;
+        this.isCollapsed = isCollapsed;
+        this.isCompleted = this.items.every((item => item.complete()));
     }
 
     render(): HTMLElement {
         const container = document.createElement("div");
         container.addClass(this.getHtmlCls());
-        if (this.items.every((item => item.complete()))) {
+        if (this.isCompleted) {
             container.setAttr("completed", true);
         }
 
