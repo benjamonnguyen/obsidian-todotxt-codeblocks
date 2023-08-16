@@ -27,6 +27,9 @@ export default class LanguageLine implements ViewModel {
         const errs: Error[] = [];
 
         const match = LanguageLine.REGEX.exec(line);
+        if (!match) {
+            throw "Invalid line: " + line;
+        }
         langLine.title = match?.at(1) || match?.at(2)
             || `Todo.txt (${moment().format("YYYY-MM-DD")})`;
         langLine.id = randomUUID();

@@ -1,3 +1,4 @@
+import { EditorView } from '@codemirror/view';
 import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from ".";
 import { randomUUID } from "crypto";
 import { LanguageLine } from ".";
@@ -14,12 +15,36 @@ export default class TodoList implements ViewModel {
     items: TodoItem[];
     projectGroups: ProjectGroupContainer[];
 
-    constructor(langLine: LanguageLine, body: string) {
+    constructor(langLine: LanguageLine, items: TodoItem[]) {
         this.id = `${randomUUID()}`;
         this.langLine = langLine;
-        this.items = this.parseTodoItems(body);
+        this.items = items;
         this.projectGroups = this.buildProjectGroups(this.items, this.langLine.collapsedProjectGroups);
-        this.sort(this.items, this.projectGroups, this.langLine);
+        this.sort();
+    }
+
+    static from(lineNumber: number, view: EditorView): { todoList: TodoList, from: number, to: number } {
+        let i = lineNumber;
+        const firstLine = view.state.doc.line(i++);
+        const { langLine, errs }= LanguageLine.from(firstLine.text);
+        if (errs.length) {
+            console.error("LanguageLine errs: " + errs);
+        };
+
+        let to: number = firstLine.to;
+        const items: TodoItem[] = [];
+        while (i < view.state.doc.lines) {
+            const line = view.state.doc.line(i++);
+            if (line.text.startsWith("\`\`\`")) break;
+            items.push(new TodoItem(line.text))
+            to = line.to
+        }
+
+        return {
+            todoList: new TodoList(langLine, items),
+            from: firstLine.from,
+            to: to
+        };
     }
 
     render(): HTMLElement {
@@ -50,19 +75,21 @@ export default class TodoList implements ViewModel {
         return TodoList.HTML_CLS;
     }
 
-    private parseTodoItems(body: string): TodoItem[] {
-        return body.split("\n").filter(line => line.trim().length)
-            .map(line => new TodoItem(line));
+    toString(): string {
+        let res = this.langLine.toString() + "\n";
+        res += this.items.map(item => item.toString()).join("\n");
+        
+        return res;
     }
 
-    private sort(items: TodoItem[], projectGroups: ProjectGroupContainer[], langLine: LanguageLine) {
+    sort() {
         const ASC = "asc";
 
         // dates (creation, completion)
 
         // ctx
-        const contextOrder = this.getContextOrder(items, langLine.sortFieldToOrder.get("ctx"));
-        items.sort((a, b) => {
+        const contextOrder = this.getContextOrder(this.items, this.langLine.sortFieldToOrder.get("ctx"));
+        this.items.sort((a, b) => {
 
             let aScore = Number.MAX_VALUE;
             if (a.contexts().length) {
@@ -82,9 +109,9 @@ export default class TodoList implements ViewModel {
         });
 
         // prio
-        const prioritySortOrder = langLine.sortFieldToOrder.get("prio");
+        const prioritySortOrder = this.langLine.sortFieldToOrder.get("prio");
         if (prioritySortOrder) {
-            items.sort((a, b) => {
+            this.items.sort((a, b) => {
                 const aScore = a.priority()?.charCodeAt(0) || Number.MAX_VALUE;
                 const bScore = b.priority()?.charCodeAt(0) || Number.MAX_VALUE;
                 if (!prioritySortOrder.length || prioritySortOrder.first()! === ASC) {
@@ -97,9 +124,9 @@ export default class TodoList implements ViewModel {
         // due
 
         // status
-        const statusSortOrder = langLine.sortFieldToOrder.get("status");
+        const statusSortOrder = this.langLine.sortFieldToOrder.get("status");
         if (statusSortOrder) {
-            items.sort((a, b) => {
+            this.items.sort((a, b) => {
                 const aScore = a.complete() ? 1 : 0;
                 const bScore = b.complete() ? 1 : 0;
                 if (!statusSortOrder.length || statusSortOrder.first()! === ASC) {
@@ -110,27 +137,27 @@ export default class TodoList implements ViewModel {
         }
 
         // proj
-        const projectOrder = this.getProjectOrder(items, langLine.sortFieldToOrder.get("proj"));
-        projectGroups.sort((a, b) => {
+        const projectOrder = this.getProjectOrder(this.items, this.langLine.sortFieldToOrder.get("proj"));
+        this.projectGroups.sort((a, b) => {
             let aScore = projectOrder.findIndex(proj => proj === a.name);
             let bScore = projectOrder.findIndex(proj => proj === b.name);
 
             if (statusSortOrder) {
-                if (a.isCompleted) aScore += projectGroups.length;
-                if (b.isCompleted) bScore += projectGroups.length;
+                if (a.isCompleted) aScore += this.projectGroups.length;
+                if (b.isCompleted) bScore += this.projectGroups.length;
             }
 
             return aScore - bScore;
         });
-        items.sort((a, b) => {
+        this.items.sort((a, b) => {
             let aScore: number | undefined;
             let bScore: number | undefined;
             a.projects().forEach(proj =>
-                aScore =  Math.min(projectGroups.findIndex(group => group.name === proj),
+                aScore =  Math.min(this.projectGroups.findIndex(group => group.name === proj),
                     aScore === undefined ? Number.MAX_VALUE : aScore)
             );
             b.projects().forEach(proj =>
-                bScore = Math.min(projectGroups.findIndex(group => group.name === proj),
+                bScore = Math.min(this.projectGroups.findIndex(group => group.name === proj),
                     bScore === undefined ? Number.MAX_VALUE : bScore)
             );
 

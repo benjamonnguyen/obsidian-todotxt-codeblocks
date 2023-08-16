@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
-import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton } from "./model";
+import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton, TodoList } from "./model";
 import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
@@ -12,8 +12,8 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
         return false;
     }
-    const span = target.parentElement;
-    if (!span || !(span instanceof HTMLSpanElement) || span.className !== TodoItem.HTML_CLS) {
+    const itemEl = target.parentElement;
+    if (!itemEl || !(itemEl instanceof HTMLSpanElement) || itemEl.className !== TodoItem.HTML_CLS) {
         return false;
     }
     /* State changes do not persist to EditorView in Reading mode.
@@ -27,18 +27,22 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    
-    const line = findLine(span, view);
-    const todoItem = new TodoItem(line.text);
-    if (todoItem.complete()) {
-        todoItem.clearCompleted();
-        todoItem.setComplete(false);
+
+    const itemIdx = parseInt(itemEl.id.match(/\d+$/)?.first()!);
+    const pos = view.posAtDOM(itemEl);
+    const listLine = view.state.doc.lineAt(pos);
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
+    const item = todoList.items.at(itemIdx);
+    if (item?.complete()) {
+        item.clearCompleted();
+        item.setComplete(false);
     } else {
-        todoItem.setCompleted(new Date());
+        item?.setCompleted(new Date());
     }
+    todoList.sort();
     
     event.preventDefault();
-    updateView(mdView, [{from: line.from, to: line.to, insert: todoItem.toString()}]);
+    updateView(mdView, [{from, to, insert: todoList.toString()}]);
     
     return true;
 }
