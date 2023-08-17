@@ -85,32 +85,41 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     if (!target || !(target instanceof SVGElement)) {
         return false;
     }
-    const newTarget = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
-    if (!newTarget || newTarget.getAttr("action") !== ActionType.EDIT.name) {
+    const editBtnEl = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
+    if (!editBtnEl || editBtnEl.getAttr("action") !== ActionType.EDIT.name) {
         return false;
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
 
-    const line = findLine(newTarget, view);
+    const pos = view.posAtDOM(editBtnEl);
+    const listLine = view.state.doc.lineAt(pos);
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
 
-    if (newTarget.id === EditItemModal.ID) {
-        new EditItemModal(app, line.text, result =>
-            updateView(mdView, [{from: line.from, to: line.to, insert: result}])
-        ).open();
-    } else if (newTarget.id === EditListOptionsModal.ID) {
-        const { langLine } = LanguageLine.from(line.text);
+    if (editBtnEl.id === EditItemModal.ID) {
+        const itemIdx = parseInt(editBtnEl.getAttr("item-id")?.match(/\d+$/)?.first()!);
+        const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
+
+        new EditItemModal(app, itemLine.text, result => {
+            todoList.items[itemIdx] = new TodoItem(result);
+            todoList.sort();
+            updateView(mdView, [{from, to, insert: todoList.toString()}]);
+        }).open();
+    } else if (editBtnEl.id === EditListOptionsModal.ID) {
+        const { langLine } = LanguageLine.from(listLine.text);
+        
         new EditListOptionsModal(this.app, langLine, result => {
-            langLine.title = result.title;
-            langLine.sortFieldToOrder.clear();
+            todoList.langLine.title = result.title;
+            todoList.langLine.sortFieldToOrder.clear();
             result.sortOrders.split(" ")
                 .map(sortOrder => LanguageLine.handleSort(sortOrder))
                 .forEach(res => {
                     if (!(res instanceof Error)) {
-                        langLine.sortFieldToOrder.set(res.field, res.order);
+                        todoList.langLine.sortFieldToOrder.set(res.field, res.order);
                     }
                 });
-            updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString() + "\n"}]);
+            todoList.sort();
+            updateView(mdView, [{from, to, insert: todoList.toString()}]);
         }).open();
     }
     
@@ -212,7 +221,7 @@ function findLine(el: Element, view: EditorView): Line {
 
 function updateView(mdView: MarkdownView, changes: {from: number, to?: number, insert?: string}[]) {
     console.log("changes:", changes);
-    save(mdView); // To prevent race condition
+    save(mdView); // Prevent race condition by checking if there are UNSAVED_ITEMS pending
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
     const transaction = view.state.update({changes: changes});
