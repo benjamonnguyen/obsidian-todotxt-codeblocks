@@ -19,7 +19,6 @@ export default class TodoList implements ViewModel {
         this.id = `${randomUUID()}`;
         this.langLine = langLine;
         this.items = items;
-        this.projectGroups = this.buildProjectGroups(this.items, this.langLine.collapsedProjectGroups);
         this.sort();
     }
 
@@ -137,6 +136,7 @@ export default class TodoList implements ViewModel {
         }
 
         // proj
+        this.projectGroups = this.buildProjectGroups(this.items, this.langLine.collapsedProjectGroups);
         const projectOrder = this.getProjectOrder(this.items, this.langLine.sortFieldToOrder.get("proj"));
         this.projectGroups.sort((a, b) => {
             let aScore = projectOrder.findIndex(proj => proj === a.name);

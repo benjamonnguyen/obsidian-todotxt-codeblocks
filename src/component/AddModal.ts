@@ -8,8 +8,8 @@ export default class AddModal extends Modal {
         "(C) Schedule annual checkup +Health due:1yM",
         "Pick up milk +Groceries due:Sa",
         "Tend to herb @garden +Home rec:1w2d",
-        "(A) Fix parsing @bug +obsidian-todotxt-codeblock due:0",
-        "Ship new @feature +obsidian-todotxt-codeblock due:2040-08-06",
+        "(A) Fix parsing @bug +obsidian-todotxt-codeblocks due:0",
+        "Ship new @feature +obsidian-todotxt-codeblocks due:2040-08-06",
     ];
 
     result: string;
