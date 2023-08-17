@@ -8,7 +8,6 @@ import MyPlugin from './main';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
-    
     if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
         return false;
     }
@@ -27,10 +26,10 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-
     const itemIdx = parseInt(itemEl.id.match(/\d+$/)?.first()!);
     const pos = view.posAtDOM(itemEl);
     const listLine = view.state.doc.lineAt(pos);
+
     const { todoList, from, to } = TodoList.from(listLine.number, view);
     const item = todoList.items.at(itemIdx);
     if (item?.complete()) {
@@ -43,13 +42,11 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     
     event.preventDefault();
     updateView(mdView, [{from, to, insert: todoList.toString()}]);
-    
     return true;
 }
 
 export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
-
     if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox"
         || !target.hasClass(ProjectGroupContainer.CHECKBOX_CLS)) {
         return false;
@@ -63,11 +60,11 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    
     const line = findLine(target, view);
     const { langLine } = LanguageLine.from(line.text);
     const project = target.labels?.item(0).getText().substring(1);
     if (!project) return false;
+
     if (target.getAttr("checked")) {
         langLine.collapsedProjectGroups.add(project);
     } else {
@@ -75,7 +72,6 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     }
     
     updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString()}]);
-    
     return true;
 }
 
@@ -91,7 +87,6 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-
     const pos = view.posAtDOM(editBtnEl);
     const listLine = view.state.doc.lineAt(pos);
     const { todoList, from, to } = TodoList.from(listLine.number, view);
@@ -139,10 +134,13 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boo
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    const line = findLine(document.getElementById(listId)!, view);
+    const listLine = findLine(document.getElementById(listId)!, view);
 
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
     new AddModal(app, result => {
-        updateView(mdView, [{from: line.to + 1, insert: result + "\n"}])
+        todoList.items.push(new TodoItem(result));
+        todoList.sort();
+        updateView(mdView, [{from, to, insert: todoList.toString()}]);
     }).open();
     
     return true;
