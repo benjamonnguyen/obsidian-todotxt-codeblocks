@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
-import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton } from "./model";
+import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton, TodoList } from "./model";
 import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
@@ -8,12 +8,11 @@ import MyPlugin from './main';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
-    
     if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox") {
         return false;
     }
-    const span = target.parentElement;
-    if (!span || !(span instanceof HTMLSpanElement) || span.className !== TodoItem.HTML_CLS) {
+    const itemEl = target.parentElement;
+    if (!itemEl || !(itemEl instanceof HTMLSpanElement) || itemEl.className !== TodoItem.HTML_CLS) {
         return false;
     }
     /* State changes do not persist to EditorView in Reading mode.
@@ -27,25 +26,27 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    
-    const line = findLine(span, view);
-    const todoItem = new TodoItem(line.text);
-    if (todoItem.complete()) {
-        todoItem.clearCompleted();
-        todoItem.setComplete(false);
+    const itemIdx = parseInt(itemEl.id.match(/\d+$/)?.first()!);
+    const pos = view.posAtDOM(itemEl);
+    const listLine = view.state.doc.lineAt(pos);
+
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
+    const item = todoList.items.at(itemIdx);
+    if (item?.complete()) {
+        item.clearCompleted();
+        item.setComplete(false);
     } else {
-        todoItem.setCompleted(new Date());
+        item?.setCompleted(new Date());
     }
+    todoList.sort();
     
     event.preventDefault();
-    updateView(mdView, [{from: line.from, to: line.to, insert: todoItem.toString()}]);
-    
+    updateView(mdView, [{from, to, insert: todoList.toString()}]);
     return true;
 }
 
 export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
-
     if (!target || !(target instanceof HTMLInputElement) || target.type !== "checkbox"
         || !target.hasClass(ProjectGroupContainer.CHECKBOX_CLS)) {
         return false;
@@ -59,11 +60,11 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    
     const line = findLine(target, view);
     const { langLine } = LanguageLine.from(line.text);
     const project = target.labels?.item(0).getText().substring(1);
     if (!project) return false;
+
     if (target.getAttr("checked")) {
         langLine.collapsedProjectGroups.add(project);
     } else {
@@ -71,7 +72,6 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     }
     
     updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString()}]);
-    
     return true;
 }
 
@@ -81,32 +81,40 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     if (!target || !(target instanceof SVGElement)) {
         return false;
     }
-    const newTarget = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
-    if (!newTarget || newTarget.getAttr("action") !== ActionType.EDIT.name) {
+    const editBtnEl = target.hasClass("todotxt-action-btn") ? target : target.parentElement;
+    if (!editBtnEl || editBtnEl.getAttr("action") !== ActionType.EDIT.name) {
         return false;
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
+    const pos = view.posAtDOM(editBtnEl);
+    const listLine = view.state.doc.lineAt(pos);
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
 
-    const line = findLine(newTarget, view);
+    if (editBtnEl.id === EditItemModal.ID) {
+        const itemIdx = parseInt(editBtnEl.getAttr("item-id")?.match(/\d+$/)?.first()!);
+        const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
 
-    if (newTarget.id === EditItemModal.ID) {
-        new EditItemModal(app, line.text, result =>
-            updateView(mdView, [{from: line.from, to: line.to, insert: result}])
-        ).open();
-    } else if (newTarget.id === EditListOptionsModal.ID) {
-        const { langLine } = LanguageLine.from(line.text);
+        new EditItemModal(app, itemLine.text, result => {
+            todoList.items[itemIdx] = new TodoItem(result);
+            todoList.sort();
+            updateView(mdView, [{from, to, insert: todoList.toString()}]);
+        }).open();
+    } else if (editBtnEl.id === EditListOptionsModal.ID) {
+        const { langLine } = LanguageLine.from(listLine.text);
+        
         new EditListOptionsModal(this.app, langLine, result => {
-            langLine.title = result.title;
-            langLine.sortFieldToOrder.clear();
+            todoList.langLine.title = result.title;
+            todoList.langLine.sortFieldToOrder.clear();
             result.sortOrders.split(" ")
                 .map(sortOrder => LanguageLine.handleSort(sortOrder))
                 .forEach(res => {
                     if (!(res instanceof Error)) {
-                        langLine.sortFieldToOrder.set(res.field, res.order);
+                        todoList.langLine.sortFieldToOrder.set(res.field, res.order);
                     }
                 });
-            updateView(mdView, [{from: line.from, to: line.to, insert: langLine.toString() + "\n"}]);
+            todoList.sort();
+            updateView(mdView, [{from, to, insert: todoList.toString()}]);
         }).open();
     }
     
@@ -126,10 +134,13 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boo
     }
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
-    const line = findLine(document.getElementById(listId)!, view);
+    const listLine = findLine(document.getElementById(listId)!, view);
 
+    const { todoList, from, to } = TodoList.from(listLine.number, view);
     new AddModal(app, result => {
-        updateView(mdView, [{from: line.to + 1, insert: result + "\n"}])
+        todoList.items.push(new TodoItem(result));
+        todoList.sort();
+        updateView(mdView, [{from, to, insert: todoList.toString()}]);
     }).open();
     
     return true;
@@ -208,7 +219,7 @@ function findLine(el: Element, view: EditorView): Line {
 
 function updateView(mdView: MarkdownView, changes: {from: number, to?: number, insert?: string}[]) {
     console.log("changes:", changes);
-    save(mdView); // To prevent race condition
+    save(mdView); // Prevent race condition by checking if there are UNSAVED_ITEMS pending
     // @ts-ignore
     const view = mdView.editor.cm as EditorView;
     const transaction = view.state.update({changes: changes});

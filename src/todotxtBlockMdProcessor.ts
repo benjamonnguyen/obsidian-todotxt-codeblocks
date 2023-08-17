@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext, Notice } from "obsidian";
-import { LanguageLine, TodoList } from "./model";
+import { LanguageLine, TodoList, TodoItem } from "./model";
 import MyPlugin from "./main";
 
 // line 0 is langLine
@@ -17,7 +17,10 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     }
 
     // Create todo list and update editor state.
-    const todoList = new TodoList(langLine, source);
+    const items = source.split("\n")
+        .filter(line => line.trim().length)
+        .map(line => new TodoItem(line));
+    const todoList = new TodoList(langLine, items);
 
     const newLangLine = langLine.toString();
     if (languageLine !== newLangLine) {

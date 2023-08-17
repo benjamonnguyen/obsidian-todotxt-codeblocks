@@ -205,11 +205,16 @@ svg.todotxt-action-btn[action="add"] {
     padding: 0.25rem;
     font-size: large;
     font-weight: bold;
-  }
+}
+
+.project-group-container[completed] label {
+    color: var(--checklist-done-color);
+    text-decoration: var(--checklist-done-decoration);
+}
   
 .theme-dark .project-group-container label:hover {
     background: var(--todotxt-color-slate-700);
-  }
+}
 
 .theme-light .project-group-container label:hover {
     background: var(--todotxt-color-gray-100);
