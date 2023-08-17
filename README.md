@@ -61,7 +61,8 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - default (configurable)
   - desc/asc (defaults to asc)
 - [x] Collapsible project groups
-- [ ] Extensions:
+- [ ] Reserved extensions:
+  - items cannot have duplicate key/value pairs for a reserved extension
   - "due:" (Due date) / "rec:" (Recurring frequency)
     - <number><[dateUnit]> (ex. 1d)
       - dateUnits: d, w, m, y (defaults to d)
