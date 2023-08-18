@@ -9,6 +9,7 @@ If your plugin does not need CSS, delete this file.
 
 :root {
   --todotxt-color-amber-300: rgb(252 211 77);
+  --todotxt-color-amber-400: rgb(240, 146, 38);
   --todotxt-color-amber-600: rgb(217 119 6);
   --todotxt-color-blue-200: rgb(191 219 254);
   --todotxt-color-blue-300: rgb(147 197 253);
@@ -68,34 +69,27 @@ button.todotxt-priority-x {
     background-color: var(--todotxt-color-gray-400);
 }
 
-input[type="checkbox"]:checked ~ .todotxt-item-description {
+input[type="checkbox"]:checked ~ .todotxt-item-description,
+input[type="checkbox"]:checked ~ .todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
-
-/* input[type="checkbox"]:checked ~ .todotxt-item-description {
-    color: var(--checklist-done-color);
-    text-decoration: var(--checklist-done-decoration);
-} */
-    
 /* .todo-text span {
     margin-right: 0.3em;
-}
-
-.todo-due {
-    color: var(--todotxt-color-sky-600);
-}
-.todo-due-soon {
-    color: var(--todotxt-color-amber-600);
-}
-.todo-due-past {
-    color: var(--todotxt-color-red-600);
-}
-
-.todo-completed, .todo-completed span {
-    text-decoration-line: line-through;
-    color: var(--todotxt-color-gray-400);
 } */
+
+.theme-dark .todotxt-due-later {
+    color: var(--todotxt-color-indigo-200);
+}
+.theme-light .todotxt-due-later {
+    color: var(--todotxt-color-indigo-900);
+}
+.todotxt-due-today {
+    color: var(--todotxt-color-amber-400);
+}
+.todotxt-overdue {
+    color: var(--todotxt-color-red-700);
+}
 
 /* .todo-tag {
     font-size: 0.75rem;

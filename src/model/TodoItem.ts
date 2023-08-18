@@ -2,6 +2,8 @@ import { Item } from "jstodotxt";
 import { randomUUID } from "crypto";
 import { ActionButton, ActionType, type ViewModel } from ".";
 import { AddModal, EditItemModal } from "src/component";
+import { moment } from "obsidian";
+import { processExtensions, Extension } from "src/extension";
 
 
 export default class TodoItem extends Item implements ViewModel {
@@ -12,6 +14,11 @@ export default class TodoItem extends Item implements ViewModel {
     constructor(text: string, idx: number | undefined = undefined) {
         super(text);
         if (idx !== undefined) this.setIdx(idx);
+    }
+
+    setBody(body: string): void {
+        super.setBody(body);
+        processExtensions(this);
         if (!this.created()) {
             this.setCreated(new Date());
         }
@@ -38,18 +45,14 @@ export default class TodoItem extends Item implements ViewModel {
             });
         }
         
-        const description = item.createSpan({
-            cls: "todotxt-item-description",
-            text: this.body(),
-        });
+        item.createEl("span").outerHTML = this.buildDescriptionHtml();
+
         const actions = item.createSpan({
             cls: "todotxt-item-actions"
         });
 
         actions.appendChild(new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render());
         actions.appendChild(new ActionButton(ActionType.DEL, AddModal.ID, item.id).render());
-        
-        // TODO TodoContext/TodoProject
         
         return item;
     }
@@ -71,6 +74,14 @@ export default class TodoItem extends Item implements ViewModel {
             return parseInt(this.id.match(/\d+$/)?.first()!);
         }
     }
+
+    addExtension(key: string, value: string): void {
+        if (Extension.isReserved(key) && this.extensions().find(ext => ext.key === key)) {
+            throw "Extension already exists for key: " + key;
+        }
+        super.addExtension(key, value);
+        processExtensions(this);
+    }
     
     private getPriorityHtmlClasses(): string[] {
         let letterCls;
@@ -89,5 +100,34 @@ export default class TodoItem extends Item implements ViewModel {
         }
         
         return [letterCls, "todotxt-priority"];
+    }
+
+    private buildDescriptionHtml(): string {
+        let descriptionHtml = "<span class=\"todotxt-item-description\">";
+        for (const str of this.body().split(" ")) {
+            if (str.startsWith(Extension.DUE + ":")) {
+                const split = str.split(":");
+                const due = moment(split.at(1));
+                const now = moment();
+                const extension = split[0] + ":" + split[1];
+                if (due.isSame(now, "d")) {
+                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-due-today\">" + extension + "</span>";
+                } else if (due.isBefore(now, "d")) {
+                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-overdue\">" + extension + "</span>";
+                } else {
+                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-due-later\">" + extension + "</span>";
+                }
+                const remaining = split.slice(2);
+                if (remaining.length) {
+                    descriptionHtml += ":" + split.slice(2).join(":");
+                }
+                descriptionHtml += " ";
+            } else {
+                descriptionHtml += str + " ";
+            }
+        };
+        descriptionHtml += "</span>";
+        
+        return descriptionHtml.trimEnd();
     }
 }
