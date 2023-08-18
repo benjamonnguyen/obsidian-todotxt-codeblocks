@@ -46,18 +46,39 @@ export default class TodoItem extends Item implements ViewModel {
             });
         }
         
-        const description = item.createSpan({
-            cls: "todotxt-item-description",
-            text: this.body(),
-        });
+        let descriptionHtml = "<span class=\"todotxt-item-description\">";
+        for (const str of this.body().split(" ")) {
+            if (str.startsWith(Extension.DUE + ":")) {
+                const split = str.split(":");
+                const due = moment(split.at(1));
+                const now = moment();
+                const extension = split[0] + ":" + split[1];
+                if (due.isSame(now, "d")) {
+                    descriptionHtml += "<span class=\"todotxt-due-today\">" + extension + "</span>";
+                } else if (due.isBefore(now, "d")) {
+                    descriptionHtml += "<span class=\"todotxt-overdue\">" + extension + "</span>";
+                } else {
+                    descriptionHtml += "<span class=\"todotxt-due\">" + extension + "</span>";
+                }
+                const remaining = split.slice(2);
+                if (remaining.length) {
+                    descriptionHtml += ":" + split.slice(2).join(":");
+                }
+                descriptionHtml += " ";
+            } else {
+                descriptionHtml += str + " ";
+            }
+        };
+        descriptionHtml += "</span>";
+        const description = item.createSpan();
+        description.outerHTML = descriptionHtml.trimEnd();
+
         const actions = item.createSpan({
             cls: "todotxt-item-actions"
         });
 
         actions.appendChild(new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render());
         actions.appendChild(new ActionButton(ActionType.DEL, AddModal.ID, item.id).render());
-        
-        // TODO TodoContext/TodoProject
         
         return item;
     }
@@ -81,20 +102,6 @@ export default class TodoItem extends Item implements ViewModel {
     }
 
     // #region extensions
-    getExtensionsAsMap(): Map<string, string> {
-        const res: Map<string, string> = new Map();
-        this.extensions().forEach(({ key, value }) => {
-            if (res.has(key)) {
-                // to adhere to todo.txt spec, allow duplicate keys in body but only use first occurence
-                console.warn(`Duplicate key/value pair in extensions: ${key}/${value}`);
-            } else {
-                res.set(key, value);
-            }
-        })
-
-        return res;
-    }
-
     addExtension(key: string, value: string): void {
         if (Extension.isReserved(key) && this.extensions().find(ext => ext.key === key)) {
             throw "Extension already exists for key: " + key;
