@@ -5,6 +5,7 @@ import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
 import MyPlugin from './main';
+import { ExtensionType } from './extension';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
@@ -32,14 +33,25 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
 
     const { todoList, from, to } = TodoList.from(listLine.number, view);
     const item = todoList.items.at(itemIdx);
-    if (item?.complete()) {
-        item.clearCompleted();
-        item.setComplete(false);
-    } else {
-        item?.setCompleted(new Date());
+    if (item) {
+        if (item.complete()) {
+            item.clearCompleted();
+            item.setComplete(false);
+        } else {
+            item.setCompleted(new Date());
+            // if rec extension exists, automatically add new item with due and rec ext
+            const recExt = item.extensions().find(ext => ext.key === ExtensionType.RECURRING);
+            if (recExt) {
+                const newItem = new TodoItem("");
+                newItem.setPriority(item.priority());
+                newItem.setBody(item.body());
+                newItem.addExtension(ExtensionType.DUE, recExt.value);
+                todoList.items.push(newItem);
+            }
+        }
     }
+
     todoList.sort();
-    
     event.preventDefault();
     updateView(mdView, [{from, to, insert: todoList.toString()}]);
     return true;
