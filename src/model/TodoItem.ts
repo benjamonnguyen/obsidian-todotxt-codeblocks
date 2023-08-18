@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { ActionButton, ActionType, type ViewModel } from ".";
 import { AddModal, EditItemModal } from "src/component";
 import { moment } from "obsidian";
-import { processExtensions, Extension } from "src/extension";
+import { processExtensions, ExtensionType } from "src/extension";
 
 
 export default class TodoItem extends Item implements ViewModel {
@@ -76,11 +76,21 @@ export default class TodoItem extends Item implements ViewModel {
     }
 
     addExtension(key: string, value: string): void {
-        if (Extension.isReserved(key) && this.extensions().find(ext => ext.key === key)) {
-            throw "Extension already exists for key: " + key;
+        // if extension is of reserved extension type, replace
+        if (Object.values(ExtensionType).includes(key as ExtensionType)) {
+            const oldExt = this.extensions().find(ext => ext.key === key);
+            if (oldExt) {
+                this.removeExtension(oldExt.key, oldExt.value);
+                console.warn(`Replacing ${oldExt.key} extension value: ${oldExt.value} -> ${value}`);
+            }
         }
         super.addExtension(key, value);
         processExtensions(this);
+    }
+
+    setExtension(key: string, value: string): void {
+        // there's a span tracking bug
+        throw "Use addExtension()";
     }
     
     private getPriorityHtmlClasses(): string[] {
@@ -105,7 +115,7 @@ export default class TodoItem extends Item implements ViewModel {
     private buildDescriptionHtml(): string {
         let descriptionHtml = "<span class=\"todotxt-item-description\">";
         for (const str of this.body().split(" ")) {
-            if (str.startsWith(Extension.DUE + ":")) {
+            if (str.startsWith(ExtensionType.DUE + ":")) {
                 const split = str.split(":");
                 const due = moment(split.at(1));
                 const now = moment();
