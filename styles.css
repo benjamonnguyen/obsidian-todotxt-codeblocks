@@ -69,24 +69,19 @@ button.todotxt-priority-x {
     background-color: var(--todotxt-color-gray-400);
 }
 
-input[type="checkbox"]:checked ~ .todotxt-item-description {
+input[type="checkbox"]:checked ~ .todotxt-item-description,
+input[type="checkbox"]:checked ~ .todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
-
-/* input[type="checkbox"]:checked ~ .todotxt-item-description {
-    color: var(--checklist-done-color);
-    text-decoration: var(--checklist-done-decoration);
-} */
-    
 /* .todo-text span {
     margin-right: 0.3em;
 } */
 
-.theme-dark .todotxt-due {
+.theme-dark .todotxt-due-later {
     color: var(--todotxt-color-indigo-200);
 }
-.theme-light .todotxt-due {
+.theme-light .todotxt-due-later {
     color: var(--todotxt-color-indigo-900);
 }
 .todotxt-due-today {
