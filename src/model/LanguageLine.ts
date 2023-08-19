@@ -4,7 +4,7 @@ import { ActionButton, ActionType, type ViewModel } from ".";
 import { EditListOptionsModal } from "src/component";
 
 export default class LanguageLine implements ViewModel {
-    private static REGEX = /^```todotxt (?="([^"]+)"|((?!sort:|filter:|collapse:)\S+))/;
+    private static REGEX = /^```todotxt (?:"([^"]*)")?/;
     static HTML_CLS = "todotxt-list-title";
     static LANGUAGE_IDENTIFIER = "```todotxt";
     static SORT_PREFIX = "sort:";
@@ -30,16 +30,15 @@ export default class LanguageLine implements ViewModel {
         if (!match) {
             throw "Invalid line: " + line;
         }
-        langLine.title = match?.at(1) || match?.at(2)
-            || `Todo.txt (${moment().format("YYYY-MM-DD")})`;
+        langLine.title = match?.at(1) || `Todo.txt (${moment().format("YYYY-MM-DD")})`;
         langLine.id = randomUUID();
 
         for (const [i, str] of line.split(" ").entries()) {
             if (str.startsWith(LanguageLine.COLLAPSE_PREFIX)) {
                 const collapsedProjs = str.substring(LanguageLine.COLLAPSE_PREFIX.length).split(",");
-                if (collapsedProjs.length > 1) {
-                    collapsedProjs.forEach(proj => langLine.collapsedProjectGroups.add(proj));
-                }
+                collapsedProjs.forEach(proj => {
+                    if (proj) langLine.collapsedProjectGroups.add(proj);
+                });
             } else if (str.startsWith(LanguageLine.SORT_PREFIX)) {
                 // Sort ascending by default.
                 const res = LanguageLine.handleSort(str);
