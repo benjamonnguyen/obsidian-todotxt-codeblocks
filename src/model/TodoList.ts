@@ -86,7 +86,8 @@ export default class TodoList implements ViewModel {
     sort() {
         const ASC = "asc";
 
-        const createdSortOrder = this.langLine.sortFieldToOrder.get("created");
+        const createdSortOrder = this.langLine.sortFieldToOrder.get("created")
+            || this.langLine.sortFieldToOrder.get("default");
         if (createdSortOrder) {
             this.items.sort((a, b) => {
                 const aDate = moment(a.created());
@@ -124,19 +125,8 @@ export default class TodoList implements ViewModel {
         }
         // console.log("ctxOrder", this.items.map(item => item.body()));
 
-        const prioritySortOrder = this.langLine.sortFieldToOrder.get("prio");
-        if (prioritySortOrder) {
-            this.items.sort((a, b) => {
-                const aScore = a.priority()?.charCodeAt(0) || Number.MAX_VALUE;
-                const bScore = b.priority()?.charCodeAt(0) || Number.MAX_VALUE;
-                if (!prioritySortOrder.length || prioritySortOrder.first()! === ASC) {
-                    return aScore - bScore;
-                }
-                return bScore - aScore;
-            });
-        }
-
-        const dueSortOrder = this.langLine.sortFieldToOrder.get("due");
+        const dueSortOrder = this.langLine.sortFieldToOrder.get("due")
+            || this.langLine.sortFieldToOrder.get("default");
         if (dueSortOrder) {
             this.items.sort((a, b) => {
                 const aDueExtValue = a.extensions().find(ext => ext.key === ExtensionType.DUE)?.value;
@@ -152,7 +142,22 @@ export default class TodoList implements ViewModel {
         }
         // console.log("dueOrder", this.items.map(item => item.body()));
 
-        const completedSortOrder = this.langLine.sortFieldToOrder.get("completed");
+        const prioritySortOrder = this.langLine.sortFieldToOrder.get("prio")
+            || this.langLine.sortFieldToOrder.get("default");
+        if (prioritySortOrder) {
+            this.items.sort((a, b) => {
+                const aScore = a.priority()?.charCodeAt(0) || Number.MAX_VALUE;
+                const bScore = b.priority()?.charCodeAt(0) || Number.MAX_VALUE;
+                if (!prioritySortOrder.length || prioritySortOrder.first()! === ASC) {
+                    return aScore - bScore;
+                }
+                return bScore - aScore;
+            });
+        }
+        // console.log("prioOrder", this.items.map(item => item.body()));
+
+        const completedSortOrder = this.langLine.sortFieldToOrder.get("completed")
+            || this.langLine.sortFieldToOrder.get("default");
         if (completedSortOrder) {
             this.items.sort((a, b) => {
                 const aDate = moment(a.completed());
@@ -166,7 +171,8 @@ export default class TodoList implements ViewModel {
         }
         // console.log("completedOrder", this.items.map(item => item.body()));
 
-        const statusSortOrder = this.langLine.sortFieldToOrder.get("status");
+        const statusSortOrder = this.langLine.sortFieldToOrder.get("status")
+            || this.langLine.sortFieldToOrder.get("default");
         if (statusSortOrder) {
             this.items.sort((a, b) => {
                 const aScore = a.complete() ? 1 : 0;
@@ -177,6 +183,7 @@ export default class TodoList implements ViewModel {
                 return bScore - aScore;
             });
         }
+        // console.log("statusOrder", this.items.map(item => item.body()));
 
         this.projectGroups = this.buildProjectGroups(this.items, this.langLine.collapsedProjectGroups);
         const projectOrder = this.getProjectOrder(this.items, this.langLine.sortFieldToOrder.get("proj"));

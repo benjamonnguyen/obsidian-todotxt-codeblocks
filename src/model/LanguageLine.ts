@@ -9,7 +9,7 @@ export default class LanguageLine implements ViewModel {
     static LANGUAGE_IDENTIFIER = "```todotxt";
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
-    static STR_ARR_SORT_FIELDS = new Set(["proj", "ctx"]);
+    static STR_ARR_SORT_FIELDS = new Set(["proj", "ctx", "default"]);
     static ASC_DESC_SORT_FIELDS = new Set(["status", "prio", "created", "completed", "due"]);
     static ALL_SORT_FIELDS = Array.from(LanguageLine.STR_ARR_SORT_FIELDS)
         .concat(...LanguageLine.ASC_DESC_SORT_FIELDS);
@@ -111,7 +111,6 @@ export default class LanguageLine implements ViewModel {
 
     static handleSort(str: string): { field: string, order: string[] } | Error {
         const segs = Array.from(str.match(/([^:\n\s]+):([^:\n\s]+)(?::([^:\n\s]+))?/)?.values() || []);
-        let err;
         const field = segs.at(2);
         const order = segs.at(3)?.split(",");
         if (!field) {
@@ -128,6 +127,8 @@ export default class LanguageLine implements ViewModel {
             if (!order) {
                 return new SyntaxError("Provide context order (ex. \"sort:ctx:bug,feature,nice-to-have\")");
             }
+        } else if (field === "default") {
+            if (order) order.length = 0;
         } else if (LanguageLine.ASC_DESC_SORT_FIELDS.has(field)) {
             const orderStr = segs.at(3);
             if (orderStr && orderStr !== "asc" && orderStr !== "desc") {

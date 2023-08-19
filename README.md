@@ -49,21 +49,25 @@ A codeblock alternative to mvgrimes's [obsidian-todotxt-plugin](https://github.c
 Add yours tasks to a `todotxt` codeblock to get started!
 
 ## Features
-- [ ] sorting
-  - sort:proj:a,b,c
-  - status
-  - prio
-  - due
-  - completed
-  - created
-  - ctx
-    - "n/c" = no context (ex. "sort:ctx:bug,feature,n/c,nice-to-have")
-  - default (configurable)
+- [x] sorting (listed in order of priority)
+  - string[]
+    - `proj` (project)
+      - ex. "sort:proj:a,b,c"
+    - `ctx` (context)
+      - "n/c" = no context
+      - ex. "sort:ctx:bug,feature,n/c,nice-to-have"
   - desc/asc (defaults to asc)
+    - `status`
+    - `prio` (priority)
+    - `completed` (completed date)
+    - `due` (due date extension)
+    - `created` (created date)
+  - default (ex. "sort:default")
+    - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
 - [x] Collapsible project groups
 - Reserved extensions:
   - items cannot have duplicate key/value pairs for a reserved extension
-  - [ ] "due:" (Due date) / "rec:" (Recurring frequency)
+  - [x] `due:` (Due date) / `rec:` (Recurrence frequency)
     - \<YYYY-MM-DD> (ex. 1996-08-06)
     - \<MM-DD> (ex. 08-06)
     - \<number><[dateUnit]> (ex. 1d)
@@ -83,3 +87,5 @@ Add yours tasks to a `todotxt` codeblock to get started!
 ## Donations
 Feel free to support me if you enjoy the plugin!
 https://www.buymeacoffee.com/benjamonn
+
+## 
