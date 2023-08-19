@@ -90,7 +90,7 @@ export default class TodoItem extends Item implements ViewModel {
 
     setExtension(key: string, value: string): void {
         // there's a span tracking bug
-        throw "Use addExtension()";
+        throw "Use addExtension() instead";
     }
     
     private getPriorityHtmlClasses(): string[] {

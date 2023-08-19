@@ -4,6 +4,8 @@ import { randomUUID } from "crypto";
 import { LanguageLine } from ".";
 import type { ViewModel } from ".";
 import { AddModal } from "src/component";
+import { moment } from 'obsidian';
+import { ExtensionType } from 'src/extension';
 
 export default class TodoList implements ViewModel {
     // "n/c" will respresent order for items with no context (ex. sort:ctx:a,b,n/c,c)
@@ -84,30 +86,44 @@ export default class TodoList implements ViewModel {
     sort() {
         const ASC = "asc";
 
-        // dates (creation, completion)
+        const createdSortOrder = this.langLine.sortFieldToOrder.get("created");
+        if (createdSortOrder) {
+            this.items.sort((a, b) => {
+                const aDate = moment(a.created());
+                const bDate = moment(b.created());
 
-        // ctx
-        const contextOrder = this.getContextOrder(this.items, this.langLine.sortFieldToOrder.get("ctx"));
-        this.items.sort((a, b) => {
+                if (!createdSortOrder.length || createdSortOrder.first()! === ASC) {
+                    return aDate.diff(bDate, "d");
+                }
+                return bDate.diff(aDate, "d");
+            });
+        }
+        // console.log("createdOrder", this.items.map(item => item.body()));
 
-            let aScore = Number.MAX_VALUE;
-            if (a.contexts().length) {
-                a.contexts().forEach(ctx => aScore = Math.min(contextOrder.indexOf(ctx), aScore));
-            } else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
-                aScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), aScore);
-            }
+        const ctxSortOrder = this.langLine.sortFieldToOrder.get("ctx");
+        if (ctxSortOrder) {
+            const contextOrder = this.getContextOrder(this.items, ctxSortOrder);
+            this.items.sort((a, b) => {
+    
+                let aScore = Number.MAX_VALUE;
+                if (a.contexts().length) {
+                    a.contexts().forEach(ctx => aScore = Math.min(contextOrder.indexOf(ctx), aScore));
+                } else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
+                    aScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), aScore);
+                }
+    
+                let bScore = Number.MAX_VALUE;
+                if (b.contexts().length) {
+                    b.contexts().forEach(ctx => bScore = Math.min(contextOrder.indexOf(ctx), bScore));
+                } else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
+                    bScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), bScore);
+                }
+    
+                return aScore - bScore;
+            });
+        }
+        // console.log("ctxOrder", this.items.map(item => item.body()));
 
-            let bScore = Number.MAX_VALUE;
-            if (b.contexts().length) {
-                b.contexts().forEach(ctx => bScore = Math.min(contextOrder.indexOf(ctx), bScore));
-            } else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
-                bScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), bScore);
-            }
-
-            return aScore - bScore;
-        });
-
-        // prio
         const prioritySortOrder = this.langLine.sortFieldToOrder.get("prio");
         if (prioritySortOrder) {
             this.items.sort((a, b) => {
@@ -120,9 +136,36 @@ export default class TodoList implements ViewModel {
             });
         }
 
-        // due
+        const dueSortOrder = this.langLine.sortFieldToOrder.get("due");
+        if (dueSortOrder) {
+            this.items.sort((a, b) => {
+                const aDueExtValue = a.extensions().find(ext => ext.key === ExtensionType.DUE)?.value;
+                const bDueExtValue = b.extensions().find(ext => ext.key === ExtensionType.DUE)?.value;
+                const aDate = aDueExtValue ? moment(aDueExtValue) : moment(new Date(8640000000000000));
+                const bDate = bDueExtValue ? moment(bDueExtValue) : moment(new Date(8640000000000000));
 
-        // status
+                if (!dueSortOrder.length || dueSortOrder.first()! === ASC) {
+                    return aDate.diff(bDate, "d");
+                }
+                return bDate.diff(aDate, "d");
+            });
+        }
+        // console.log("dueOrder", this.items.map(item => item.body()));
+
+        const completedSortOrder = this.langLine.sortFieldToOrder.get("completed");
+        if (completedSortOrder) {
+            this.items.sort((a, b) => {
+                const aDate = moment(a.completed());
+                const bDate = moment(b.completed());
+
+                if (!completedSortOrder.length || completedSortOrder.first()! === ASC) {
+                    return aDate.diff(bDate, "d");
+                }
+                return bDate.diff(aDate, "d");
+            });
+        }
+        // console.log("completedOrder", this.items.map(item => item.body()));
+
         const statusSortOrder = this.langLine.sortFieldToOrder.get("status");
         if (statusSortOrder) {
             this.items.sort((a, b) => {
@@ -135,7 +178,6 @@ export default class TodoList implements ViewModel {
             });
         }
 
-        // proj
         this.projectGroups = this.buildProjectGroups(this.items, this.langLine.collapsedProjectGroups);
         const projectOrder = this.getProjectOrder(this.items, this.langLine.sortFieldToOrder.get("proj"));
         this.projectGroups.sort((a, b) => {
@@ -163,6 +205,7 @@ export default class TodoList implements ViewModel {
 
             return (aScore || -1) - (bScore || -1);
         });
+        // console.log("projOrder", this.items.map(item => item.body()));
 
         for (const [i, item] of this.items.entries()) {
             item.setIdx(i);
