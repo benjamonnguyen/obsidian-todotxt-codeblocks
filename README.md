@@ -5,6 +5,8 @@ A codeblock alternative to mvgrimes's [obsidian-todotxt-plugin](https://github.c
 
 Add yours tasks to a `todotxt` codeblock to get started!
 
+<img src="assets/demo.gif" />
+
 ## Features
 - [x] **Sorting** (listed in order of priority)
   - string[]
@@ -43,6 +45,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
 
 ## Donations
 Feel free to support me if you enjoy the plugin!
+
 <a href="https://www.buymeacoffee.com/benjamonn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Acknowledgements
