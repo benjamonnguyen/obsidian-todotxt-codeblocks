@@ -10,7 +10,7 @@ export default class LanguageLine implements ViewModel {
     static SORT_PREFIX = "sort:";
     static COLLAPSE_PREFIX = "collapse:";
     static STR_ARR_SORT_FIELDS = new Set(["proj", "ctx"]);
-    static ASC_DESC_SORT_FIELDS = new Set(["status", "prio"]);
+    static ASC_DESC_SORT_FIELDS = new Set(["status", "prio", "created", "completed", "due"]);
     static ALL_SORT_FIELDS = Array.from(LanguageLine.STR_ARR_SORT_FIELDS)
         .concat(...LanguageLine.ASC_DESC_SORT_FIELDS);
 
