@@ -1,5 +1,5 @@
 import { App, Modal, Setting, Notice } from "obsidian";
-import MyPlugin from "src/main";
+import TodotxtCodeblocksPlugin from "src/main";
 import { LanguageLine } from "src/model";
 
 export class EditListOptionsModal extends Modal {
@@ -56,7 +56,7 @@ export class EditListOptionsModal extends Modal {
             if (errs.length) {
                 let errMsg = "";
                 errs.forEach(e => errMsg += `- ${e.message}\n`);
-                new Notice(MyPlugin.NAME + " ERROR\n" + errMsg, 15000);
+                new Notice(TodotxtCodeblocksPlugin.NAME + " ERROR\n" + errMsg, 15000);
             } else {
                 this.close();
                 this.onSubmit(this.result);

@@ -1,6 +1,6 @@
 import { MarkdownPostProcessorContext, Notice } from "obsidian";
 import { LanguageLine, TodoList, TodoItem } from "./model";
-import MyPlugin from "./main";
+import TodotxtCodeblocksPlugin from "./main";
 
 // line 0 is langLine
 export const UNSAVED_ITEMS: { listId: string, line: number, newText?: string }[] = [];
@@ -13,7 +13,7 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
     if (errs.length) {
         let errMsg = "";
         errs.forEach(e => errMsg += `- ${e.message}\n`);
-        new Notice(MyPlugin.NAME + " ERROR\n" + errMsg, 15000);
+        new Notice(TodotxtCodeblocksPlugin.NAME + " ERROR\n" + errMsg, 15000);
     }
 
     // Create todo list and update editor state.

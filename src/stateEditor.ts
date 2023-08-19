@@ -4,7 +4,7 @@ import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton
 import { App, MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
-import MyPlugin from './main';
+import TodotxtCodeblocksPlugin from './main';
 import { ExtensionType } from './extension';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -20,7 +20,7 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
     * Create a notice and return true.
     */
     if (mdView.getMode() === "preview") {
-        new Notice(MyPlugin.NAME + " WARNING\nCheckbox toggle disabled in Reading View");
+        new Notice(TodotxtCodeblocksPlugin.NAME + " WARNING\nCheckbox toggle disabled in Reading View");
         event.preventDefault();
         return true;
     }
@@ -202,7 +202,7 @@ export function save(mdView: MarkdownView) {
     });
 
     updateView(mdView, changes);
-    var noticeMsg = MyPlugin.NAME + " SAVING\n";
+    var noticeMsg = TodotxtCodeblocksPlugin.NAME + " SAVING\n";
     changes.filter(c => c.insert).forEach(c => noticeMsg += `- ${c.insert}\n`);
     new Notice(noticeMsg, 2500);
 }

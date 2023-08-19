@@ -1,6 +1,6 @@
 import { moment, Notice } from "obsidian";
 import { Moment } from "moment";
-import MyPlugin from "src/main";
+import TodotxtCodeblocksPlugin from "src/main";
 import { TodoItem } from "./model";
 
 export enum ExtensionType {
@@ -27,7 +27,7 @@ function processDueExtensions(item: TodoItem) {
             if (details) {
                 msg += `\n(${details})`;
             }
-            new Notice(MyPlugin.NAME + " INFO\n" + msg, 15000);
+            new Notice(TodotxtCodeblocksPlugin.NAME + " INFO\n" + msg, 15000);
         } catch (_) {
             handleError(item, ext);
         }
@@ -107,5 +107,5 @@ function handleError(item: TodoItem, extension: { key: string, value: string }) 
     const errMsg = `Invalid value for \"${extension.key}\" extension: ${extension.value}`;
     console.warn(errMsg);
     item.removeExtension(extension.key, extension.value);
-    new Notice(MyPlugin.NAME + " WARNING\n" + errMsg, 15000);
+    new Notice(TodotxtCodeblocksPlugin.NAME + " WARNING\n" + errMsg, 15000);
 }
