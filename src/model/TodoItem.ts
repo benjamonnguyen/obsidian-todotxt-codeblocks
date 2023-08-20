@@ -45,14 +45,15 @@ export default class TodoItem extends Item implements ViewModel {
             });
         }
         
-        item.createEl("span").outerHTML = this.buildDescriptionHtml();
-
+        this.buildDescriptionHtml(item);
+        
         const actions = item.createSpan({
             cls: "todotxt-item-actions"
         });
-
-        actions.appendChild(new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render());
-        actions.appendChild(new ActionButton(ActionType.DEL, AddModal.ID, item.id).render());
+        actions.append(
+            new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render(),
+            new ActionButton(ActionType.DEL, AddModal.ID, item.id).render(),
+        );
         
         return item;
     }
@@ -112,8 +113,11 @@ export default class TodoItem extends Item implements ViewModel {
         return [letterCls, "todotxt-priority"];
     }
 
-    private buildDescriptionHtml(): string {
-        let descriptionHtml = "<span class=\"todotxt-item-description\">";
+    private buildDescriptionHtml(itemEl: HTMLElement): HTMLElement {
+        const span = itemEl.createSpan({
+            cls: "todotxt-item-description",
+        });
+
         for (const str of this.body().split(" ")) {
             if (str.startsWith(ExtensionType.DUE + ":")) {
                 const split = str.split(":");
@@ -121,23 +125,31 @@ export default class TodoItem extends Item implements ViewModel {
                 const now = moment();
                 const extension = split[0] + ":" + split[1];
                 if (due.isSame(now, "d")) {
-                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-due-today\">" + extension + "</span>";
+                    span.createSpan({
+                        cls: "todotxt-due-ext todotxt-due-today",
+                        text: extension,
+                    });
                 } else if (due.isBefore(now, "d")) {
-                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-overdue\">" + extension + "</span>";
+                    span.createSpan({
+                        cls: "todotxt-due-ext todotxt-overdue",
+                        text: extension,
+                    });
                 } else {
-                    descriptionHtml += "<span class=\"todotxt-due-ext todotxt-due-later\">" + extension + "</span>";
+                    span.createSpan({
+                        cls: "todotxt-due-ext todotxt-due-later",
+                        text: extension,
+                    });
                 }
                 const remaining = split.slice(2);
                 if (remaining.length) {
-                    descriptionHtml += ":" + split.slice(2).join(":");
+                    span.appendText(":" + split.slice(2).join(":"));
                 }
-                descriptionHtml += " ";
             } else {
-                descriptionHtml += str + " ";
+                span.appendText(str);
             }
+            span.appendText(" ");
         };
-        descriptionHtml += "</span>";
-        
-        return descriptionHtml.trimEnd();
+
+        return span;
     }
 }

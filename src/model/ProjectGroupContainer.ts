@@ -39,10 +39,13 @@ export default class ProjectGroupContainer implements ViewModel {
             attr: {"for": checkboxId},
         }).setText("+" + this.name);
 
-        container.createDiv({
+        const list = container.createDiv({
             cls: ProjectGroupContainer.LIST_CLS,
-        }).innerHTML = this.items.map(item =>
-            item.render().outerHTML).join("<br>");
+        });
+        this.items.forEach(item => {
+            list.appendChild(item.render());
+            list.createEl("br");
+        });
 
         return container;
     }

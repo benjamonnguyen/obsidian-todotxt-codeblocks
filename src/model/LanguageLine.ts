@@ -4,7 +4,7 @@ import { ActionButton, ActionType, type ViewModel } from ".";
 import { EditListOptionsModal } from "src/component";
 
 export default class LanguageLine implements ViewModel {
-    private static REGEX = /^```todotxt (?:"([^"]*)")?/;
+    private static REGEX = /^```todotxt(?: "([^"]*)")?/;
     static HTML_CLS = "todotxt-list-title";
     static LANGUAGE_IDENTIFIER = "```todotxt";
     static SORT_PREFIX = "sort:";

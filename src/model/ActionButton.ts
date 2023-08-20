@@ -12,18 +12,19 @@ export class ActionButton implements ViewModel {
         this.id = id;
         this.itemId = itemId;
     }
-    render(): HTMLElement {
-        const svg = document.createElement("svg");
+    render(): Element {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.addClass(this.getHtmlCls());
         svg.setAttrs({
-            "xmlns": "http://www.w3.org/2000/svg",
             "viewBox": "0 0 100 100",
             "stroke": "currentColor",
             "action": this.type.name,
             "id": this.id,
             "item-id": this.itemId,
         });
-        svg.appendChild(this.type.path);
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttrs(this.type.pathAttrs);
+        svg.appendChild(path);
 
         return svg;
     }
@@ -55,12 +56,11 @@ export class ActionType {
         "d": "M50,18.8V50m0,0V81.2M50,50H81.2M50,50H18.8"
     });
 
-    path: HTMLElement;
+    pathAttrs: { [key: string]: string | number | boolean | null; };
     name: string;
     
     constructor(name: string, pathAttrs: { [key: string]: string | number | boolean | null; }) {
         this.name = name;
-        this.path = document.createElement("path");
-        this.path.setAttrs(pathAttrs);
+        this.pathAttrs = pathAttrs;
     }
 }

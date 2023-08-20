@@ -55,13 +55,14 @@ export default class TodoList implements ViewModel {
 
         const addBtn = new ActionButton(ActionType.ADD, AddModal.ID, list.id).render();
         list.appendChild(addBtn);
-
         list.appendChild(this.langLine.render());
 
-        list.innerHTML += this.items
-            .filter(item => !item.projects().length)
-            .map(item => item.render().outerHTML)
-            .join("<br>");
+        this.items
+        .filter(item => !item.projects().length)
+        .forEach(item => {
+            list.append(item.render());
+            list.createEl("br");
+        });
 
         this.projectGroups.forEach(projGroup => list.appendChild(projGroup.render()));
 
