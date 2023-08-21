@@ -27,14 +27,15 @@ export function todotxtBlockProcessor(source: string, el: HTMLElement, ctx: Mark
         UNSAVED_ITEMS.push({ listId: todoList.getId(), line: 0, newText: newLangLine });
     }
 
-    for (const [ i, line ] of source.split("\n").entries()) {
+    const lines = source.split("\n");
+    for (const [ i, line ] of lines.entries()) {
         const newItem = todoList.items.at(i)?.toString();
         if (newItem) {
             if (line !== newItem) {
                 UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1, newText: newItem });
             }
-        } else {
-            // Remove empty lines.
+        } else if (i !== lines.length - 1) {
+            // Remove empty lines except for last.
             UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1 });
         }
     }
