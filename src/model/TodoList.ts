@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from ".";
-import { randomUUID } from "crypto";
+import { v4 as randomUUID } from "uuid";
 import { LanguageLine } from ".";
 import type { ViewModel } from ".";
 import { AddModal } from "src/component";

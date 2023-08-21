@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { v4 as randomUUID } from "uuid";
 import { moment } from "obsidian";
 import { ActionButton, ActionType, type ViewModel } from ".";
 import { EditListOptionsModal } from "src/component";

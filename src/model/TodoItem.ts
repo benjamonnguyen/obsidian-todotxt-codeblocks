@@ -1,5 +1,5 @@
 import { Item } from "jstodotxt";
-import { randomUUID } from "crypto";
+import { v4 as randomUUID } from "uuid";
 import { ActionButton, ActionType, type ViewModel } from ".";
 import { AddModal, EditItemModal } from "src/component";
 import { moment } from "obsidian";
