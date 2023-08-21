@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, ButtonComponent, Modal, Setting } from "obsidian";
 
 export default class AddModal extends Modal {
 
@@ -23,13 +23,7 @@ export default class AddModal extends Modal {
     onOpen() {
         const { contentEl } = this;
         
-        const input = new Setting(contentEl)
-        .addText((text) => {
-            text.setPlaceholder(AddModal.placeholders[(Math.floor(Math.random() * AddModal.placeholders.length))]);
-            text.onChange((value) => {
-                this.result = value
-            });
-        });
+        const input = new Setting(contentEl);
         input.settingEl.addClasses([
             "todotxt-modal-input-begin",
             "todotxt-modal-input",
@@ -40,12 +34,21 @@ export default class AddModal extends Modal {
         .addButton((btn) =>
         btn
         .setButtonText("Add")
+        .setDisabled(true)
         .setCta()
         .onClick(() => {
             this.close();
             this.onSubmit(this.result);
         }));
         submit.settingEl.addClass("todotxt-modal-submit");
+
+        input.addText((text) => {
+            text.setPlaceholder(AddModal.placeholders[(Math.floor(Math.random() * AddModal.placeholders.length))]);
+            text.onChange((value) => {
+                submit.components.find(component => component instanceof ButtonComponent)?.setDisabled(!value);
+                this.result = value
+            });
+        });
     }
     
     onClose() {
