@@ -118,15 +118,7 @@ export default class LanguageLine implements ViewModel {
         if (!LanguageLine.ASC_DESC_SORT_FIELDS.has(field) && !LanguageLine.STR_ARR_SORT_FIELDS.has(field)) {
             return new SyntaxError(`"${field}" is not a valid sort field (${LanguageLine.ALL_SORT_FIELDS.join(", ")})`);
         }
-        if (field === "proj") {
-            if (!order) {
-                return new SyntaxError("Provide project order (ex. \"sort:proj:work,home,gym\")");
-            }
-        } else if (field === "ctx") {
-            if (!order) {
-                return new SyntaxError("Provide context order (ex. \"sort:ctx:bug,feature,nice-to-have\")");
-            }
-        } else if (field === "default") {
+        if (field === "default") {
             if (order) order.length = 0;
         } else if (LanguageLine.ASC_DESC_SORT_FIELDS.has(field)) {
             const orderStr = segs.at(3);
