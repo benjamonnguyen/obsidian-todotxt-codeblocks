@@ -144,6 +144,16 @@ export default class TodoItem extends Item implements ViewModel {
                     cls: "todotxt-due-ext todotxt-overdue",
                     text: str,
                 });
+            } else if (due.diff(now, "d") <= 7) {
+                span.createSpan({
+                    cls: "todotxt-due-ext todotxt-due-week",
+                    text: str,
+                });
+            } else if (due.diff(now, "d") <= 30) {
+                span.createSpan({
+                    cls: "todotxt-due-ext todotxt-due-month",
+                    text: str,
+                });
             } else {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-due-later",

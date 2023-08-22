@@ -78,17 +78,23 @@ input[type="checkbox"]:checked ~ .todotxt-item-description * {
     margin-right: 0.3em;
 } */
 
-.theme-dark .todotxt-due-later {
-    color: var(--todotxt-color-indigo-200);
+.theme-light.todotxt-due-later {
+    color: #264653;
 }
-.theme-light .todotxt-due-later {
-    color: var(--todotxt-color-indigo-900);
+.theme-dark .todotxt-due-later {
+    color: var(--text-muted);
 }
 .todotxt-due-today {
-    color: var(--todotxt-color-amber-400);
+    color: #F4A261;
 }
 .todotxt-overdue {
-    color: var(--todotxt-color-red-700);
+    color: #E76F51;
+}
+.todotxt-due-week {
+    color: #E9C46A;
+}
+.todotxt-due-month {
+    color: #09C269 
 }
 
 /* .todo-tag {
