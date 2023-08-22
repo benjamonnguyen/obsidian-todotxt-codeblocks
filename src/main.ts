@@ -1,4 +1,4 @@
-import { MarkdownView, Plugin } from 'obsidian';
+import { ButtonComponent, MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import { toggleCheckbox, toggleProjectGroup, save, clickEdit, clickDelete, clickAdd } from './stateEditor';
 
@@ -18,6 +18,12 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 					|| clickDelete(event, mdView)
 					|| clickAdd(event, mdView, this.app)
 					;
+			}
+		});
+		this.registerDomEvent(document, "keypress", (event: KeyboardEvent) => {
+			if (event.key === "Enter") {
+				const actionBtn = document.getElementsByClassName("mod-cta").item(0) as HTMLButtonElement | null;
+				actionBtn?.click();
 			}
 		});
 		this.registerInterval(window.setInterval(() => {

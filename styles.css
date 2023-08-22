@@ -169,9 +169,10 @@ svg.todotxt-action-btn[action="add"] {
     margin-top: 1.5rem;
 }
 
-/* .todotxt-modal-input {
-    margin-top: 0;
-} */
+button.mod-cta:disabled,
+button.mod-cta:disabled:hover {
+    background-color: var(--text-muted);
+}
 
 .todotxt-modal-input-full input[type="text"] {
     width: calc(var(--dialog-width) * 0.9);

@@ -1,16 +1,15 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, ButtonComponent, Modal, Setting } from "obsidian";
 
 export default class EditItemModal extends Modal {
 
     static ID = "edit-item-modal";
 
     result: string;
-    originalText: string;
     onSubmit: (result: string) => void;
     
     constructor(app: App, originalText: string, onSubmit: (result: string) => void) {
         super(app);
-        this.originalText = originalText;
+        this.result = originalText;
         this.onSubmit = onSubmit;
     }
     
@@ -18,12 +17,6 @@ export default class EditItemModal extends Modal {
         const { contentEl } = this;
         
         const input = new Setting(contentEl)
-        .addText((text) => {
-            text.setValue(this.originalText);
-            text.onChange((value) => {
-                this.result = value
-            });
-        });
         input.settingEl.addClasses([
             "todotxt-modal-input-begin",
             "todotxt-modal-input",
@@ -40,6 +33,14 @@ export default class EditItemModal extends Modal {
             this.onSubmit(this.result);
         }));
         submit.settingEl.addClass("todotxt-modal-submit");
+
+        input.addText((text) => {
+            text.setValue(this.result);
+            text.onChange((value) => {
+                submit.components.find(component => component instanceof ButtonComponent)?.setDisabled(!value);
+                this.result = value
+            });
+        });
     }
     
     onClose() {
