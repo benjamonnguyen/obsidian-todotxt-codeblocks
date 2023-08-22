@@ -20,7 +20,7 @@ function processDueExtensions(item: TodoItem) {
         try {
             const { date, details } = calculateDate(ext.value);
             if (date === ext.value) return;
-            item.addExtension(ExtensionType.DUE, date);
+            item.setExtension(ExtensionType.DUE, date);
             let msg = "Due date set to " + date;
             if (details) {
                 msg += `\n(${details})`;

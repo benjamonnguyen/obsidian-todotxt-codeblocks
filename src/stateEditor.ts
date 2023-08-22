@@ -45,7 +45,7 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
                 const newItem = new TodoItem("");
                 newItem.setPriority(item.priority());
                 newItem.setBody(item.body());
-                newItem.addExtension(ExtensionType.DUE, recExt.first()!.value);
+                newItem.setExtension(ExtensionType.DUE, recExt.first()!.value);
                 todoList.items.push(newItem);
             }
         }

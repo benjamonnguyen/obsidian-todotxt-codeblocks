@@ -76,6 +76,11 @@ export default class TodoItem extends Item implements ViewModel {
         }
     }
 
+    setExtension(key: string, value: string): void {
+        super.setExtension(key, value);
+        processExtensions(this);
+    }
+
     addExtension(key: string, value: string): void {
         if (Object.values(ExtensionType).includes(key as ExtensionType)) {
             if (this.getExtensions(key).first()) {
@@ -84,6 +89,7 @@ export default class TodoItem extends Item implements ViewModel {
             }
         }
         super.addExtension(key, value);
+        processExtensions(this);
     }
     
     private getPriorityHtmlClasses(): string[] {
@@ -123,33 +129,28 @@ export default class TodoItem extends Item implements ViewModel {
 
     private buildDueExtensionHtml(str: string, span: HTMLElement): boolean {
         if (str.startsWith(ExtensionType.DUE + ":")) {
-            const split = str.split(":");
+            const split = str.split(":", 2);
             if (!split.at(1)) return false;
 
             const due = moment(split.at(1));
             const now = moment();
-            const extension = split[0] + ":" + split[1];
             if (due.isSame(now, "d")) {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-due-today",
-                    text: extension,
+                    text: str,
                 });
             } else if (due.isBefore(now, "d")) {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-overdue",
-                    text: extension,
+                    text: str,
                 });
             } else {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-due-later",
-                    text: extension,
+                    text: str,
                 });
             }
-            
-            const remaining = split.slice(2);
-            if (remaining.length) {
-                span.appendText(":" + split.slice(2).join(":"));
-            }
+            return true;
         }
 
         return false;
