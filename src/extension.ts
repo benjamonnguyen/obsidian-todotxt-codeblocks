@@ -84,8 +84,9 @@ function calculateDate(value: string): { date: string, details: string | undefin
             .add(y, "y");
         
         if (dayOfWeek) {
-            const day = date.day(["Su", "M", "Tu", "W", "Th", "F", "Sa"].indexOf(dayOfWeek));
-            if (moment().isSameOrAfter(day)) day.add(7, "d");
+            const targetDate = date.clone();
+            date.day(["Su", "M", "Tu", "W", "Th", "F", "Sa"].indexOf(dayOfWeek));
+            if (date.isSameOrBefore(targetDate)) date.add(7, "d");
             dateCalculationDetails.push("dayOfWeek: " + dayOfWeek);
         }
         if (d) dateCalculationDetails.push("d: " + d);
