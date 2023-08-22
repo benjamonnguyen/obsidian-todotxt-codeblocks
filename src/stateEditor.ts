@@ -40,12 +40,12 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
         } else {
             item.setCompleted(new Date());
             // if rec extension exists, automatically add new item with due and rec ext
-            const recExt = item.extensions().find(ext => ext.key === ExtensionType.RECURRING);
-            if (recExt) {
+            const recExt = item.getExtensions(ExtensionType.RECURRING);
+            if (recExt.length) {
                 const newItem = new TodoItem("");
                 newItem.setPriority(item.priority());
                 newItem.setBody(item.body());
-                newItem.addExtension(ExtensionType.DUE, recExt.value);
+                newItem.addExtension(ExtensionType.DUE, recExt.first()!.value);
                 todoList.items.push(newItem);
             }
         }

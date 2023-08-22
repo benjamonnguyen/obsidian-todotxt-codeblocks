@@ -1,6 +1,6 @@
-import { Item } from "jstodotxt";
 import { randomUUID } from "crypto";
 import { ActionButton, ActionType, type ViewModel } from ".";
+import { Item } from "./Item";
 import { AddModal, EditItemModal } from "src/component";
 import { moment } from "obsidian";
 import { processExtensions, ExtensionType } from "src/extension";
@@ -77,21 +77,13 @@ export default class TodoItem extends Item implements ViewModel {
     }
 
     addExtension(key: string, value: string): void {
-        // if extension is of reserved extension type, replace
         if (Object.values(ExtensionType).includes(key as ExtensionType)) {
-            const oldExt = this.extensions().find(ext => ext.key === key);
-            if (oldExt) {
-                this.removeExtension(oldExt.key, oldExt.value);
-                console.warn(`Replacing ${oldExt.key} extension value: ${oldExt.value} -> ${value}`);
+            if (this.getExtensions(key).first()) {
+                console.warn(`${key} extension already exists! Skipping add: ${value}`);
+                return;
             }
         }
         super.addExtension(key, value);
-        processExtensions(this);
-    }
-
-    setExtension(key: string, value: string): void {
-        // there's a span tracking bug
-        throw "Use addExtension() instead";
     }
     
     private getPriorityHtmlClasses(): string[] {

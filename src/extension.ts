@@ -20,9 +20,7 @@ function processDueExtensions(item: TodoItem) {
         try {
             const { date, details } = calculateDate(ext.value);
             if (date === ext.value) return;
-            console.log(item.extensions());
             item.addExtension(ExtensionType.DUE, date);
-            console.log(item.extensions());
             let msg = "Due date set to " + date;
             if (details) {
                 msg += `\n(${details})`;
@@ -47,14 +45,11 @@ function processRecurringExtensions(item: TodoItem) {
 
 // remove duplicates of given type and return first extension
 function reduceExtensions(item: TodoItem, extType: ExtensionType): { key: string, value: string } | undefined {
-    const extensions = item.extensions().filter(ext => ext.key === extType);
-    for (let i = 1; i < extensions.length; i++) {
-        const { key, value } = extensions[i];
-        item.removeExtension(key, value)
-        console.warn(`Removed duplicate key/value pair for reserved extension: ${key}/${value}`);
+    const extensions = item.getExtensions(extType);
+    if (extensions.length) {
+        item.removeExtension(extType, undefined, extensions.map(({ index }) => index).slice(1));
+        return { key: extType, value: extensions.first()!.value };
     }
-
-    return extensions.first();
 }
 
 function calculateDate(value: string): { date: string, details: string | undefined } {
