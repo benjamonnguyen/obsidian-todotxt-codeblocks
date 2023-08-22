@@ -130,8 +130,8 @@ export default class TodoList implements ViewModel {
             || this.langLine.sortFieldToOrder.get("default");
         if (dueSortOrder) {
             this.items.sort((a, b) => {
-                const aDueExtValue = a.extensions().find(ext => ext.key === ExtensionType.DUE)?.value;
-                const bDueExtValue = b.extensions().find(ext => ext.key === ExtensionType.DUE)?.value;
+                const aDueExtValue = a.getExtensions(ExtensionType.DUE).first()?.value;
+                const bDueExtValue = b.getExtensions(ExtensionType.DUE).first()?.value;
                 const aDate = aDueExtValue ? moment(aDueExtValue) : moment(new Date(8640000000000000));
                 const bDate = bDueExtValue ? moment(bDueExtValue) : moment(new Date(8640000000000000));
 

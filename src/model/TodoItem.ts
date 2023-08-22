@@ -1,6 +1,6 @@
-import { Item } from "jstodotxt";
 import { v4 as randomUUID } from "uuid";
 import { ActionButton, ActionType, type ViewModel } from ".";
+import { Item } from "./Item";
 import { AddModal, EditItemModal } from "src/component";
 import { moment } from "obsidian";
 import { processExtensions, ExtensionType } from "src/extension";
@@ -76,22 +76,20 @@ export default class TodoItem extends Item implements ViewModel {
         }
     }
 
+    setExtension(key: string, value: string): void {
+        super.setExtension(key, value);
+        processExtensions(this);
+    }
+
     addExtension(key: string, value: string): void {
-        // if extension is of reserved extension type, replace
         if (Object.values(ExtensionType).includes(key as ExtensionType)) {
-            const oldExt = this.extensions().find(ext => ext.key === key);
-            if (oldExt) {
-                this.removeExtension(oldExt.key, oldExt.value);
-                console.warn(`Replacing ${oldExt.key} extension value: ${oldExt.value} -> ${value}`);
+            if (this.getExtensions(key).first()) {
+                console.warn(`${key} extension already exists! Skipping add: ${value}`);
+                return;
             }
         }
         super.addExtension(key, value);
         processExtensions(this);
-    }
-
-    setExtension(key: string, value: string): void {
-        // there's a span tracking bug
-        throw "Use addExtension() instead";
     }
     
     private getPriorityHtmlClasses(): string[] {
@@ -131,33 +129,28 @@ export default class TodoItem extends Item implements ViewModel {
 
     private buildDueExtensionHtml(str: string, span: HTMLElement): boolean {
         if (str.startsWith(ExtensionType.DUE + ":")) {
-            const split = str.split(":");
+            const split = str.split(":", 2);
             if (!split.at(1)) return false;
 
             const due = moment(split.at(1));
             const now = moment();
-            const extension = split[0] + ":" + split[1];
             if (due.isSame(now, "d")) {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-due-today",
-                    text: extension,
+                    text: str,
                 });
             } else if (due.isBefore(now, "d")) {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-overdue",
-                    text: extension,
+                    text: str,
                 });
             } else {
                 span.createSpan({
                     cls: "todotxt-due-ext todotxt-due-later",
-                    text: extension,
+                    text: str,
                 });
             }
-            
-            const remaining = split.slice(2);
-            if (remaining.length) {
-                span.appendText(":" + split.slice(2).join(":"));
-            }
+            return true;
         }
 
         return false;
