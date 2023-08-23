@@ -158,7 +158,7 @@ export default class TodoItem extends Item implements ViewModel {
         const REG = /\[([^\[\]\(\)\n]*)\]\(([^\[\]\(\)\n]*)\)/;
         const match = str.match(REG);
         if (match) {
-            const span = document.createElement("a");
+            const span = document.createElement("span");
             span.addClass("cm-url", "todotxt-link");
             span.setText(match.at(1) || "[]");
             const link = match.at(2) || "()";

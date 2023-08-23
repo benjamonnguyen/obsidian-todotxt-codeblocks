@@ -13,7 +13,8 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
         return false;
     }
     const itemEl = target.parentElement;
-    if (!itemEl || !(itemEl instanceof HTMLSpanElement) || itemEl.className !== TodoItem.HTML_CLS) {
+    console.log(itemEl);
+    if (!itemEl || !(itemEl instanceof HTMLDivElement) || itemEl.className !== TodoItem.HTML_CLS) {
         return false;
     }
     /* State changes do not persist to EditorView in Reading mode.

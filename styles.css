@@ -71,6 +71,10 @@ span.todotxt-priority-x {
     background-color: var(--todotxt-color-gray-400);
 }
 
+.todotxt-link {
+    cursor: pointer;
+}
+
 input[type="checkbox"]:checked ~ .todotxt-item-description,
 input[type="checkbox"]:checked ~ .todotxt-item-description * {
     color: var(--checklist-done-color);
