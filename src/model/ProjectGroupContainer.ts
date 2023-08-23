@@ -42,10 +42,7 @@ export default class ProjectGroupContainer implements ViewModel {
         const list = container.createDiv({
             cls: ProjectGroupContainer.LIST_CLS,
         });
-        this.items.forEach(item => {
-            list.appendChild(item.render());
-            list.createEl("br");
-        });
+        this.items.forEach(item => list.appendChild(item.render()));
 
         return container;
     }

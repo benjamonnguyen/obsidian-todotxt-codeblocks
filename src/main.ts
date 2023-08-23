@@ -10,6 +10,14 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	async onload() {
 		this.registerMarkdownCodeBlockProcessor("todotxt", todotxtBlockProcessor);
 		this.registerDomEvent(document, "click", (event: MouseEvent) => {
+			const target = (event.target as HTMLElement);
+			const link = target.getAttr("link");
+			if (target.hasClass("todotxt-link") && link) {
+				try {
+					return window.open(new URL(link));
+				} catch (_) {}
+				this.app.workspace.openLinkText(link, link);
+			}
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
 				toggleCheckbox(event, mdView)

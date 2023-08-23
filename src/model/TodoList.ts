@@ -59,10 +59,7 @@ export default class TodoList implements ViewModel {
 
         this.items
         .filter(item => !item.projects().length)
-        .forEach(item => {
-            list.append(item.render());
-            list.createEl("br");
-        });
+        .forEach(item => list.append(item.render()));
 
         this.projectGroups.forEach(projGroup => list.appendChild(projGroup.render()));
 

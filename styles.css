@@ -39,9 +39,12 @@ If your plugin does not need CSS, delete this file.
     border: 1px solid var(--text-faint);
 }
 
-/* .todotxt-item {
-    justify-content: center;
-} */
+.todotxt-item {
+    padding-top: var(--list-spacing);
+    padding-bottom: var(--list-spacing);
+    text-indent: -24px;
+    padding-inline-start: 28px;
+}
 
 button.todotxt-priority {
     border-radius: var(--radius-m);
@@ -196,7 +199,7 @@ button.mod-cta:disabled:hover {
 
 /* PROJECT GROUP CONTAINER */
 .project-group-container {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
 }
   
 .project-group-container label {
@@ -235,7 +238,7 @@ input[type="checkbox"].project-group-checkbox:checked ~ .project-group-list,
 .markdown-reading-view .project-group-list {
     height: 100%;
     transform-origin: top;
-    transition: transform .2s ease-out;
+    transition: transform 0.05s ease-out;
     transform: scaleY(1); 
 }
 

@@ -21,27 +21,34 @@ Add yours tasks to a `todotxt` codeblock to get started!
     - `completed` (completed date)
     - `due` (due date extension)
     - `created` (created date)
+    - ex. "sort:status sort:created:desc"
   - default (ex. "sort:default")
     - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
 - [x] **Collapsible project groups**
 - **Extensions**:
-  - items cannot have duplicate key/value pairs for a reserved extension
-  - [x] `due:` (Due date) / `rec:` (Recurrence frequency)
+  - [x] `due:` (Due date)
+  - [x] `rec:` (Recurrence frequency)
+- [x] Edit, add, delete in Live Preview
+- [x] Render Markdown links
+- [ ] "get:" Query for existing Todo.txt tasks and move to current codeblock
+- [ ] Archive complete todos to file
+- [ ] Daily note rollover integration
+
+## Extensions
+  - date formats
     - \<YYYY-MM-DD> (ex. 1996-08-06)
     - \<MM-DD> (ex. 08-06)
-    - \<number><[dateUnit]> (ex. 1d)
+    - \<n><[dateUnit]> (ex. 1w = 1 week from today)
+      - calculates date n number of dateUnits away from today
       - dateUnits: d, w, m, y
       - if only number is provided, unit is days (ex. 0 = today)
     - \<dayOfWeek>
+      - calculates date for first upcoming dayOfWeek
       - M, Tu, W, Th, F, Sa, Su
     - dateUnits and dayOfWeek can be combined (dayOfWeek can be at beginning or end)
       - 1w2d = 9 days (1 week + 2 days)
       - 2mM = first upcoming Monday in 2 months
       - M2m = first upcoming Monday in 2 months
-- [x] Edit, add, delete in Live Preview
-- [ ] "get:" Query for existing Todo.txt tasks and move to current codeblock
-- [ ] Archive complete todos to file
-- [ ] Daily note rollover integration
 
 ## Donations
 Feel free to support me if you enjoy the plugin!

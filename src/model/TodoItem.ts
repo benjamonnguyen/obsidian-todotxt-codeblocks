@@ -27,7 +27,7 @@ export default class TodoItem extends Item implements ViewModel {
     render(): HTMLElement {
         if (!this.id) throw "No id!";
         
-        const item = document.createElement("span");
+        const item = document.createElement("div");
         item.addClass(this.getHtmlCls());
         item.id = this.id;
         
@@ -112,57 +112,70 @@ export default class TodoItem extends Item implements ViewModel {
     }
 
     private buildDescriptionHtml(itemEl: HTMLElement): HTMLElement {
-        const span = itemEl.createSpan({
+        const description = itemEl.createSpan({
             cls: "todotxt-item-description",
         });
 
         for (const str of this.body().split(" ")) {
-            if (this.buildDueExtensionHtml(str, span)) {
+            const span = this.buildDueExtensionHtml(str) || this.buildLink(str);
+            if (span) {
+                description.appendChild(span);
             } else {
-                span.appendText(str);
+                description.appendText(str);
             }
-            span.appendText(" ");
+            description.appendText(" ");
         };
 
-        return span;
+        return description;
     }
 
-    private buildDueExtensionHtml(str: string, span: HTMLElement): boolean {
+    private buildDueExtensionHtml(str: string): HTMLSpanElement | undefined {
         if (str.startsWith(ExtensionType.DUE + ":")) {
             const split = str.split(":", 2);
-            if (!split.at(1)) return false;
+            if (!split.at(1)) return;
 
+            const span = document.createElement("span");
+            span.setText(str);
+            span.addClass("todotxt-due-ext")
             const due = moment(split.at(1));
             const now = moment();
             if (due.isSame(now, "d")) {
-                span.createSpan({
-                    cls: "todotxt-due-ext todotxt-due-today",
-                    text: str,
-                });
+                span.addClass("todotxt-due-today");
             } else if (due.isBefore(now, "d")) {
-                span.createSpan({
-                    cls: "todotxt-due-ext todotxt-overdue",
-                    text: str,
-                });
+                span.addClass("todotxt-overdue");
             } else if (due.diff(now, "d") <= 7) {
-                span.createSpan({
-                    cls: "todotxt-due-ext todotxt-due-week",
-                    text: str,
-                });
+                span.addClass("todotxt-due-week");
             } else if (due.diff(now, "d") <= 30) {
-                span.createSpan({
-                    cls: "todotxt-due-ext todotxt-due-month",
-                    text: str,
-                });
+                span.addClass("todotxt-due-month");
             } else {
-                span.createSpan({
-                    cls: "todotxt-due-ext todotxt-due-later",
-                    text: str,
-                });
+                span.addClass("todotxt-due-later");
             }
-            return true;
-        }
 
-        return false;
+            return span
+        }
+    }
+
+    private buildLink(str: string): HTMLSpanElement | undefined {
+        const REG = /\[([^\[\]\(\)\n]*)\]\(([^\[\]\(\)\n]*)\)/;
+        const match = str.match(REG);
+        if (match) {
+            const span = document.createElement("a");
+            span.addClass("cm-url", "todotxt-link");
+            span.setText(match.at(1) || "[]");
+            const link = match.at(2) || "()";
+            span.setAttr("link", link);
+
+            if (!link.startsWith("obsidian://")) {
+                try {
+                    new URL(link);
+                    span.createSpan({
+                        cls: "cm-url external-link todotxt-link",
+                        attr: {link},
+                    });
+                } catch (_) {}
+            }
+            
+            return span;
+        }
     }
 }
