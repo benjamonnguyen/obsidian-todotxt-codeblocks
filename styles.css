@@ -46,28 +46,27 @@ If your plugin does not need CSS, delete this file.
     padding-inline-start: 28px;
 }
 
-button.todotxt-priority {
+span.todotxt-priority {
     border-radius: var(--radius-m);
-    padding: 0.3rem;
+    padding: 0.125rem 0.35rem;
     margin-right: 0.25rem;
-    height: 1.25rem;
+    height: 1rem;
     font-size: small;
-    cursor: var(--cursor);
 }
 
-button.todotxt-priority-a {
+span.todotxt-priority-a {
     color: var(--todotxt-color-red-600);
     background-color: var(--todotxt-color-red-300);
 }
-button.todotxt-priority-b {
+span.todotxt-priority-b {
     color: var(--todotxt-color-orange-600);
     background-color: var(--todotxt-color-orange-300);
 }
-button.todotxt-priority-c {
+span.todotxt-priority-c {
     color: var(--todotxt-color-sky-600);
     background-color: var(--todotxt-color-sky-300);
 }
-button.todotxt-priority-x {
+span.todotxt-priority-x {
     color: white;
     background-color: var(--todotxt-color-gray-400);
 }
