@@ -115,15 +115,20 @@ export default class TodoItem extends Item implements ViewModel {
             cls: "todotxt-item-description",
         });
 
-        for (const str of this.body().split(" ")) {
-            const span = this.buildDueExtensionHtml(str) || this.buildLink(str);
+        // Word or Markdown link
+        const REGEX = /\[[^\[\]\(\)\n]*\]\([^\[\]\(\)\n]*\)|\S+/g
+        const bodyItr = this.body().matchAll(REGEX);
+        let next = bodyItr.next();
+        while (!next.done) {
+            const span = this.buildDueExtensionHtml(next.value[0]) || this.buildLink(next.value[0]);
             if (span) {
                 description.appendChild(span);
             } else {
-                description.appendText(str);
+                description.appendText(next.value[0]);
             }
             description.appendText(" ");
-        };
+            next = bodyItr.next();
+        }
 
         return description;
     }
@@ -155,8 +160,8 @@ export default class TodoItem extends Item implements ViewModel {
     }
 
     private buildLink(str: string): HTMLSpanElement | undefined {
-        const REG = /\[([^\[\]\(\)\n]*)\]\(([^\[\]\(\)\n]*)\)/;
-        const match = str.match(REG);
+        const REGEX = /\[([^\[\]\(\)\n]*)\]\(([^\[\]\(\)\n]*)\)/;
+        const match = str.match(REGEX);
         if (match) {
             const span = document.createElement("span");
             span.addClass("cm-url", "todotxt-link");
