@@ -1,4 +1,5 @@
-import { App, ButtonComponent, Modal, Setting } from "obsidian";
+import { AbstractTextComponent, App, ButtonComponent, Modal, Setting } from "obsidian";
+import AddModal from "./AddModal";
 
 export default class EditItemModal extends Modal {
 
@@ -32,15 +33,21 @@ export default class EditItemModal extends Modal {
             this.close();
             this.onSubmit(this.result);
         }));
-        submit.settingEl.addClass("todotxt-modal-submit");
+        submit.settingEl.addClass("todotxt-modal-btn", "todotxt-modal-submit");
 
-        input.addText((text) => {
+        const handleText = (text: AbstractTextComponent<any>) => {
             text.setValue(this.result);
             text.onChange((value) => {
                 submit.components.find(component => component instanceof ButtonComponent)?.setDisabled(!value);
                 this.result = value
             });
-        });
+        }
+        // @ts-ignore
+        if (this.app.isMobile) {
+            input.addTextArea(handleText);
+        } else {
+            input.addText(handleText);
+        }
     }
     
     onClose() {

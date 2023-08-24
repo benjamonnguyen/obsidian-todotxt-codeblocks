@@ -1,9 +1,9 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import { LanguageLine, TodoItem, ProjectGroupContainer, ActionType, ActionButton, TodoList } from "./model";
-import { App, MarkdownView, Notice } from 'obsidian';
+import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import { EditItemModal, AddModal, EditListOptionsModal } from "./component";
+import { EditItemModal, AddModal, EditListOptionsModal, ConfirmModal } from "./component";
 import TodotxtCodeblocksPlugin from './main';
 import { ExtensionType } from './extension';
 
@@ -13,7 +13,6 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
         return false;
     }
     const itemEl = target.parentElement;
-    console.log(itemEl);
     if (!itemEl || !(itemEl instanceof HTMLDivElement) || itemEl.className !== TodoItem.HTML_CLS) {
         return false;
     }
@@ -88,7 +87,7 @@ export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boo
     return true;
 }
 
-export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): boolean {
+export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
 
     if (!target || !(target instanceof SVGElement)) {
@@ -108,7 +107,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
         const itemIdx = parseInt(editBtnEl.getAttr("item-id")?.match(/\d+$/)?.first()!);
         const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
 
-        new EditItemModal(app, itemLine.text, result => {
+        new EditItemModal(mdView.app, itemLine.text, result => {
             todoList.items[itemIdx] = new TodoItem(result);
             todoList.sort();
             updateView(mdView, [{from, to, insert: todoList.toString()}]);
@@ -134,7 +133,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView, app: App): bo
     return true;
 }
 
-export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boolean {
+export function clickAdd(event: MouseEvent, mdView: MarkdownView): boolean {
     const { target } = event;
 
     if (!target || !(target instanceof SVGElement)) {
@@ -150,7 +149,7 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView, app: App): boo
     const listLine = findLine(document.getElementById(listId)!, view);
 
     const { todoList, from, to } = TodoList.from(listLine.number, view);
-    new AddModal(app, result => {
+    new AddModal(mdView.app, result => {
         todoList.items.push(new TodoItem(result));
         todoList.sort();
         updateView(mdView, [{from, to, insert: todoList.toString()}]);
@@ -169,11 +168,19 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
     if (!newTarget || newTarget.getAttr("action") !== ActionType.DEL.name) {
         return false;
     }
-    // @ts-ignore
-    const view = mdView.editor.cm as EditorView;
 
-    const line = findLine(newTarget, view);
-    updateView(mdView, [{from: line.from, to: line.to + 1}]); // +1 to delete entire line
+    const doDelete = () => {
+        // @ts-ignore
+        const view = mdView.editor.cm as EditorView;
+        const line = findLine(newTarget, view);
+        updateView(mdView, [{from: line.from, to: line.to + 1}]); // +1 to delete entire line
+    };
+    // @ts-ignore
+    if (mdView.app.isMobile) {
+        new ConfirmModal(mdView.app, "Delete task?", doDelete).open();
+    } else {
+        doDelete();
+    }
     
     return true;
 }

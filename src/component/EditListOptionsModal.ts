@@ -23,22 +23,22 @@ export class EditListOptionsModal extends Modal {
                 title.onChange(val => this.result.title = val);
             });
         titleOption.settingEl.addClasses([
-            "todotxt-modal-input-begin",
             "todotxt-modal-input",
+            "todotxt-modal-input-begin",
             "todotxt-modal-input-3-4",
         ]);
         titleOption.setName("Title");
 
-        const sortOrdersOption = new Setting(contentEl)
-        .addText(sortOrders => {
-            sortOrders.setValue(this.result.sortOrders);
-            sortOrders.onChange(val => this.result.sortOrders = val);
-        });
+        const sortOrdersOption = new Setting(contentEl);
         sortOrdersOption.settingEl.addClasses([
             "todotxt-modal-input",
             "todotxt-modal-input-3-4",
         ]);
         sortOrdersOption.setName("Sort Orders")
+        sortOrdersOption.addText(text => {
+            text.setValue(this.result.sortOrders);
+            text.onChange(val => this.result.sortOrders = val);
+        });
         
         const submit = new Setting(contentEl)
         .addButton((btn) =>
@@ -48,9 +48,11 @@ export class EditListOptionsModal extends Modal {
         .onClick(() => {
             const errs: Error[] = [];
             for (const sort of this.result.sortOrders.split(" ")) {
-                const res = LanguageLine.handleSort(sort);
-                if (res instanceof Error) {
-                    errs.push(res);
+                if (sort) {
+                    const res = LanguageLine.handleSort(sort);
+                    if (res instanceof Error) {
+                        errs.push(res);
+                    }
                 }
             }
             if (errs.length) {
@@ -62,7 +64,7 @@ export class EditListOptionsModal extends Modal {
                 this.onSubmit(this.result);
             }
         }));
-        submit.settingEl.addClass("todotxt-modal-submit");
+        submit.settingEl.addClass("todotxt-modal-btn", "todotxt-modal-submit");
     }
     
     onClose() {

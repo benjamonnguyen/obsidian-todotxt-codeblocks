@@ -176,9 +176,16 @@ svg.todotxt-action-btn[action="add"] {
     background-color: var(--background-modifier-hover);
 }
 
+.markdown-source-view .cm-preview-code-block:hover .edit-block-button {
+    opacity: 100;
+}
+
 /* MODAL */
 .todotxt-modal-input-begin {
     margin-top: 1.5rem;
+}
+.is-mobile .todotxt-modal-input-begin {
+    margin-top: 0;
 }
 
 button.mod-cta:disabled,
@@ -190,14 +197,28 @@ button.mod-cta:disabled:hover {
     width: calc(var(--dialog-width) * 0.9);
     max-width: calc(var(--dialog-max-width) * 0.9);
 }
-
 .todotxt-modal-input-3-4 input[type="text"] {
     width: calc(var(--dialog-width) * 0.7);
     max-width: calc(var(--dialog-max-width) * 0.7);
 }
+.is-mobile .todotxt-modal-input input[type="text"] {
+    width: 100%;
+    max-width: 100%;
+}
 
-.todotxt-modal-submit {
+.is-mobile .todotxt-modal-input textarea {
+    width: 100%;
+}
+
+.todotxt-modal-btn {
     padding-bottom: 0;
+}
+.is-mobile .todotxt-modal-btn {
+    padding: 0 !important;
+}
+
+.todotxt-modal-cancel button {
+    background-color: var(--text-muted);
 }
 
 /* PROJECT GROUP CONTAINER */

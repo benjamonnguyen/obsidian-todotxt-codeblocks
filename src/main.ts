@@ -1,4 +1,4 @@
-import { ButtonComponent, MarkdownView, Plugin } from 'obsidian';
+import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import { toggleCheckbox, toggleProjectGroup, save, clickEdit, clickDelete, clickAdd } from './stateEditor';
 
@@ -15,9 +15,9 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			if (mdView) {
 				toggleCheckbox(event, mdView)
 					|| toggleProjectGroup(event, mdView)
-					|| clickEdit(event, mdView, this.app)
+					|| clickEdit(event, mdView)
+					|| clickAdd(event, mdView)
 					|| clickDelete(event, mdView)
-					|| clickAdd(event, mdView, this.app)
 					;
 			}
 		});
