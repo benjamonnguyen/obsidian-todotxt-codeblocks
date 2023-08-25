@@ -53,7 +53,7 @@ function dateFromString(input: string): Date {
 	return new Date(
 		parseInt(input.slice(0, 4), 10),
 		parseInt(input.slice(5, 7), 10) - 1, // months are zero indexed
-		parseInt(input.slice(8), 10)
+		parseInt(input.slice(8), 10),
 	);
 }
 
@@ -325,7 +325,7 @@ export class Item {
 	 * @returns The body portion of the task.
 	 */
 	body(): string {
-		return this.#body.join(" ");
+		return this.#body.join(' ');
 	}
 
 	/**
@@ -352,9 +352,9 @@ export class Item {
 		this.#projects = [];
 		this.#extensions = new Map();
 
-		for (const str of text.split(" ")) {
+		for (const str of text.split(' ')) {
 			if (str.match(rTags)) {
-				if (!(str.startsWith("@") || str.startsWith("+"))) {
+				if (!(str.startsWith('@') || str.startsWith('+'))) {
 					const split = str.split(':', 2);
 					this.addExtension(split[0], split[1]);
 					continue;
@@ -391,7 +391,7 @@ export class Item {
 	addContext(tag: string) {
 		if (!this.#contexts.some((v) => tag === v.tag)) {
 			this.#contexts.push({ tag, start: this.#body.length });
-			this.#body.push("@" + tag);
+			this.#body.push('@' + tag);
 		}
 	}
 
@@ -424,7 +424,7 @@ export class Item {
 	addProject(tag: string) {
 		if (!this.#projects.some((v) => tag === v.tag)) {
 			this.#projects.push({ tag, start: this.#body.length });
-			this.#body.push("+" + tag); 
+			this.#body.push('+' + tag);
 		}
 	}
 
@@ -450,11 +450,11 @@ export class Item {
 
 	setExtension(key: string, value: string) {
 		let found = false;
-		const str = key + ":" + value;
+		const str = key + ':' + value;
 
 		for (const [k, indices] of this.#extensions.entries()) {
 			if (key === k) {
-				indices.forEach(idx => {
+				indices.forEach((idx) => {
 					this.#body[idx] = str;
 				});
 				found = true;
@@ -467,7 +467,7 @@ export class Item {
 	}
 
 	addExtension(key: string, value: string) {
-		this.#body.push(key + ":" + value);
+		this.#body.push(key + ':' + value);
 		const indices = this.#extensions.get(key);
 		if (indices) {
 			indices.push(this.#body.length - 1);
@@ -481,9 +481,9 @@ export class Item {
 		if (!idxs) return;
 		for (const [i, idx] of idxs.entries()) {
 			if (
-				(!value && !indices)
-				|| (value && this.#body[idx] === value)
-				|| (indices && indices.findIndex(i => i === idx) > -1)
+				(!value && !indices) ||
+				(value && this.#body[idx] === value) ||
+				(indices && indices.findIndex((i) => i === idx) > -1)
 			) {
 				// @ts-ignore Marking for deletion
 				this.#body[idx] = null;
@@ -491,20 +491,25 @@ export class Item {
 				idxs[i] = null;
 			}
 		}
-		this.#extensions.set(key, idxs.filter(o => o !== null));
+		this.#extensions.set(
+			key,
+			idxs.filter((o) => o !== null),
+		);
 		if (!this.#extensions.get(key)?.length) {
 			this.#extensions.delete(key);
 		}
-		const newBody = this.#body.filter(o => o !== null);
+		const newBody = this.#body.filter((o) => o !== null);
 		if (newBody.length !== this.#body.length) {
-			this.setBody(newBody.join(" "));
+			this.setBody(newBody.join(' '));
 		}
 	}
 
-	getExtensions(key:string): { value: string, index: number }[] {
-		return this.#extensions.get(key)?.map(index => {
-			return { value: this.#body[index].split(":", 2)[1], index };
-		}) || [];
+	getExtensions(key: string): { value: string; index: number }[] {
+		return (
+			this.#extensions.get(key)?.map((index) => {
+				return { value: this.#body[index].split(':', 2)[1], index };
+			}) || []
+		);
 	}
 }
 
