@@ -1,4 +1,4 @@
-import { AbstractTextComponent, App, ButtonComponent, Setting } from 'obsidian';
+import { AbstractTextComponent, App, ButtonComponent, Setting, TextAreaComponent } from 'obsidian';
 import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoList } from 'src/model';
 
@@ -59,6 +59,14 @@ export default class EditItemModal extends AutoCompleteableModal {
 		// @ts-ignore
 		if (this.app.isMobile) {
 			input.addTextArea(handleText);
+			const textComponent = input.components.find(
+				(component) => component instanceof TextAreaComponent,
+			);
+			if (textComponent) {
+				const inputEl = (textComponent as TextAreaComponent).inputEl;
+				inputEl.select();
+				inputEl.selectionStart = this.result.length;
+			}
 		} else {
 			input.addText(handleText);
 		}

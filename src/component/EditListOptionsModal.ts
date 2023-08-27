@@ -36,6 +36,7 @@ export class EditListOptionsModal extends Modal {
 		sortOrdersOption.setName('Sort Orders');
 		sortOrdersOption.addText((text) => {
 			text.setValue(this.result.sortOrders);
+			text.setPlaceholder('sort:default');
 			text.onChange((val) => (this.result.sortOrders = val));
 		});
 

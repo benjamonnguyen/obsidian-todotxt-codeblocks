@@ -162,6 +162,18 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	private buildLink(str: string): HTMLSpanElement | undefined {
+		try {
+			new URL(str);
+			const span = document.createElement('span');
+			span.addClass('cm-url', 'todotxt-link');
+			span.setText(str);
+			span.setAttr('link', str);
+
+			return span;
+		} catch (_) {
+			/* empty */
+		}
+
 		const REGEX = /\[([^[]()\n]*)\]\(([^[]()\n]*)\)/;
 		const match = str.match(REGEX);
 		if (match) {
