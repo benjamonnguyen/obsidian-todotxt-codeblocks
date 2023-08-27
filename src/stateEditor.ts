@@ -127,7 +127,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 		const itemIdx = parseInt(itemId);
 		const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
 
-		new EditItemModal(mdView.app, itemLine.text, (result) => {
+		new EditItemModal(mdView.app, itemLine.text, todoList, (result) => {
 			todoList.items[itemIdx] = new TodoItem(result);
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
@@ -170,7 +170,7 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView): boolean {
 	const listLine = findLine(document.getElementById(listId)!, view);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	new AddModal(mdView.app, (result) => {
+	new AddModal(mdView.app, todoList, (result) => {
 		todoList.items.push(new TodoItem(result));
 		todoList.sort();
 		updateView(mdView, [{ from, to, insert: todoList.toString() }]);

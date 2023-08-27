@@ -1,0 +1,77 @@
+import { AbstractTextComponent, App, Modal } from 'obsidian';
+
+export default abstract class AutoCompleteableModal extends Modal {
+	private prefixToSuggestionOptions: Map<string, string[]>;
+	private prevTextLength = 0;
+	private prevSelectedWord = '';
+	private filteredSuggestions: string[] | null = null;
+
+	constructor(app: App, prefixToSuggestionOptions: Map<string, string[]>) {
+		super(app);
+		this.prefixToSuggestionOptions = new Map(prefixToSuggestionOptions.entries());
+	}
+
+	suggest(
+		text: string,
+		textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
+	) {
+		// Only suggest on text insertion
+		if (text.length <= this.prevTextLength) {
+			this.prevTextLength = text.length;
+			return;
+		}
+		this.prevTextLength = text.length;
+
+		// Only suggest on text insertion to end of word
+		const cursor = textComponent.inputEl.selectionStart;
+		if (cursor === null || (cursor !== text.length && text.charAt(cursor) !== ' ')) {
+			return;
+		}
+
+		const [suggestion, fragmentLength] = this.getSuggestion(cursor, text);
+		if (suggestion) {
+			textComponent.setValue(text + suggestion.slice(fragmentLength));
+			textComponent.inputEl.setSelectionRange(text.length, textComponent.getValue().length);
+		}
+	}
+
+	private getSuggestion(cursor: number, text: string): [string | null, number] {
+		const selectedWord = this.getSelectedWord(cursor, text);
+		const fragment = selectedWord.slice(1);
+		if (!fragment) {
+			this.prevSelectedWord = selectedWord;
+			return [null, 0];
+		}
+		if (selectedWord.startsWith(this.prevSelectedWord) && this.filteredSuggestions) {
+			this.filteredSuggestions = this.filteredSuggestions.filter((sug) => sug.startsWith(fragment));
+			if (this.filteredSuggestions.length === 1) {
+				this.prevSelectedWord = selectedWord;
+				return [this.filteredSuggestions[0], fragment.length];
+			}
+		} else {
+			this.filteredSuggestions = null;
+		}
+		this.prevSelectedWord = selectedWord;
+
+		for (const [prefix, options] of this.prefixToSuggestionOptions.entries()) {
+			if (selectedWord.startsWith(prefix)) {
+				this.filteredSuggestions = options.filter((opt) => opt.startsWith(fragment));
+				if (this.filteredSuggestions.length === 1) {
+					return [this.filteredSuggestions[0], fragment.length];
+				}
+			}
+		}
+
+		return [null, 0];
+	}
+
+	private getSelectedWord(endPosition: number, text: string): string {
+		const reversedChars = [];
+		let currPosition = endPosition;
+		while (currPosition > -1 && text.charAt(currPosition) !== ' ') {
+			reversedChars.push(text.charAt(currPosition--));
+		}
+
+		return reversedChars.reverse().join('');
+	}
+}

@@ -1,13 +1,26 @@
-import { AbstractTextComponent, App, ButtonComponent, Modal, Setting } from 'obsidian';
+import { AbstractTextComponent, App, ButtonComponent, Setting } from 'obsidian';
+import AutoCompleteableModal from './AutoCompleteableModal';
+import { TodoList } from 'src/model';
 
-export default class EditItemModal extends Modal {
+export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'edit-item-modal';
 
 	result: string;
 	onSubmit: (result: string) => void;
 
-	constructor(app: App, originalText: string, onSubmit: (result: string) => void) {
-		super(app);
+	constructor(
+		app: App,
+		originalText: string,
+		todoList: TodoList,
+		onSubmit: (result: string) => void,
+	) {
+		super(
+			app,
+			new Map([
+				['+', todoList.projectGroups.map((group) => group.name)],
+				['@', [...todoList.orderedContexts]],
+			]),
+		);
 		this.result = originalText;
 		this.onSubmit = onSubmit;
 	}
@@ -33,13 +46,14 @@ export default class EditItemModal extends Modal {
 		);
 		submit.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-submit');
 
-		const handleText = (text: AbstractTextComponent<any>) => {
-			text.setValue(this.result);
-			text.onChange((value) => {
+		const handleText = (textComponent: AbstractTextComponent<any>) => {
+			textComponent.setValue(this.result);
+			textComponent.onChange((text) => {
 				submit.components
 					.find((component) => component instanceof ButtonComponent)
-					?.setDisabled(!value);
-				this.result = value;
+					?.setDisabled(!text);
+				this.result = text;
+				this.suggest(text, textComponent);
 			});
 		};
 		// @ts-ignore
