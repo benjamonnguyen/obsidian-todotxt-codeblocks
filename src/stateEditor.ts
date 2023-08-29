@@ -154,9 +154,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 	return true;
 }
 
-export function clickAdd(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-
+export function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
 	if (!target || !(target instanceof SVGElement)) {
 		return false;
 	}

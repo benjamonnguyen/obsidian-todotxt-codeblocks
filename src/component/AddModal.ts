@@ -3,7 +3,7 @@ import { TodoList } from 'src/model';
 import AutoCompleteableModal from './AutoCompleteableModal';
 
 export default class AddModal extends AutoCompleteableModal {
-	static ID = 'add-modal';
+	static ID = 'todotxt-add-modal';
 	static placeholders = [
 		'(B) Call Mom @Phone +Family rec:1m',
 		'(C) Schedule annual checkup +Health due:1yM',
