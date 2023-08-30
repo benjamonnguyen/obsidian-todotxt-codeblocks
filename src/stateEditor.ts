@@ -51,11 +51,11 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
 		} else {
 			item.setCompleted(new Date());
 			// if rec extension exists, automatically add new item with due and rec ext
-			const recExt = item.getExtensions(ExtensionType.RECURRING);
+			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
 			if (recExt.length) {
 				const newItem = new TodoItem('');
 				newItem.setPriority(item.priority());
-				newItem.setBody(item.body());
+				newItem.setBody(item.getBody());
 				newItem.setExtension(ExtensionType.DUE, recExt.first()!.value);
 				todoList.items.push(newItem);
 			}

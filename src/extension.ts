@@ -14,7 +14,7 @@ export function processExtensions(item: TodoItem) {
 }
 
 function processDueExtensions(item: TodoItem) {
-	const ext = reduceExtensions(item, ExtensionType.DUE);
+	const ext = invalidateDuplicates(item, ExtensionType.DUE);
 	if (ext) {
 		try {
 			const { date, details } = calculateDate(ext.value);
@@ -32,7 +32,7 @@ function processDueExtensions(item: TodoItem) {
 }
 
 function processRecurringExtensions(item: TodoItem) {
-	const ext = reduceExtensions(item, ExtensionType.RECURRING);
+	const ext = invalidateDuplicates(item, ExtensionType.RECURRING);
 	if (ext) {
 		try {
 			calculateDate(ext.value);
@@ -42,14 +42,21 @@ function processRecurringExtensions(item: TodoItem) {
 	}
 }
 
-// remove duplicates of given type and return first extension
-function reduceExtensions(
+// invalidate duplicates and return first extension
+function invalidateDuplicates(
 	item: TodoItem,
 	extType: ExtensionType,
 ): { key: string; value: string } | undefined {
-	const extensions = item.getExtensions(extType);
+	const extensions = item.getExtensionValuesAndBodyIndices(extType);
 	if (extensions.length) {
-		item.removeExtension(extType, undefined, extensions.map(({ index }) => index).slice(1));
+		if (
+			item.invalidateExtensions(extType, undefined, extensions.map(({ index }) => index).slice(1))
+		) {
+			const msg = 'Invalidated duplicates of reserved extension: ' + extType;
+			console.warn(msg);
+			new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\n' + msg, 10000);
+		}
+
 		return { key: extType, value: extensions.first()!.value };
 	}
 }
@@ -149,11 +156,11 @@ function extractDateUnits(value: string):
 }
 
 function handleError(e: Error, item: TodoItem, extension: { key: string; value: string }) {
+	item.invalidateExtensions(extension.key, extension.value);
 	let errMsg = `Invalid value for "${extension.key}" extension: ${extension.value}`;
 	if (e.message) {
 		errMsg += '\nerror: ' + e.message;
 	}
-	console.error(errMsg);
-	item.removeExtension(extension.key, extension.value);
+	console.warn(errMsg);
 	new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\n' + errMsg, 10000);
 }

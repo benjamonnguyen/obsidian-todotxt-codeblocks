@@ -84,13 +84,37 @@ export default class TodoItem extends Item implements ViewModel {
 
 	addExtension(key: string, value: string): void {
 		if (Object.values(ExtensionType).includes(key as ExtensionType)) {
-			if (this.getExtensions(key).first()) {
+			if (this.extensions.get(key)) {
 				console.warn(`${key} extension already exists! Skipping add: ${value}`);
 				return;
 			}
 		}
 		super.addExtension(key, value);
 		processExtensions(this);
+	}
+
+	// Invalidate by postfixing key with '*'
+	invalidateExtensions(key: string, value?: string, indices?: number[]): number {
+		let count = 0;
+		const targetIndices = indices || this.extensions.get(key);
+		targetIndices?.forEach((bodyIdx) => {
+			const str = this.body.at(bodyIdx);
+			if (str !== undefined) {
+				const split = str.split(':', 2);
+				if (value === undefined || split[1] === value) {
+					this.body[bodyIdx] = split[0] + '*:' + split[1];
+					count++;
+				}
+			}
+		});
+
+		if (count) {
+			const { body, extensions } = this.parseBody(this.getBody());
+			this.body = body;
+			this.extensions = extensions;
+		}
+
+		return count;
 	}
 
 	private getPriorityHtmlClasses(): string[] {
@@ -119,7 +143,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 		// Word or Markdown link
 		const REGEX = /\[[^[]()\n]*\]\([^[]()\n]*\)|\S+/g;
-		const bodyItr = this.body().matchAll(REGEX);
+		const bodyItr = this.getBody().matchAll(REGEX);
 		let next = bodyItr.next();
 		while (!next.done) {
 			const span = this.buildDueExtensionHtml(next.value[0]) || this.buildLink(next.value[0]);
@@ -162,16 +186,17 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	private buildLink(str: string): HTMLSpanElement | undefined {
-		try {
-			new URL(str);
-			const span = document.createElement('span');
-			span.addClass('cm-url', 'todotxt-link');
-			span.setText(str);
-			span.setAttr('link', str);
+		if (/^\w+:\/\//.test(str)) {
+			try {
+				const span = document.createElement('span');
+				span.addClass('cm-url', 'todotxt-link');
+				span.setText(str);
+				span.setAttr('link', str);
 
-			return span;
-		} catch (_) {
-			/* empty */
+				return span;
+			} catch (_) {
+				/* empty */
+			}
 		}
 
 		const REGEX = /\[([^[]()\n]*)\]\(([^[]()\n]*)\)/;
