@@ -11,7 +11,9 @@ export function todotxtBlockProcessor(
 	ctx: MarkdownPostProcessorContext,
 ) {
 	// Parse language line.
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const info = ctx.getSectionInfo(el)!;
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const languageLine = info.text.split('\n', info.lineStart + 1).last()!;
 	const { langLine, errs } = LanguageLine.from(languageLine);
 	if (errs.length) {
@@ -35,7 +37,6 @@ export function todotxtBlockProcessor(
 	const lines = source.split('\n');
 	for (const [i, line] of lines.entries()) {
 		const newItem = todoList.items.at(i)?.toString();
-		console.log(i, line, newItem?.toString());
 		if (newItem) {
 			if (line !== newItem) {
 				UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1, newText: newItem });
