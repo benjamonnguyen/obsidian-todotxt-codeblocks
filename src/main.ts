@@ -8,6 +8,7 @@ import {
 	clickDelete,
 	clickAdd,
 } from './stateEditor';
+import { createNewTaskCmd } from './command';
 
 export default class TodotxtCodeblocksPlugin extends Plugin {
 	static NAME = 'obsidian-todotxt-codeblocks';
@@ -15,13 +16,16 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	async onload() {
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
 		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
+			const { target } = event;
+			if (!target) return;
+
 			if (this.clickLink(event)) return;
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
 				toggleCheckbox(event, mdView) ||
 					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
-					clickAdd(event, mdView) ||
+					clickAdd(target, mdView) ||
 					clickDelete(event, mdView);
 			}
 		});
@@ -39,6 +43,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				save(mdView!);
 			}, 2000),
 		);
+		this.addCommand(createNewTaskCmd);
 	}
 
 	onunload() {}

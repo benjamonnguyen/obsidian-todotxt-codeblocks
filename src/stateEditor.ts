@@ -8,11 +8,12 @@ import {
 	ActionButton,
 	TodoList,
 } from './model';
-import { MarkdownView, Notice } from 'obsidian';
+import { MarkdownView, Notice, moment } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
 import { EditItemModal, AddModal, EditListOptionsModal, ConfirmModal } from './component';
 import TodotxtCodeblocksPlugin from './main';
 import { ExtensionType } from './extension';
+import { calculateDate } from './dateUtil';
 
 export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -51,13 +52,12 @@ export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean
 		} else {
 			item.setCompleted(new Date());
 			// if rec extension exists, automatically add new item with due and rec ext
-			const recExt = item.getExtensions(ExtensionType.RECURRING);
-			if (recExt.length) {
-				const newItem = new TodoItem('');
-				newItem.setPriority(item.priority());
-				newItem.setBody(item.body());
-				newItem.setExtension(ExtensionType.DUE, recExt.first()!.value);
-				todoList.items.push(newItem);
+			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
+			if (recExt.at(0)) {
+				const recurringTask = createRecurringTask(recExt[0].value, item);
+				if (recurringTask) {
+					todoList.items.push(recurringTask);
+				}
 			}
 		}
 	}
@@ -127,7 +127,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 		const itemIdx = parseInt(itemId);
 		const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
 
-		new EditItemModal(mdView.app, itemLine.text, (result) => {
+		new EditItemModal(mdView.app, itemLine.text, todoList, (result) => {
 			todoList.items[itemIdx] = new TodoItem(result);
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
@@ -154,9 +154,7 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 	return true;
 }
 
-export function clickAdd(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-
+export function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
 	if (!target || !(target instanceof SVGElement)) {
 		return false;
 	}
@@ -167,10 +165,12 @@ export function clickAdd(event: MouseEvent, mdView: MarkdownView): boolean {
 	}
 	// @ts-ignore
 	const view = mdView.editor.cm as EditorView;
-	const listLine = findLine(document.getElementById(listId)!, view);
+	const listEl = document.getElementById(listId);
+	if (!listEl) return false;
+	const listLine = findLine(listEl, view);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	new AddModal(mdView.app, (result) => {
+	new AddModal(mdView.app, todoList, (result) => {
 		todoList.items.push(new TodoItem(result));
 		todoList.sort();
 		updateView(mdView, [{ from, to, insert: todoList.toString() }]);
@@ -271,4 +271,35 @@ function updateView(
 	const view = mdView.editor.cm as EditorView;
 	const transaction = view.state.update({ changes: changes });
 	view.dispatch(transaction);
+}
+
+function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | undefined {
+	try {
+		const hasPlusPrefix = rec.startsWith('+');
+		const { date, details } = calculateDate(
+			rec,
+			hasPlusPrefix
+				? moment(originalItem.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value)
+				: null,
+		);
+		const newItem = new TodoItem('-');
+		newItem.setPriority(originalItem.priority());
+		newItem.setBody(originalItem.getBody());
+		newItem.setExtension(ExtensionType.DUE, date);
+
+		let msg = 'Created recurring task due: ' + date;
+		if (details) {
+			let deets = details;
+			if (hasPlusPrefix) {
+				deets += ', + option';
+			}
+			msg += `\n(${deets})`;
+		}
+		new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
+
+		return newItem;
+	} catch (e) {
+		console.error(e);
+		new Notice(TodotxtCodeblocksPlugin.NAME + ' ERROR\nFailed to create recurring task');
+	}
 }

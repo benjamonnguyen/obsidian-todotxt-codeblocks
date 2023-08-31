@@ -80,9 +80,6 @@ input[type="checkbox"]:checked ~ .todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
-/* .todo-text span {
-    margin-right: 0.3em;
-} */
 
 .theme-light.todotxt-due-later {
     color: #264653;
@@ -91,10 +88,10 @@ input[type="checkbox"]:checked ~ .todotxt-item-description * {
     color: var(--text-muted);
 }
 .todotxt-due-today {
-    color: #F4A261;
+    color: #E76F51;
 }
 .todotxt-overdue {
-    color: #E76F51;
+    color: var(--todotxt-color-red-700);
 }
 .todotxt-due-week {
     color: #E9C46A;

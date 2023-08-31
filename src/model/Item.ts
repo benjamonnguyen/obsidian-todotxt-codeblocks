@@ -65,10 +65,10 @@ export class Item {
 	#priority: Priority = null;
 	#created: Date | null = null;
 	#completed: Date | null = null;
-	#body: string[] = [];
+	protected body: string[] = [];
 	#contexts: TrackedContext[] = [];
 	#projects: TrackedProject[] = [];
-	#extensions: Map<string, number[]> = new Map();
+	protected extensions: Map<string, number[]> = new Map();
 
 	constructor(line: string) {
 		this.parse(line);
@@ -85,10 +85,10 @@ export class Item {
 		this.#priority = null;
 		this.#created = null;
 		this.#completed = null;
-		this.#body = [];
+		this.body = [];
 		this.#contexts = [];
 		this.#projects = [];
-		this.#extensions = new Map();
+		this.extensions = new Map();
 
 		// this can't _not_ match due to the .* at the end
 		const match = <RegExpExecArray>rTodo.exec(line);
@@ -115,7 +115,7 @@ export class Item {
 			this.#priority ? `(${this.#priority})` : '',
 			this.completedToString(),
 			this.createdToString(),
-			this.body(),
+			this.getBody(),
 		];
 
 		return parts.filter((v) => v !== null && v !== '').join(' ');
@@ -324,8 +324,8 @@ export class Item {
 	 * Get the body of the task.
 	 * @returns The body portion of the task.
 	 */
-	body(): string {
-		return this.#body.join(' ');
+	getBody(): string {
+		return this.body.join(' ');
 	}
 
 	/**
@@ -338,39 +338,11 @@ export class Item {
 	 * @param text A todo.txt description string.
 	 */
 	setBody(text: string) {
-		let start = 0;
-		const tags = (text.match(rTags) || []).map((tag): [string, number] => {
-			const tagStart = text.indexOf(tag, start);
-			if (tagStart != -1) {
-				start = tagStart + tag.length;
-			}
-			return [tag, tagStart];
-		});
-
-		this.#body = [];
-		this.#contexts = [];
-		this.#projects = [];
-		this.#extensions = new Map();
-
-		for (const str of text.split(' ')) {
-			if (str.match(rTags)) {
-				if (!(str.startsWith('@') || str.startsWith('+'))) {
-					const split = str.split(':', 2);
-					this.addExtension(split[0], split[1]);
-					continue;
-				}
-			}
-			this.#body.push(str);
-		}
-
-		// TODO refactor Project and Context to not use span logic
-		tags.forEach(([tag, start]) => {
-			if (tag[0] == '@') {
-				this.#contexts.push({ tag: tag.slice(1), start });
-			} else if (tag[0] == '+') {
-				this.#projects.push({ tag: tag.slice(1), start });
-			}
-		});
+		const { body, contexts, projects, extensions } = this.parseBody(text);
+		this.body = body;
+		this.#contexts = contexts;
+		this.#projects = projects;
+		this.extensions = extensions;
 	}
 
 	/**
@@ -390,8 +362,8 @@ export class Item {
 	 */
 	addContext(tag: string) {
 		if (!this.#contexts.some((v) => tag === v.tag)) {
-			this.#contexts.push({ tag, start: this.#body.length });
-			this.#body.push('@' + tag);
+			this.#contexts.push({ tag, start: this.body.length });
+			this.body.push('@' + tag);
 		}
 	}
 
@@ -423,8 +395,8 @@ export class Item {
 	 */
 	addProject(tag: string) {
 		if (!this.#projects.some((v) => tag === v.tag)) {
-			this.#projects.push({ tag, start: this.#body.length });
-			this.#body.push('+' + tag);
+			this.#projects.push({ tag, start: this.body.length });
+			this.body.push('+' + tag);
 		}
 	}
 
@@ -444,72 +416,124 @@ export class Item {
 	 *
 	 * @returns Extensions iterator
 	 */
-	extensions() {
-		return this.#extensions.entries();
+	getExtensions() {
+		return this.extensions.entries();
 	}
 
-	setExtension(key: string, value: string) {
-		let found = false;
-		const str = key + ':' + value;
+	setExtension(key: string, value: string, indices?: number[]) {
+		const kv = key + ':' + value;
 
-		for (const [k, indices] of this.#extensions.entries()) {
-			if (key === k) {
-				indices.forEach((idx) => {
-					this.#body[idx] = str;
-				});
-				found = true;
-			}
-		}
-
-		if (!found) {
+		const existingIndices = this.extensions.get(key);
+		if (existingIndices) {
+			(indices || existingIndices).forEach((i) => (this.body[i] = kv));
+		} else {
 			this.addExtension(key, value);
 		}
 	}
 
 	addExtension(key: string, value: string) {
-		this.#body.push(key + ':' + value);
-		const indices = this.#extensions.get(key);
+		this.body.push(key + ':' + value);
+		const indices = this.extensions.get(key);
 		if (indices) {
-			indices.push(this.#body.length - 1);
+			indices.push(this.body.length - 1);
 		} else {
-			this.#extensions.set(key, [this.#body.length - 1]);
+			this.extensions.set(key, [this.body.length - 1]);
 		}
 	}
 
 	removeExtension(key: string, value?: string, indices?: number[]) {
-		const idxs = this.#extensions.get(key);
-		if (!idxs) return;
-		for (const [i, idx] of idxs.entries()) {
+		const existingIndices = this.extensions.get(key);
+		if (!existingIndices) return;
+
+		const targetIndices = indices || existingIndices;
+		for (const [extIdx, bodyIdx] of targetIndices.entries()) {
+			if (this.body.at(bodyIdx) === undefined) continue;
 			if (
-				(!value && !indices) ||
-				(value && this.#body[idx] === value) ||
-				(indices && indices.findIndex((i) => i === idx) > -1)
+				(value && this.body[bodyIdx].split(':', 2)[1] === value) ||
+				existingIndices.findIndex((i) => i === bodyIdx) > -1
 			) {
-				// @ts-ignore Marking for deletion
-				this.#body[idx] = null;
-				// @ts-ignore Marking for deletion
-				idxs[i] = null;
+				// Marking for deletion
+				this.body[bodyIdx] = '';
+				// Marking for deletion
+				existingIndices[extIdx] = -1;
 			}
 		}
-		this.#extensions.set(
+
+		this.extensions.set(
 			key,
-			idxs.filter((o) => o !== null),
+			existingIndices.filter((i) => i > -1),
 		);
-		if (!this.#extensions.get(key)?.length) {
-			this.#extensions.delete(key);
+		if (!this.extensions.get(key)?.length) {
+			this.extensions.delete(key);
 		}
-		const newBody = this.#body.filter((o) => o !== null);
-		if (newBody.length !== this.#body.length) {
-			this.setBody(newBody.join(' '));
+		const newBody = this.body.filter((str) => str);
+		if (newBody.length !== this.body.length) {
+			const { body, extensions } = this.parseBody(newBody.join(' '));
+			this.body = body;
+			this.extensions = extensions;
 		}
 	}
 
-	getExtensions(key: string): { value: string; index: number }[] {
+	getExtensionValuesAndBodyIndices(key: string): { value: string; index: number }[] {
 		return (
-			this.#extensions.get(key)?.map((index) => {
-				return { value: this.#body[index].split(':', 2)[1], index };
+			this.extensions.get(key)?.map((index) => {
+				return { value: this.body[index].split(':', 2)[1], index };
 			}) || []
 		);
+	}
+
+	parseBody(text: string): {
+		body: string[];
+		contexts: TrackedTag[];
+		projects: TrackedTag[];
+		extensions: Map<string, number[]>;
+	} {
+		const body: string[] = [];
+		const contexts: TrackedTag[] = [];
+		const projects: TrackedTag[] = [];
+		const extensions: Map<string, number[]> = new Map();
+		if (!text) {
+			console.warn('Text is empty');
+			body.push('-');
+			return { body, contexts, projects, extensions };
+		}
+
+		let start = 0;
+		const tags = (text.match(rTags) || []).map((tag): [string, number] => {
+			const tagStart = text.indexOf(tag, start);
+			if (tagStart != -1) {
+				start = tagStart + tag.length;
+			}
+			return [tag, tagStart];
+		});
+
+		for (const str of text.split(' ')) {
+			if (str.match(rTags)) {
+				if (!(str.startsWith('@') || str.startsWith('+'))) {
+					const split = str.split(':', 2);
+					if (split.length === 2 && split[1]) {
+						const indices = extensions.get(split[0]);
+						if (indices) {
+							indices.push(body.length);
+						} else {
+							extensions.set(split[0], [body.length]);
+						}
+					}
+				}
+			}
+			body.push(str);
+		}
+
+		// TODO refactor Project and Context to not use span logic
+		tags.forEach(([tag, start]) => {
+			if (tag[0] == '@') {
+				contexts.push({ tag: tag.slice(1), start });
+			} else if (tag[0] == '+') {
+				projects.push({ tag: tag.slice(1), start });
+			}
+		});
+
+		return { body, contexts, projects, extensions };
 	}
 }
 

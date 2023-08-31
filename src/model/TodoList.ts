@@ -16,6 +16,7 @@ export default class TodoList implements ViewModel {
 	langLine: LanguageLine;
 	items: TodoItem[];
 	projectGroups: ProjectGroupContainer[];
+	orderedContexts: string[];
 
 	constructor(langLine: LanguageLine, items: TodoItem[]) {
 		this.id = `${randomUUID()}`;
@@ -104,21 +105,25 @@ export default class TodoList implements ViewModel {
 		// console.log("createdOrder", this.items.map(item => item.body()));
 
 		const ctxSortOrder = this.langLine.sortFieldToOrder.get('ctx');
+		this.orderedContexts = this.getContextOrder(this.items, ctxSortOrder);
 		if (ctxSortOrder) {
-			const contextOrder = this.getContextOrder(this.items, ctxSortOrder);
 			this.items.sort((a, b) => {
 				let aScore = Number.MAX_VALUE;
 				if (a.contexts().length) {
-					a.contexts().forEach((ctx) => (aScore = Math.min(contextOrder.indexOf(ctx), aScore)));
-				} else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
-					aScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), aScore);
+					a.contexts().forEach(
+						(ctx) => (aScore = Math.min(this.orderedContexts.indexOf(ctx), aScore)),
+					);
+				} else if (this.orderedContexts.indexOf(TodoList.NO_CONTEXT) !== -1) {
+					aScore = Math.min(this.orderedContexts.indexOf(TodoList.NO_CONTEXT), aScore);
 				}
 
 				let bScore = Number.MAX_VALUE;
 				if (b.contexts().length) {
-					b.contexts().forEach((ctx) => (bScore = Math.min(contextOrder.indexOf(ctx), bScore)));
-				} else if (contextOrder.indexOf(TodoList.NO_CONTEXT) !== -1) {
-					bScore = Math.min(contextOrder.indexOf(TodoList.NO_CONTEXT), bScore);
+					b.contexts().forEach(
+						(ctx) => (bScore = Math.min(this.orderedContexts.indexOf(ctx), bScore)),
+					);
+				} else if (this.orderedContexts.indexOf(TodoList.NO_CONTEXT) !== -1) {
+					bScore = Math.min(this.orderedContexts.indexOf(TodoList.NO_CONTEXT), bScore);
 				}
 
 				return aScore - bScore;
@@ -130,8 +135,8 @@ export default class TodoList implements ViewModel {
 			this.langLine.sortFieldToOrder.get('due') || this.langLine.sortFieldToOrder.get('default');
 		if (dueSortOrder) {
 			this.items.sort((a, b) => {
-				const aDueExtValue = a.getExtensions(ExtensionType.DUE).first()?.value;
-				const bDueExtValue = b.getExtensions(ExtensionType.DUE).first()?.value;
+				const aDueExtValue = a.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value;
+				const bDueExtValue = b.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value;
 				const aDate = aDueExtValue ? moment(aDueExtValue) : moment(new Date(8640000000000000));
 				const bDate = bDueExtValue ? moment(bDueExtValue) : moment(new Date(8640000000000000));
 

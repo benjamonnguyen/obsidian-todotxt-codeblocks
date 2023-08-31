@@ -11,7 +11,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
 - [x] **Sorting** (listed in order of priority)
   - string[]
     - `proj` (project)
-      - ex. "sort:proj:a,b,c"
+      - ex. "sort:proj:Home,Work"
     - `ctx` (context)
       - "n/c" = no context
       - ex. "sort:ctx:bug,feature,n/c,nice-to-have"
@@ -25,30 +25,39 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - default (ex. "sort:default")
     - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
 - [x] **Collapsible project groups**
-- **Extensions**:
+- [x] Edit, add, delete buttons in Live Preview
+- [x] Render Markdown links
+- [ ] Archive complete todos to file
+- [ ] Configurable defaults
+
+**Commands**
+- [x] `Create new task in focused list`
+
+**Extensions**
   - [x] `due:` (Due date)
   - [x] `rec:` (Recurrence frequency)
-- [x] Edit, add, delete in Live Preview
-- [x] Render Markdown links
-- [ ] "get:" Query for existing Todo.txt tasks and move to current codeblock
-- [ ] Archive complete todos to file
-- [ ] Daily note rollover integration
+
+**Language line options**
+  - [ ] `get:` Query for existing Todo.txt tasks and move to current codeblock
+  - [ ] `link:` Link a *.todotxt file to the todotxt codeblock
+  - [ ] `filter:`
 
 ## Extensions
   - date formats
     - \<YYYY-MM-DD> (ex. 1996-08-06)
     - \<MM-DD> (ex. 08-06)
     - \<n><[dateUnit]> (ex. 1w = 1 week from today)
-      - calculates date n number of dateUnits away from today
-      - dateUnits: d, w, m, y
-      - if only number is provided, unit is days (ex. 0 = today)
+      - calculates date n number of dateUnits away
+      - dateUnits: d, w, m, y, b (business day)
+      - if dateUnit is omitted, it defaults to **d**ays (ex. 0 = today)
     - \<dayOfWeek>
       - calculates date for first upcoming dayOfWeek
       - M, Tu, W, Th, F, Sa, Su
     - dateUnits and dayOfWeek can be combined (dayOfWeek can be at beginning or end)
-      - 1w2d = 9 days (1 week + 2 days)
-      - 2mM = first upcoming Monday in 2 months
-      - M2m = first upcoming Monday in 2 months
+      - 1w2d = 9 days (1 **w**eek + 2 **d**ays)
+      - 1mM = first upcoming **M**onday in 1 **m**onths
+      - Su5d = first upcoming **Su**nday in 5 **d**ays
+    - if the `rec:` value is prefixed with a plus (ex. rec:+1w), the date is determined from the original due date rather than the completed date
 
 ## Donations
 Feel free to support me if you enjoy the plugin!
