@@ -35,12 +35,12 @@ export function todotxtBlockProcessor(
 	const lines = source.split('\n');
 	for (const [i, line] of lines.entries()) {
 		const newItem = todoList.items.at(i)?.toString();
+		console.log(i, line, newItem?.toString());
 		if (newItem) {
 			if (line !== newItem) {
 				UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1, newText: newItem });
 			}
-		} else if (i !== lines.length - 1) {
-			// Remove empty lines except for last.
+		} else if (lines.length > 1) {
 			UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1 });
 		}
 	}
