@@ -36,10 +36,11 @@ export default class TodoItem extends Item implements ViewModel {
 		});
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
-		if (this.priority()) {
+		const prio = this.priority();
+		if (prio) {
 			item.createEl('span', {
 				cls: this.getPriorityHtmlClasses(),
-				text: this.priority()!,
+				text: prio,
 			});
 		}
 
@@ -199,7 +200,7 @@ export default class TodoItem extends Item implements ViewModel {
 			}
 		}
 
-		const REGEX = /\[([^[]()\n]*)\]\(([^[]()\n]*)\)/;
+		const REGEX = /\[([^[\]()\n]*)\]\(([^[\]()\n]*)\)/;
 		const match = str.match(REGEX);
 		if (match) {
 			const span = document.createElement('span');
