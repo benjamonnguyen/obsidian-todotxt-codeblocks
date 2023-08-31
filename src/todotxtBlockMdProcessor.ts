@@ -11,7 +11,9 @@ export function todotxtBlockProcessor(
 	ctx: MarkdownPostProcessorContext,
 ) {
 	// Parse language line.
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const info = ctx.getSectionInfo(el)!;
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const languageLine = info.text.split('\n', info.lineStart + 1).last()!;
 	const { langLine, errs } = LanguageLine.from(languageLine);
 	if (errs.length) {
@@ -39,8 +41,7 @@ export function todotxtBlockProcessor(
 			if (line !== newItem) {
 				UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1, newText: newItem });
 			}
-		} else if (i !== lines.length - 1) {
-			// Remove empty lines except for last.
+		} else if (lines.length > 1) {
 			UNSAVED_ITEMS.push({ listId: todoList.getId(), line: i + 1 });
 		}
 	}
