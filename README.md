@@ -24,8 +24,9 @@ Add yours tasks to a `todotxt` codeblock to get started!
     - ex. "sort:status sort:created:desc"
   - default (ex. "sort:default")
     - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
-- [x] **Collapsible project groups**
+- [x] Collapsible project groups
 - [x] Edit, add, delete buttons in Live Preview
+- [x] Autocompletion for projects and contexts
 - [x] Render Markdown links
 - [ ] Archive complete todos to file
 - [ ] Configurable defaults
