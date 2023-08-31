@@ -50,13 +50,12 @@ Add yours tasks to a `todotxt` codeblock to get started!
     - \<n><[dateUnit]> (ex. 1w = 1 week from today)
       - calculates date n number of dateUnits away
       - dateUnits: d, w, m, y, b (business day)
-      - if dateUnit is omitted, it defaults to **d**ays (ex. 0 = today)
-    - \<dayOfWeek>
+      - if only a number is provided, it will calculate **d**ays (ex. 0 = today, 1 = tomorrow, 7 = next week)
+    - \<dayOfWeek> (ex. M = next Monday)
       - calculates date for first upcoming dayOfWeek
       - M, Tu, W, Th, F, Sa, Su
-    - dateUnits and dayOfWeek can be combined (dayOfWeek can be at beginning or end)
+    - dayOfWeek and dateUnits (except b) can be combined (dayOfWeek must come first)
       - 1w2d = 9 days (1 **w**eek + 2 **d**ays)
-      - 1mM = first upcoming **M**onday in 1 **m**onths
       - Su5d = first upcoming **Su**nday in 5 **d**ays
     - if the `rec:` value is prefixed with a plus (ex. rec:+1w), the date is determined from the original due date rather than the completed date
 

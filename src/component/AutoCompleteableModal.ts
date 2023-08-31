@@ -42,24 +42,23 @@ export default abstract class AutoCompleteableModal extends Modal {
 			this.prevSelectedWord = selectedWord;
 			return [null, 0];
 		}
+
 		if (selectedWord.startsWith(this.prevSelectedWord) && this.filteredSuggestions) {
 			this.filteredSuggestions = this.filteredSuggestions.filter((sug) => sug.startsWith(fragment));
-			if (this.filteredSuggestions.length === 1) {
-				this.prevSelectedWord = selectedWord;
-				return [this.filteredSuggestions[0], fragment.length];
-			}
 		} else {
 			this.filteredSuggestions = null;
+			for (const [prefix, options] of this.prefixToSuggestionOptions.entries()) {
+				if (selectedWord.startsWith(prefix)) {
+					this.filteredSuggestions = options.filter((opt) => opt.startsWith(fragment));
+					this.filteredSuggestions.sort();
+					break;
+				}
+			}
 		}
 		this.prevSelectedWord = selectedWord;
 
-		for (const [prefix, options] of this.prefixToSuggestionOptions.entries()) {
-			if (selectedWord.startsWith(prefix)) {
-				this.filteredSuggestions = options.filter((opt) => opt.startsWith(fragment));
-				if (this.filteredSuggestions.length === 1) {
-					return [this.filteredSuggestions[0], fragment.length];
-				}
-			}
+		if (this.filteredSuggestions && this.filteredSuggestions.length) {
+			return [this.filteredSuggestions[0], fragment.length];
 		}
 
 		return [null, 0];
