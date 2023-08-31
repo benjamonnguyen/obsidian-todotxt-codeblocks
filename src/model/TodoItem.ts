@@ -143,7 +143,7 @@ export default class TodoItem extends Item implements ViewModel {
 		});
 
 		// Word or Markdown link
-		const REGEX = /\[[^[]()\n]*\]\([^[]()\n]*\)|\S+/g;
+		const REGEX = /\[[^[\]()\n]*\]\([^[\]()\n]*\)|\S+/g;
 		const bodyItr = this.getBody().matchAll(REGEX);
 		let next = bodyItr.next();
 		while (!next.done) {
