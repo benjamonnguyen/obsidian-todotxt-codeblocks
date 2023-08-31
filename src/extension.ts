@@ -52,7 +52,7 @@ function invalidateDuplicates(
 		if (
 			item.invalidateExtensions(extType, undefined, extensions.map(({ index }) => index).slice(1))
 		) {
-			const msg = 'Invalidated duplicates of reserved extension: ' + extType;
+			const msg = `Invalidated duplicates of ${extType} extension`;
 			console.warn(msg);
 			new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\n' + msg, 10000);
 		}
