@@ -5,7 +5,7 @@ import { clickAdd } from 'src/stateEditor';
 
 export default {
 	id: 'create-new-todotxt-task-cmd',
-	name: 'Create new task',
+	name: 'Create new task in focused list',
 	editorCallback: (editor: Editor, view: MarkdownView) => {
 		const addBtn = Array.from(view.contentEl.getElementsByClassName('todotxt-action-btn'))
 			.filter((a) => a.id === AddModal.ID)
