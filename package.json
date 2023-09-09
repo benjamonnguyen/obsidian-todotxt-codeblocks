@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-todotxt-codeblocks",
-	"version": "0.2.0-SNAPSHOT",
+	"version": "0.2.0-alpha",
 	"description": "Manage your tasks inside codeblocks according to the Todo.txt specification.",
 	"main": "main.js",
 	"scripts": {
