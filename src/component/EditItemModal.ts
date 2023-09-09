@@ -1,19 +1,14 @@
 import { AbstractTextComponent, App, ButtonComponent, Setting, TextAreaComponent } from 'obsidian';
 import AutoCompleteableModal from './AutoCompleteableModal';
-import { TodoList } from 'src/model';
+import { TodoItem, TodoList } from 'src/model';
 
 export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'edit-item-modal';
 
-	result: string;
-	onSubmit: (result: string) => void;
+	result: TodoItem;
+	onSubmit: (result: TodoItem) => void;
 
-	constructor(
-		app: App,
-		originalText: string,
-		todoList: TodoList,
-		onSubmit: (result: string) => void,
-	) {
+	constructor(app: App, item: TodoItem, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
 		super(
 			app,
 			new Map([
@@ -21,7 +16,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 				['@', [...todoList.orderedContexts]],
 			]),
 		);
-		this.result = originalText;
+		this.result = item;
 		this.onSubmit = onSubmit;
 	}
 
@@ -35,6 +30,29 @@ export default class EditItemModal extends AutoCompleteableModal {
 			'todotxt-modal-input-full',
 		]);
 
+		input.addDropdown((dropDown) => {
+			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
+			dropDown
+				.addOptions({
+					none: '(-)',
+					A: '(A)',
+					B: '(B)',
+					C: '(C)',
+					D: '(D)',
+				})
+				.onChange((val) => {
+					this.result.setPriority(val !== 'none' ? val : null);
+				});
+			const prio = this.result.priority();
+			if (prio) {
+				if (prio > 'D') {
+					dropDown.addOption(prio, `(${prio})`);
+				}
+				dropDown.setValue(prio);
+			}
+		});
+		// TODO command to increase/decrease priority
+
 		const submit = new Setting(contentEl).addButton((btn) =>
 			btn
 				.setButtonText('Edit')
@@ -47,12 +65,12 @@ export default class EditItemModal extends AutoCompleteableModal {
 		submit.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-submit');
 
 		const handleText = (textComponent: AbstractTextComponent<any>) => {
-			textComponent.setValue(this.result);
+			textComponent.setValue(this.result.getBody());
 			textComponent.onChange((text) => {
 				submit.components
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
-				this.result = text;
+				this.result.setBody(text);
 				this.suggest(text, textComponent);
 			});
 		};
@@ -65,9 +83,10 @@ export default class EditItemModal extends AutoCompleteableModal {
 			if (textComponent) {
 				const inputEl = (textComponent as TextAreaComponent).inputEl;
 				inputEl.select();
-				inputEl.selectionStart = this.result.length;
+				inputEl.selectionStart = this.result.getBody().length;
 			}
 		} else {
+			input.controlEl.setCssProps({ display: 'contents' });
 			input.addText(handleText);
 		}
 	}

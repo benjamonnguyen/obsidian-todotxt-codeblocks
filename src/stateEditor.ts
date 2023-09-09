@@ -125,10 +125,10 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 			return true;
 		}
 		const itemIdx = parseInt(itemId);
-		const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
+		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
 
-		new EditItemModal(mdView.app, itemLine.text, todoList, (result) => {
-			todoList.items[itemIdx] = new TodoItem(result);
+		new EditItemModal(mdView.app, item, todoList, (result) => {
+			todoList.items[itemIdx] = result;
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();

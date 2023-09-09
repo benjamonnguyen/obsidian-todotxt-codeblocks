@@ -218,6 +218,10 @@ button.mod-cta:disabled:hover {
     background-color: var(--text-muted);
 }
 
+.todotxt-modal-dropdown-priority {
+    margin-right: 0.5rem;
+}
+
 /* PROJECT GROUP CONTAINER */
 .project-group-container {
     margin-top: 0.5rem;
