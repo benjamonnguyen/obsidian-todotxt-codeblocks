@@ -10,7 +10,7 @@ import {
 } from './model';
 import { MarkdownView, Notice, moment } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import { EditItemModal, AddModal, EditListOptionsModal, ConfirmModal } from './component';
+import { EditItemModal, AddItemModal, EditListOptionsModal, ConfirmModal } from './component';
 import TodotxtCodeblocksPlugin from './main';
 import { ExtensionType } from './extension';
 import { calculateDate } from './dateUtil';
@@ -170,8 +170,8 @@ export function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
 	const listLine = findLine(listEl, view);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	new AddModal(mdView.app, todoList, (result) => {
-		todoList.items.push(new TodoItem(result));
+	new AddItemModal(mdView.app, new TodoItem(''), todoList, (result) => {
+		todoList.items.push(result);
 		todoList.sort();
 		updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 	}).open();
