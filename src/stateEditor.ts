@@ -1,210 +1,10 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
-import {
-	LanguageLine,
-	TodoItem,
-	ProjectGroupContainer,
-	ActionType,
-	ActionButton,
-	TodoList,
-} from './model';
-import { MarkdownView, Notice, moment } from 'obsidian';
+import { TodoItem, ActionButton } from './model';
+import { MarkdownView, Notice } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import { EditItemModal, AddItemModal, EditListOptionsModal, ConfirmModal } from './component';
+import { EditListOptionsModal } from './component';
 import TodotxtCodeblocksPlugin from './main';
-import { ExtensionType } from './extension';
-import { calculateDate } from './dateUtil';
-
-export function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-	if (!target || !(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
-		return false;
-	}
-	const itemEl = target.parentElement;
-	if (!itemEl || !(itemEl instanceof HTMLDivElement) || itemEl.className !== TodoItem.HTML_CLS) {
-		return false;
-	}
-	/* State changes do not persist to EditorView in Reading mode.
-	 * Create a notice and return true.
-	 */
-	if (mdView.getMode() === 'preview') {
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\nCheckbox toggle disabled in Reading View');
-		event.preventDefault();
-		return true;
-	}
-
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
-	const itemIdx = itemEl.id.match(/\d+$/)?.first();
-	if (!itemIdx) {
-		console.error('Item element has invalid id: ' + itemEl.id);
-		return true;
-	}
-	const pos = view.posAtDOM(itemEl);
-	const listLine = view.state.doc.lineAt(pos);
-
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	const item = todoList.items.at(parseInt(itemIdx));
-	if (item) {
-		if (item.complete()) {
-			item.clearCompleted();
-			item.setComplete(false);
-		} else {
-			item.setCompleted(new Date());
-			// if rec extension exists, automatically add new item with due and rec ext
-			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
-			if (recExt.at(0)) {
-				const recurringTask = createRecurringTask(recExt[0].value, item);
-				if (recurringTask) {
-					todoList.items.push(recurringTask);
-				}
-			}
-		}
-	}
-
-	todoList.sort();
-	event.preventDefault();
-	updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-	return true;
-}
-
-export function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-	if (
-		!target ||
-		!(target instanceof HTMLInputElement) ||
-		target.type !== 'checkbox' ||
-		!target.hasClass(ProjectGroupContainer.CHECKBOX_CLS)
-	) {
-		return false;
-	}
-	/* State changes do not persist to EditorView in Reading mode.
-	 * Create a notice and return true.
-	 */
-	if (mdView.getMode() === 'preview') {
-		event.preventDefault();
-		return true;
-	}
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
-	const line = findLine(target, view);
-	const { langLine } = LanguageLine.from(line.text);
-	const project = target.labels?.item(0).getText().substring(1);
-	if (!project) return false;
-
-	if (target.getAttr('checked')) {
-		langLine.collapsedProjectGroups.add(project);
-	} else {
-		langLine.collapsedProjectGroups.delete(project);
-	}
-
-	updateView(mdView, [{ from: line.from, to: line.to, insert: langLine.toString() }]);
-	return true;
-}
-
-export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-
-	if (!target || !(target instanceof SVGElement)) {
-		return false;
-	}
-	const editBtnEl = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	if (!editBtnEl || editBtnEl.getAttr('action') !== ActionType.EDIT.name) {
-		return false;
-	}
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
-	const pos = view.posAtDOM(editBtnEl);
-	const listLine = view.state.doc.lineAt(pos);
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
-
-	if (editBtnEl.id === EditItemModal.ID) {
-		const itemId = editBtnEl.getAttr('item-id')?.match(/\d+$/)?.first();
-		if (!itemId) {
-			console.error('EditBtn element has invalid item-id: ' + editBtnEl.getAttr('item-id'));
-			return true;
-		}
-		const itemIdx = parseInt(itemId);
-		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
-
-		new EditItemModal(mdView.app, item, todoList, (result) => {
-			todoList.items[itemIdx] = result;
-			todoList.sort();
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-		}).open();
-	} else if (editBtnEl.id === EditListOptionsModal.ID) {
-		const { langLine } = LanguageLine.from(listLine.text);
-
-		new EditListOptionsModal(this.app, langLine, (result) => {
-			todoList.langLine.title = result.title;
-			todoList.langLine.sortFieldToOrder.clear();
-			result.sortOrders
-				.split(' ')
-				.map((sortOrder) => LanguageLine.handleSort(sortOrder))
-				.forEach((res) => {
-					if (!(res instanceof Error)) {
-						todoList.langLine.sortFieldToOrder.set(res.field, res.order);
-					}
-				});
-			todoList.sort();
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-		}).open();
-	}
-
-	return true;
-}
-
-export function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
-	if (!target || !(target instanceof SVGElement)) {
-		return false;
-	}
-	const newTarget = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	const listId = newTarget?.getAttr('item-id');
-	if (!newTarget || newTarget.getAttr('action') !== ActionType.ADD.name || !listId) {
-		return false;
-	}
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
-	const listEl = document.getElementById(listId);
-	if (!listEl) return false;
-	const listLine = findLine(listEl, view);
-
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	new AddItemModal(mdView.app, new TodoItem(''), todoList, (result) => {
-		todoList.items.push(result);
-		todoList.sort();
-		updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-	}).open();
-
-	return true;
-}
-
-export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
-	const { target } = event;
-
-	if (!target || !(target instanceof SVGElement)) {
-		return false;
-	}
-	const newTarget = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	if (!newTarget || newTarget.getAttr('action') !== ActionType.DEL.name) {
-		return false;
-	}
-
-	const doDelete = () => {
-		// @ts-ignore
-		const view = mdView.editor.cm as EditorView;
-		const line = findLine(newTarget, view);
-		updateView(mdView, [{ from: line.from, to: line.to + 1 }]); // +1 to delete entire line
-	};
-	// @ts-ignore
-	if (mdView.app.isMobile) {
-		new ConfirmModal(mdView.app, 'Delete task?', doDelete).open();
-	} else {
-		doDelete();
-	}
-
-	return true;
-}
 
 export function save(mdView: MarkdownView) {
 	if (!UNSAVED_ITEMS || !UNSAVED_ITEMS.length) return;
@@ -236,7 +36,7 @@ export function save(mdView: MarkdownView) {
 	new Notice(noticeMsg, 2500);
 }
 
-function findLine(el: Element, view: EditorView): Line {
+export function findLine(el: Element, view: EditorView): Line {
 	const pos = view.posAtDOM(el);
 	const line = view.state.doc.lineAt(pos);
 	// console.log("pos", pos, "- line", line);
@@ -261,7 +61,7 @@ function findLine(el: Element, view: EditorView): Line {
 	return view.state.doc.lineAt(pos);
 }
 
-function updateView(
+export function updateView(
 	mdView: MarkdownView,
 	changes: { from: number; to?: number; insert?: string }[],
 ) {
@@ -271,35 +71,4 @@ function updateView(
 	const view = mdView.editor.cm as EditorView;
 	const transaction = view.state.update({ changes: changes });
 	view.dispatch(transaction);
-}
-
-function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | undefined {
-	try {
-		const hasPlusPrefix = rec.startsWith('+');
-		const { date, details } = calculateDate(
-			rec,
-			hasPlusPrefix
-				? moment(originalItem.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value)
-				: null,
-		);
-		const newItem = new TodoItem('-');
-		newItem.setPriority(originalItem.priority());
-		newItem.setBody(originalItem.getBody());
-		newItem.setExtension(ExtensionType.DUE, date);
-
-		let msg = 'Created recurring task due: ' + date;
-		if (details) {
-			let deets = details;
-			if (hasPlusPrefix) {
-				deets += ', + option';
-			}
-			msg += `\n(${deets})`;
-		}
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
-
-		return newItem;
-	} catch (e) {
-		console.error(e);
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' ERROR\nFailed to create recurring task');
-	}
 }

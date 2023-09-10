@@ -1,13 +1,13 @@
 import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
+import { save } from './stateEditor';
 import {
 	toggleCheckbox,
 	toggleProjectGroup,
-	save,
 	clickEdit,
-	clickDelete,
 	clickAdd,
-} from './stateEditor';
+	clickDelete,
+} from './event-handler';
 import { createNewTaskCmd } from './command';
 
 export default class TodotxtCodeblocksPlugin extends Plugin {
