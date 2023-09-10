@@ -494,7 +494,6 @@ export class Item {
 		const extensions: Map<string, number[]> = new Map();
 		if (!text) {
 			console.warn('Text is empty');
-			body.push('-');
 			return { body, contexts, projects, extensions };
 		}
 

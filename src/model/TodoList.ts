@@ -3,7 +3,7 @@ import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from '.';
 import { v4 as randomUUID } from 'uuid';
 import { LanguageLine } from '.';
 import type { ViewModel } from '.';
-import { AddModal } from 'src/component';
+import { AddItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
 
@@ -57,7 +57,7 @@ export default class TodoList implements ViewModel {
 		list.addClass(this.getHtmlCls());
 		list.id = this.id;
 
-		const addBtn = new ActionButton(ActionType.ADD, AddModal.ID, list.id).render();
+		const addBtn = new ActionButton(ActionType.ADD, AddItemModal.ID, list.id).render();
 		list.appendChild(addBtn);
 		list.appendChild(this.langLine.render());
 

@@ -54,19 +54,23 @@ span.todotxt-priority {
     font-size: small;
 }
 
-span.todotxt-priority-a {
+.todotxt-priority-a,
+.todotxt-priority-a:hover {
     color: var(--todotxt-color-red-600);
     background-color: var(--todotxt-color-red-300);
 }
-span.todotxt-priority-b {
+.todotxt-priority-b,
+.todotxt-priority-b:hover {
     color: var(--todotxt-color-orange-600);
     background-color: var(--todotxt-color-orange-300);
 }
-span.todotxt-priority-c {
+.todotxt-priority-c,
+.todotxt-priority-c:hover {
     color: var(--todotxt-color-sky-600);
     background-color: var(--todotxt-color-sky-300);
 }
-span.todotxt-priority-x {
+.todotxt-priority-x,
+.todotxt-priority-x:hover {
     color: white;
     background-color: var(--todotxt-color-gray-400);
 }
@@ -181,7 +185,7 @@ svg.todotxt-action-btn[action="add"] {
 .todotxt-modal-input-begin {
     margin-top: 1.5rem;
 }
-.is-mobile .todotxt-modal-input-begin {
+.is-phone .todotxt-modal-input-begin {
     margin-top: 0;
 }
 
@@ -198,24 +202,43 @@ button.mod-cta:disabled:hover {
     width: calc(var(--dialog-width) * 0.7);
     max-width: calc(var(--dialog-max-width) * 0.7);
 }
-.is-mobile .todotxt-modal-input input[type="text"] {
+.is-phone .todotxt-modal-input input[type="text"] {
     width: 100%;
     max-width: 100%;
 }
 
-.is-mobile .todotxt-modal-input textarea {
+.is-phone .todotxt-modal-input textarea {
     width: 100%;
 }
 
 .todotxt-modal-btn {
     padding-bottom: 0;
 }
-.is-mobile .todotxt-modal-btn {
+.is-phone .todotxt-modal-btn {
     padding: 0 !important;
 }
 
 .todotxt-modal-cancel button {
     background-color: var(--text-muted);
+}
+
+.setting-item select.todotxt-modal-dropdown-priority {
+    width: 3.4rem;
+    padding-left: 0.4rem;
+    margin-right: 0.4rem;
+    text-align: center;
+}
+.is-phone select.todotxt-modal-dropdown-priority {
+    width: 3.8rem;
+    margin-top: 0.25rem;
+    float: left;
+    height: calc(var(--input-height) * 0.8);
+}
+.todotxt-modal-input .setting-item-control {
+    display: contents;
+}
+.is-phone .todotxt-modal-input .setting-item-control {
+    display: block;
 }
 
 /* PROJECT GROUP CONTAINER */

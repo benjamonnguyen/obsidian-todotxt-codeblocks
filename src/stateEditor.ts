@@ -10,7 +10,7 @@ import {
 } from './model';
 import { MarkdownView, Notice, moment } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import { EditItemModal, AddModal, EditListOptionsModal, ConfirmModal } from './component';
+import { EditItemModal, AddItemModal, EditListOptionsModal, ConfirmModal } from './component';
 import TodotxtCodeblocksPlugin from './main';
 import { ExtensionType } from './extension';
 import { calculateDate } from './dateUtil';
@@ -125,10 +125,10 @@ export function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 			return true;
 		}
 		const itemIdx = parseInt(itemId);
-		const itemLine = view.state.doc.line(listLine.number + 1 + itemIdx);
+		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
 
-		new EditItemModal(mdView.app, itemLine.text, todoList, (result) => {
-			todoList.items[itemIdx] = new TodoItem(result);
+		new EditItemModal(mdView.app, item, todoList, (result) => {
+			todoList.items[itemIdx] = result;
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
@@ -170,8 +170,8 @@ export function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
 	const listLine = findLine(listEl, view);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	new AddModal(mdView.app, todoList, (result) => {
-		todoList.items.push(new TodoItem(result));
+	new AddItemModal(mdView.app, new TodoItem(''), todoList, (result) => {
+		todoList.items.push(result);
 		todoList.sort();
 		updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 	}).open();
