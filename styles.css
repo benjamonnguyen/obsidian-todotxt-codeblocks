@@ -147,7 +147,7 @@ svg.todotxt-action-btn[action="todotxt-delete-item"] {
     width: var(--icon-s);
 }
 
-#edit-list-options-modal {
+svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
     padding: 0.1rem;
     margin-left: 0.25rem;
     vertical-align: text-bottom;
@@ -218,8 +218,11 @@ button.mod-cta:disabled:hover {
     padding: 0 !important;
 }
 
-.todotxt-modal-cancel button {
+button.todotxt-modal-cancel {
     background-color: var(--text-muted);
+}
+button.todotxt-modal-cancel:hover {
+    background-color: var(--text-faint);
 }
 
 .setting-item select.todotxt-modal-dropdown-priority {

@@ -2,6 +2,7 @@ import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
 import { updateView } from 'src/stateEditor';
+import { ActionType } from 'src/model';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -10,7 +11,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		return false;
 	}
 	const editBtnEl = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	if (!editBtnEl || editBtnEl.getAttr('action') !== EditItemModal.ID) {
+	if (!editBtnEl || editBtnEl.getAttr('action-type') !== ActionType.EDIT.name) {
 		return false;
 	}
 	// @ts-ignore
@@ -19,10 +20,11 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	const listLine = view.state.doc.lineAt(pos);
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
 
-	if (editBtnEl.id === EditItemModal.ID) {
-		const itemId = editBtnEl.getAttr('item-id')?.match(/\d+$/)?.first();
+	const action = editBtnEl.getAttr('action');
+	if (action === EditItemModal.ID) {
+		const itemId = editBtnEl.getAttr('target-id')?.match(TodoItem.ID_REGEX)?.at(1);
 		if (!itemId) {
-			console.error('EditBtn element has invalid item-id: ' + editBtnEl.getAttr('item-id'));
+			console.error('EditBtn element has invalid target-id:', editBtnEl.id);
 			return true;
 		}
 		const itemIdx = parseInt(itemId);
@@ -33,7 +35,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
-	} else if (editBtnEl.id === EditListOptionsModal.ID) {
+	} else if (action === EditListOptionsModal.ID) {
 		const { langLine } = LanguageLine.from(listLine.text);
 
 		new EditListOptionsModal(this.app, langLine, (result) => {
@@ -50,6 +52,8 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			todoList.sort();
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
+	} else {
+		console.error('ActionType.EDIT has no implementation for action:', action);
 	}
 
 	return true;

@@ -8,7 +8,7 @@ export default function clickAdd(target: EventTarget, mdView: MarkdownView): boo
 		return false;
 	}
 	const newTarget = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	const listId = newTarget?.getAttr('item-id');
+	const listId = newTarget?.getAttr('target-id');
 	if (!newTarget || newTarget.getAttr('action') !== AddItemModal.ID || !listId) {
 		return false;
 	}

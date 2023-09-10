@@ -5,12 +5,12 @@ export class ActionButton implements ViewModel {
 
 	type: ActionType;
 	action: string;
-	itemId: string;
+	id: string;
 
-	constructor(type: ActionType, action: string, itemId: string) {
+	constructor(type: ActionType, action: string, id: string) {
 		this.type = type;
 		this.action = action;
-		this.itemId = itemId;
+		this.id = id;
 	}
 	render(): Element {
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -20,7 +20,7 @@ export class ActionButton implements ViewModel {
 			stroke: 'currentColor',
 			'action-type': this.type.name,
 			action: this.action,
-			'item-id': this.itemId,
+			'target-id': this.id,
 		});
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		path.setAttrs(this.type.pathAttrs);

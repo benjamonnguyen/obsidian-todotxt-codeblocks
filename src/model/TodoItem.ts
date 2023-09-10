@@ -7,6 +7,7 @@ import { processExtensions, ExtensionType } from 'src/extension';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
+	static ID_REGEX = /^item-\S+-(\d+)$/;
 
 	private id: string | undefined;
 
@@ -66,12 +67,12 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	setIdx(idx: number) {
-		this.id = randomUUID() + '-' + idx;
+		this.id = 'item-' + randomUUID() + '-' + idx;
 	}
 
 	getIdx(): number | undefined {
 		if (this.id) {
-			const idx = this.id.match(/\d+$/)?.first();
+			const idx = this.id.match(TodoItem.ID_REGEX)?.at(1);
 			if (idx) {
 				return parseInt(idx);
 			}

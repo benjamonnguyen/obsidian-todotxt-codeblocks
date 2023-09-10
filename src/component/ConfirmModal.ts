@@ -18,24 +18,24 @@ export default class ConfirmModal extends Modal {
 			text: this.text,
 		});
 
-		const submit = new Setting(contentEl).addButton((btn) =>
-			btn
-				.setButtonText('Confirm')
-				.setCta()
-				.onClick(() => {
-					this.close();
-					this.onSubmit();
-				}),
-		);
-		submit.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-submit');
-
-		const cancel = new Setting(contentEl).addButton((btn) =>
-			btn
-				.setButtonText('Cancel')
-				.setCta()
-				.onClick(() => this.close()),
-		);
-		cancel.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-cancel');
+		new Setting(contentEl)
+			.addButton((confirmBtn) => {
+				confirmBtn.setClass('todotxt-modal-submit');
+				confirmBtn
+					.setButtonText('Confirm')
+					.setCta()
+					.onClick(() => {
+						this.close();
+						this.onSubmit();
+					});
+			})
+			.addButton((cancelBtn) => {
+				cancelBtn.setClass('todotxt-modal-cancel');
+				cancelBtn
+					.setButtonText('Cancel')
+					.setCta()
+					.onClick(() => this.close());
+			});
 	}
 
 	onClose() {

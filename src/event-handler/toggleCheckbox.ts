@@ -25,7 +25,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 
 	// @ts-ignore
 	const view = mdView.editor.cm as EditorView;
-	const itemIdx = itemEl.id.match(/\d+$/)?.first();
+	const itemIdx = itemEl.id.match(TodoItem.ID_REGEX)?.at(1);
 	if (!itemIdx) {
 		console.error('Item element has invalid id: ' + itemEl.id);
 		return true;

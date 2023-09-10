@@ -19,7 +19,7 @@ export default class TodoList implements ViewModel {
 	orderedContexts: string[];
 
 	constructor(langLine: LanguageLine, items: TodoItem[]) {
-		this.id = `${randomUUID()}`;
+		this.id = `list-${randomUUID()}`;
 		this.langLine = langLine;
 		this.items = items;
 		this.sort();
@@ -62,7 +62,7 @@ export default class TodoList implements ViewModel {
 		});
 		actions.append(
 			new ActionButton(ActionType.ADD, AddItemModal.ID, list.id).render(),
-			new ActionButton(ActionType.DEL, 'todotxt-archive-item', list.id).render(),
+			new ActionButton(ActionType.DEL, 'todotxt-archive-items', list.id).render(),
 		);
 		list.appendChild(this.langLine.render());
 
