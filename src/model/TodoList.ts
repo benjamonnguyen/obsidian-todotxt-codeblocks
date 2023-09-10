@@ -57,8 +57,13 @@ export default class TodoList implements ViewModel {
 		list.addClass(this.getHtmlCls());
 		list.id = this.id;
 
-		const addBtn = new ActionButton(ActionType.ADD, AddItemModal.ID, list.id).render();
-		list.appendChild(addBtn);
+		const actions = list.createSpan({
+			cls: 'todotxt-list-actions',
+		});
+		actions.append(
+			new ActionButton(ActionType.ADD, AddItemModal.ID, list.id).render(),
+			new ActionButton(ActionType.DEL, 'todotxt-archive-item', list.id).render(),
+		);
 		list.appendChild(this.langLine.render());
 
 		this.items

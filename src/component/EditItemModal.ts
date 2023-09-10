@@ -10,7 +10,7 @@ import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
 export default class EditItemModal extends AutoCompleteableModal {
-	static ID = 'edit-item-modal';
+	static ID = 'todotxt-edit-item-modal';
 
 	result: TodoItem;
 	onSubmit: (result: TodoItem) => void;

@@ -1,6 +1,6 @@
 import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
-import { ActionType, TodoList, TodoItem, LanguageLine } from 'src/model';
+import { TodoList, TodoItem, LanguageLine } from 'src/model';
 import { updateView } from 'src/stateEditor';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -10,7 +10,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		return false;
 	}
 	const editBtnEl = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	if (!editBtnEl || editBtnEl.getAttr('action') !== ActionType.EDIT.name) {
+	if (!editBtnEl || editBtnEl.getAttr('action') !== EditItemModal.ID) {
 		return false;
 	}
 	// @ts-ignore

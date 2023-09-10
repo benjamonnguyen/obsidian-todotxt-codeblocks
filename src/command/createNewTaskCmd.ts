@@ -1,7 +1,7 @@
 import { Editor, MarkdownView, Notice } from 'obsidian';
 import { AddItemModal } from 'src/component';
 import TodotxtCodeblocksPlugin from 'src/main';
-import { clickAdd } from 'src/stateEditor';
+import { clickAdd } from 'src/event-handler';
 
 export default {
 	id: 'create-new-todotxt-task-cmd',

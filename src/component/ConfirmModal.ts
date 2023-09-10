@@ -1,7 +1,7 @@
 import { App, Modal, Setting } from 'obsidian';
 
 export default class ConfirmModal extends Modal {
-	static ID = 'confirm-modal';
+	static ID = 'todotxt-confirm-modal';
 
 	text: string;
 	onSubmit: () => void;

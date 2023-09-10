@@ -1,6 +1,6 @@
 import { MarkdownView } from 'obsidian';
 import { AddItemModal } from 'src/component';
-import { ActionType, TodoList, TodoItem } from 'src/model';
+import { TodoList, TodoItem } from 'src/model';
 import { findLine, updateView } from 'src/stateEditor';
 
 export default function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
@@ -9,7 +9,7 @@ export default function clickAdd(target: EventTarget, mdView: MarkdownView): boo
 	}
 	const newTarget = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
 	const listId = newTarget?.getAttr('item-id');
-	if (!newTarget || newTarget.getAttr('action') !== ActionType.ADD.name || !listId) {
+	if (!newTarget || newTarget.getAttr('action') !== AddItemModal.ID || !listId) {
 		return false;
 	}
 	// @ts-ignore

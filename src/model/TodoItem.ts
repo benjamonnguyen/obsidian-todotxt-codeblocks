@@ -1,7 +1,7 @@
 import { v4 as randomUUID } from 'uuid';
 import { ActionButton, ActionType, type ViewModel } from '.';
 import { Item } from './Item';
-import { AddItemModal, EditItemModal } from 'src/component';
+import { EditItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { processExtensions, ExtensionType } from 'src/extension';
 
@@ -51,7 +51,7 @@ export default class TodoItem extends Item implements ViewModel {
 		});
 		actions.append(
 			new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render(),
-			new ActionButton(ActionType.DEL, AddItemModal.ID, item.id).render(),
+			new ActionButton(ActionType.DEL, 'todotxt-delete-item', item.id).render(),
 		);
 
 		return item;

@@ -1,6 +1,5 @@
 import { MarkdownView } from 'obsidian';
 import { ConfirmModal } from 'src/component';
-import { ActionType } from 'src/model';
 import { findLine, updateView } from 'src/stateEditor';
 
 export default function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -10,7 +9,7 @@ export default function clickDelete(event: MouseEvent, mdView: MarkdownView): bo
 		return false;
 	}
 	const newTarget = target.hasClass('todotxt-action-btn') ? target : target.parentElement;
-	if (!newTarget || newTarget.getAttr('action') !== ActionType.DEL.name) {
+	if (!newTarget || newTarget.getAttr('action') !== 'todotxt-delete-item') {
 		return false;
 	}
 
