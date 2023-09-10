@@ -54,19 +54,23 @@ span.todotxt-priority {
     font-size: small;
 }
 
-.todotxt-priority-a {
+.todotxt-priority-a,
+.todotxt-priority-a:hover {
     color: var(--todotxt-color-red-600);
     background-color: var(--todotxt-color-red-300);
 }
-.todotxt-priority-b {
+.todotxt-priority-b,
+.todotxt-priority-b:hover {
     color: var(--todotxt-color-orange-600);
     background-color: var(--todotxt-color-orange-300);
 }
-.todotxt-priority-c {
+.todotxt-priority-c,
+.todotxt-priority-c:hover {
     color: var(--todotxt-color-sky-600);
     background-color: var(--todotxt-color-sky-300);
 }
-.todotxt-priority-x {
+.todotxt-priority-x,
+.todotxt-priority-x:hover {
     color: white;
     background-color: var(--todotxt-color-gray-400);
 }
@@ -218,16 +222,10 @@ button.mod-cta:disabled:hover {
     background-color: var(--text-muted);
 }
 
-.todotxt-modal-dropdown-priority {
-    margin-right: 0.5rem;
-}
-.setting-item select.todotxt-modal-dropdown-priority:hover {
-    color: var(--text-normal);
-    background-color: var(--interactive-hover);
-}
 .setting-item select.todotxt-modal-dropdown-priority {
     width: 3.4rem;
     padding-left: 0.4rem;
+    margin-right: 0.4rem;
     text-align: center;
 }
 .is-phone select.todotxt-modal-dropdown-priority {
