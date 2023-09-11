@@ -24,6 +24,7 @@ function processDueExtension(item: TodoItem) {
 			if (details) {
 				msg += `\n(${details})`;
 			}
+			// TODO Notice codesmells
 			new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
 		} catch (e) {
 			handleError(e, item, ext);

@@ -5,7 +5,8 @@ import { TodoItem, TodoList } from 'src/model';
 export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'todotxt-edit-item-modal';
 
-	result: TodoItem;
+	item: TodoItem;
+	body: string;
 	onSubmit: (result: TodoItem) => void;
 	input: Setting;
 	submit: Setting;
@@ -19,7 +20,8 @@ export default class EditItemModal extends AutoCompleteableModal {
 				['@', [...todoList.orderedContexts]],
 			]),
 		);
-		this.result = item;
+		this.body = item.getBody();
+		this.item = item;
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
@@ -31,7 +33,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.render();
 		this.textComponent.inputEl.focus();
 		this.textComponent.inputEl.select();
-		this.textComponent.inputEl.selectionStart = this.result.getBody().length;
+		this.textComponent.inputEl.selectionStart = this.body.length;
 	}
 
 	onClose() {
@@ -49,11 +51,12 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.submit.addButton((btn) =>
 			btn
 				.setButtonText(this.getSubmitButtonText())
-				.setDisabled(!this.result.getBody().length)
+				.setDisabled(!this.body.length)
 				.setCta()
 				.onClick(() => {
 					this.close();
-					this.onSubmit(this.result);
+					this.item.setBody(this.body);
+					this.onSubmit(this.item);
 				}),
 		);
 		this.submit.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-submit');
@@ -62,12 +65,12 @@ export default class EditItemModal extends AutoCompleteableModal {
 			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 		) => {
 			this.textComponent = textComponent;
-			textComponent.setValue(this.result.getBody());
+			textComponent.setValue(this.body);
 			textComponent.onChange((text) => {
 				this.submit.components
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
-				this.result.setBody(text);
+				this.body = text;
 				this.suggest(text, textComponent);
 			});
 		};
@@ -92,7 +95,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 				}
 			};
 			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
-			handlePriorityStyle(this.result.priority(), dropDown);
+			handlePriorityStyle(this.item.priority(), dropDown);
 			dropDown
 				.addOptions({
 					none: '(-)',
@@ -102,10 +105,10 @@ export default class EditItemModal extends AutoCompleteableModal {
 					D: '(D)',
 				})
 				.onChange((val) => {
-					this.result.setPriority(val !== 'none' ? val : null);
-					handlePriorityStyle(this.result.priority(), dropDown);
+					this.item.setPriority(val !== 'none' ? val : null);
+					handlePriorityStyle(this.item.priority(), dropDown);
 				});
-			const prio = this.result.priority();
+			const prio = this.item.priority();
 			if (prio) {
 				if (prio > 'D') {
 					dropDown.addOption(prio, `(${prio})`);
