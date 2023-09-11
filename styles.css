@@ -137,8 +137,8 @@ svg.todotxt-action-btn {
     width: var(--icon-size);
 }
 
-svg.todotxt-action-btn[action="edit"],
-svg.todotxt-action-btn[action="delete"] {
+svg.todotxt-action-btn[action="todotxt-edit-item-modal"],
+svg.todotxt-action-btn[action="todotxt-delete-item"] {
     padding: 0.1rem;
     margin-left: 0.15rem;
     margin-right: -0.15rem;
@@ -147,7 +147,7 @@ svg.todotxt-action-btn[action="delete"] {
     width: var(--icon-s);
 }
 
-#edit-list-options-modal {
+svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
     padding: 0.1rem;
     margin-left: 0.25rem;
     vertical-align: text-bottom;
@@ -155,12 +155,15 @@ svg.todotxt-action-btn[action="delete"] {
     width: calc(var(--icon-size) * 1.35);
 }
 
-svg.todotxt-action-btn[action="add"] {
-    padding: var(--size-2-2) var(--size-2-3);
+span.todotxt-list-actions {
     position: absolute;
     top: var(--size-2-2);
     right: calc(var(--size-2-2) * 9);
     display: flex;
+}
+.cm-preview-code-block:hover .todotxt-list-actions > svg.todotxt-action-btn {
+    color: var(--text-muted);
+    padding: var(--size-2-2) var(--size-2-3);
 }
 
 .markdown-source-view .todotxt-item:hover svg.todotxt-action-btn,
@@ -169,9 +172,6 @@ svg.todotxt-action-btn[action="add"] {
     transition: all .15s ease;
 }
 
-.cm-preview-code-block:hover svg.todotxt-action-btn[action="add"] {
-    color: var(--text-muted);
-}
 
 .markdown-source-view svg.todotxt-action-btn:hover {
     background-color: var(--background-modifier-hover);
@@ -218,8 +218,11 @@ button.mod-cta:disabled:hover {
     padding: 0 !important;
 }
 
-.todotxt-modal-cancel button {
+button.todotxt-modal-cancel {
     background-color: var(--text-muted);
+}
+button.todotxt-modal-cancel:hover {
+    background-color: var(--text-faint);
 }
 
 .setting-item select.todotxt-modal-dropdown-priority {

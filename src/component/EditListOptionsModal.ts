@@ -3,7 +3,7 @@ import TodotxtCodeblocksPlugin from 'src/main';
 import { LanguageLine } from 'src/model';
 
 export class EditListOptionsModal extends Modal {
-	static ID = 'edit-list-options-modal';
+	static ID = 'todotxt-edit-list-options-modal';
 
 	result: EditListOptionsModalResult;
 	onSubmit: (result: EditListOptionsModalResult) => void;

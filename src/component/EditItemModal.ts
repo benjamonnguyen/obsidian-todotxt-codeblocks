@@ -1,22 +1,15 @@
-import {
-	AbstractTextComponent,
-	App,
-	ButtonComponent,
-	DropdownComponent,
-	Setting,
-	TextAreaComponent,
-} from 'obsidian';
+import { AbstractTextComponent, App, ButtonComponent, DropdownComponent, Setting } from 'obsidian';
 import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
 export default class EditItemModal extends AutoCompleteableModal {
-	static ID = 'edit-item-modal';
+	static ID = 'todotxt-edit-item-modal';
 
 	result: TodoItem;
 	onSubmit: (result: TodoItem) => void;
 	input: Setting;
 	submit: Setting;
-	textComponent: AbstractTextComponent<any>;
+	textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
 
 	constructor(app: App, item: TodoItem, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
 		super(
@@ -36,6 +29,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	onOpen() {
 		this.render();
+		this.textComponent.inputEl.focus();
+		this.textComponent.inputEl.select();
+		this.textComponent.inputEl.selectionStart = this.result.getBody().length;
 	}
 
 	onClose() {
@@ -62,7 +58,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 		);
 		this.submit.settingEl.addClass('todotxt-modal-btn', 'todotxt-modal-submit');
 
-		const handleText = (textComponent: AbstractTextComponent<any>) => {
+		const handleText = (
+			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
+		) => {
 			this.textComponent = textComponent;
 			textComponent.setValue(this.result.getBody());
 			textComponent.onChange((text) => {
@@ -118,26 +116,11 @@ export default class EditItemModal extends AutoCompleteableModal {
 		// @ts-ignore
 		if (this.app.isMobile) {
 			this.input.addTextArea(handleText);
-			this.renderForMobile(this.input, addPriorityDropDown);
+			this.input.addDropdown(addPriorityDropDown);
 		} else {
 			this.input.addDropdown(addPriorityDropDown);
 			this.input.addText(handleText);
 		}
-	}
-
-	private renderForMobile(
-		input: Setting,
-		addPriorityDropDown: (dropDown: DropdownComponent) => void,
-	) {
-		const textComponent = input.components.find(
-			(component) => component instanceof TextAreaComponent,
-		);
-		if (textComponent) {
-			const inputEl = (textComponent as TextAreaComponent).inputEl;
-			inputEl.select();
-			inputEl.selectionStart = this.result.getBody().length;
-		}
-		input.addDropdown(addPriorityDropDown);
 	}
 
 	getSubmitButtonText(): string {
