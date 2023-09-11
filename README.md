@@ -24,13 +24,12 @@ Add yours tasks to a `todotxt` codeblock to get started!
     - ex. "sort:status sort:created:desc"
   - default (ex. "sort:default")
     - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
-- **UI**
+- **Live Preview**
   - [x] Collapsible project groups
-  - [x] Edit, add, delete buttons in Live Preview
+  - [x] Edit, add, delete buttons
   - [x] Render Markdown links
-  - [x] Priority picker
-- [x] Autocompletion for projects and contexts
-- [x] Archive completed tasks to archive.todotxt file
+- [x] **Autocompletion** for projects and contexts
+- [x] **Archive** completed tasks to `archive.todotxt` file
 - [ ] Configurable defaults
 
 **Commands**
