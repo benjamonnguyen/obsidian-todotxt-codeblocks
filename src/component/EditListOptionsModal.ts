@@ -33,7 +33,7 @@ export class EditListOptionsModal extends Modal {
 
 		const sortOrdersOption = new Setting(contentEl);
 		sortOrdersOption.settingEl.addClasses(['todotxt-modal-input', 'todotxt-modal-input-3-4']);
-		sortOrdersOption.setName('Sort Orders');
+		sortOrdersOption.setName('Sort options');
 		sortOrdersOption.addText((text) => {
 			text.setValue(this.result.sortOrders);
 			text.setPlaceholder('sort:default');

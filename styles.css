@@ -39,6 +39,10 @@ If your plugin does not need CSS, delete this file.
     border: 1px solid var(--text-faint);
 }
 
+.is-phone .todotxt-list-title {
+    margin-block-start: 1.5rem;
+}
+
 .todotxt-item {
     padding-top: var(--list-spacing);
     padding-bottom: var(--list-spacing);
@@ -72,7 +76,7 @@ span.todotxt-priority {
 .todotxt-priority-x,
 .todotxt-priority-x:hover {
     color: white;
-    background-color: var(--todotxt-color-gray-400);
+    background-color: var(--checklist-done-color);
 }
 
 .todotxt-link {

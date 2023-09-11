@@ -22,9 +22,10 @@ export default class ConfirmModal extends Modal {
 		if (this.subText) {
 			const st = contentEl.createEl('p');
 			st.setText(this.subText);
+			st.setCssProps({ 'margin-top': '0' });
 		}
 
-		new Setting(contentEl)
+		const buttons = new Setting(contentEl)
 			.addButton((confirmBtn) => {
 				confirmBtn.setClass('todotxt-modal-submit');
 				confirmBtn
@@ -42,6 +43,7 @@ export default class ConfirmModal extends Modal {
 					.setCta()
 					.onClick(() => this.close());
 			});
+		buttons.controlEl.setCssProps({ 'margin-top': '0' });
 	}
 
 	onClose() {

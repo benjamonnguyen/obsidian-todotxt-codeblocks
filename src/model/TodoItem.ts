@@ -38,14 +38,17 @@ export default class TodoItem extends Item implements ViewModel {
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
 		const prio = this.priority();
-		if (prio) {
+		if (prio && !this.complete()) {
 			item.createEl('span', {
 				cls: this.getPriorityHtmlClasses(),
 				text: prio,
 			});
 		}
 
-		this.buildDescriptionHtml(item);
+		const description = this.buildDescriptionHtml(item);
+		if (prio && this.complete()) {
+			description.setText(`(${this.priority()}) ` + description.getText());
+		}
 
 		const actions = item.createSpan({
 			cls: 'todotxt-item-actions',
