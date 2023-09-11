@@ -41,7 +41,10 @@ export default function clickDelete(event: MouseEvent, mdView: MarkdownView): bo
 				(mdView.app.vault.getAbstractFileByPath('archive.todotxt') as TFile) ||
 				(await mdView.app.vault.create('archive.todotxt', ''));
 			mdView.app.vault.process(archiveFile, (data) => {
-				const res: string[] = [data];
+				const res: string[] = [];
+				if (data) {
+					res.push(data);
+				}
 				completedItems.forEach((item) => res.push(item.toString()));
 
 				return res.join('\n');
