@@ -29,6 +29,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	onOpen() {
 		this.render();
+		this.textComponent.inputEl.focus();
+		this.textComponent.inputEl.select();
+		this.textComponent.inputEl.selectionStart = this.result.getBody().length;
 	}
 
 	onClose() {
@@ -59,7 +62,6 @@ export default class EditItemModal extends AutoCompleteableModal {
 			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 		) => {
 			this.textComponent = textComponent;
-			textComponent.inputEl.id = 'testes';
 			textComponent.setValue(this.result.getBody());
 			textComponent.onChange((text) => {
 				this.submit.components

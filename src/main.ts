@@ -14,6 +14,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	static NAME = 'obsidian-todotxt-codeblocks';
 
 	async onload() {
+		this.registerExtensions(['todotxt'], 'markdown');
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
 		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
 			const { target } = event;

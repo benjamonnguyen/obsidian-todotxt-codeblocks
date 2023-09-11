@@ -41,8 +41,10 @@ export default class TodoList implements ViewModel {
 		while (i < view.state.doc.lines) {
 			const line = view.state.doc.line(i++);
 			if (line.text.startsWith('```')) break;
-			items.push(new TodoItem(line.text));
 			to = line.to;
+			if (line.text.trim()) {
+				items.push(new TodoItem(line.text));
+			}
 		}
 
 		return {

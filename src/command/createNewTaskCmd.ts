@@ -8,7 +8,7 @@ export default {
 	name: 'Create new task in focused list',
 	editorCallback: (editor: Editor, view: MarkdownView) => {
 		const addBtn = Array.from(view.contentEl.getElementsByClassName('todotxt-action-btn'))
-			.filter((a) => a.id === AddItemModal.ID)
+			.filter((a) => a.getAttr('action') === AddItemModal.ID)
 			.filter((a) => a.getCssPropertyValue('color') !== 'rgba(0, 0, 0, 0)')
 			.first();
 		if (addBtn) {

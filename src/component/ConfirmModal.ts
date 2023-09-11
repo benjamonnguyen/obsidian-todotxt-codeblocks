@@ -4,11 +4,13 @@ export default class ConfirmModal extends Modal {
 	static ID = 'todotxt-confirm-modal';
 
 	text: string;
-	onSubmit: () => void;
+	subText: string;
+	onSubmit: () => Promise<void>;
 
-	constructor(app: App, text: string, onSubmit: () => void) {
+	constructor(app: App, text: string, subText: string, onSubmit: () => Promise<void>) {
 		super(app);
 		this.text = text;
+		this.subText = subText;
 		this.onSubmit = onSubmit;
 	}
 
@@ -17,6 +19,10 @@ export default class ConfirmModal extends Modal {
 		contentEl.createEl('h3', {
 			text: this.text,
 		});
+		if (this.subText) {
+			const st = contentEl.createEl('p');
+			st.setText(this.subText);
+		}
 
 		new Setting(contentEl)
 			.addButton((confirmBtn) => {
