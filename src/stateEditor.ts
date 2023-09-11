@@ -44,7 +44,7 @@ export function findLine(el: Element, view: EditorView): Line {
 		/* Workaround since view.posAtDOM(codeBlockLine) returns the position
 		 * of the start of the code block.
 		 */
-		const itemIdx = el.id.match(TodoItem.ID_REGEX)?.first();
+		const itemIdx = el.id.match(TodoItem.ID_REGEX)?.at(1);
 		if (!itemIdx) {
 			throw 'Item element has invalid id: ' + el.id;
 		}
