@@ -3,3 +3,4 @@ export { default as toggleProjectGroup } from './toggleProjectGroup';
 export { default as clickEdit } from './clickEdit';
 export { default as clickAdd } from './clickAdd';
 export { default as clickDelete } from './clickDelete';
+export { default as clickLink } from './clickLink';
