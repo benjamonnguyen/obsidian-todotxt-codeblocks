@@ -23,7 +23,6 @@ export default class TodoList implements ViewModel {
 		this.id = `list-${randomUUID()}`;
 		this.langLine = langLine;
 		this.items = items;
-		this.sort();
 	}
 
 	static from(

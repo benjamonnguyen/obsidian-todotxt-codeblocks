@@ -28,6 +28,7 @@ export function todotxtBlockProcessor(
 		.filter((line) => line.trim().length)
 		.map((line) => new TodoItem(line));
 	const todoList = new TodoList(langLine, items);
+	todoList.sort();
 
 	const newLangLine = langLine.toString();
 	if (languageLine !== newLangLine) {
