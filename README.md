@@ -22,8 +22,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
     - `due` (due date extension)
     - `created` (created date)
     - ex. "sort:status sort:created:desc"
-  - default (ex. "sort:default")
-    - equivalent to "sort:status sort:prio sort:completed sort:due sort:created"
+  - `default` (ex. "sort:default")
 - **Live Preview**
   - [x] Collapsible project groups
   - [x] Edit, add, delete buttons
