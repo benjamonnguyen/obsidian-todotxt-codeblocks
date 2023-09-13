@@ -493,7 +493,6 @@ export class Item {
 		const projects: TrackedTag[] = [];
 		const extensions: Map<string, number[]> = new Map();
 		if (!text) {
-			console.warn('Text is empty');
 			return { body, contexts, projects, extensions };
 		}
 

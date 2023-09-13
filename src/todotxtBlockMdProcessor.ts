@@ -15,7 +15,7 @@ export function todotxtBlockProcessor(
 	const info = ctx.getSectionInfo(el)!;
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const languageLine = info.text.split('\n', info.lineStart + 1).last()!;
-	const { langLine, errs } = LanguageLine.from(languageLine);
+	const { langLine, errors: errs } = LanguageLine.from(languageLine);
 	if (errs.length) {
 		let errMsg = '';
 		errs.forEach((e) => (errMsg += `- ${e.message}\n`));

@@ -23,7 +23,7 @@ export default class LanguageLine implements ViewModel {
 
 	private constructor() {}
 
-	static from(line: string): { langLine: LanguageLine; errs: Error[] } {
+	static from(line: string): { langLine: LanguageLine; errors: Error[] } {
 		const langLine = new LanguageLine();
 		const errs: Error[] = [];
 
@@ -53,7 +53,7 @@ export default class LanguageLine implements ViewModel {
 			}
 		}
 
-		return { langLine, errs };
+		return { langLine, errors: errs };
 	}
 
 	render(): HTMLElement {
