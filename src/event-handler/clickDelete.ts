@@ -1,9 +1,9 @@
-import { MarkdownView, Notice, TFile } from 'obsidian';
+import { MarkdownView, TFile } from 'obsidian';
 import { ConfirmModal } from 'src/component';
 import { ActionType } from 'src/model';
 import { findLine, updateView } from 'src/stateEditor';
 import { TodoList } from 'src/model';
-import TodotxtCodeblocksPlugin from 'src/main';
+import { notice, Level } from 'src/notice';
 
 export default function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -51,9 +51,7 @@ export default function clickDelete(event: MouseEvent, mdView: MarkdownView): bo
 			});
 			todoList.items = todoList.items.filter((item) => !item.complete());
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-			new Notice(
-				`${TodotxtCodeblocksPlugin.NAME} INFO\nMoved ${completedItems.length} completed tasks to archive.todotxt`,
-			);
+			notice(`Moved ${completedItems.length} completed tasks to archive.todotxt`, Level.INFO);
 		};
 
 		new ConfirmModal(

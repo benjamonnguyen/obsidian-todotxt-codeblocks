@@ -1,12 +1,12 @@
-import { Editor, MarkdownView, Notice } from 'obsidian';
+import { Editor, MarkdownView } from 'obsidian';
 import { AddItemModal } from 'src/component';
-import TodotxtCodeblocksPlugin from 'src/main';
 import { clickAdd } from 'src/event-handler';
+import { Level, notice } from 'src/notice';
 
 export default {
 	id: 'create-new-todotxt-task-cmd',
 	name: 'Create new task in focused list',
-	editorCallback: (editor: Editor, view: MarkdownView) => {
+	editorCallback: (_: Editor, view: MarkdownView) => {
 		const addBtn = Array.from(view.contentEl.getElementsByClassName('todotxt-action-btn'))
 			.filter((a) => a.getAttr('action') === AddItemModal.ID)
 			.filter((a) => a.getCssPropertyValue('color') !== 'rgba(0, 0, 0, 0)')
@@ -14,9 +14,7 @@ export default {
 		if (addBtn) {
 			clickAdd(addBtn as EventTarget, view);
 		} else {
-			new Notice(
-				TodotxtCodeblocksPlugin.NAME + ' WARNING\nNo focused Todo.txt codeblock available',
-			);
+			notice('No focused Todo.txt codeblock available', Level.WARN);
 		}
 	},
 };

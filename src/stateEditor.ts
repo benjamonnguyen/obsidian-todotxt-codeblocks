@@ -1,9 +1,9 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import { TodoItem, ActionButton } from './model';
-import { MarkdownView, Notice } from 'obsidian';
+import { MarkdownView } from 'obsidian';
 import { UNSAVED_ITEMS } from './todotxtBlockMdProcessor';
-import TodotxtCodeblocksPlugin from './main';
+import { notice, Level } from './notice';
 
 export function save(mdView: MarkdownView) {
 	if (!UNSAVED_ITEMS || !UNSAVED_ITEMS.length) return;
@@ -30,9 +30,9 @@ export function save(mdView: MarkdownView) {
 	});
 
 	updateView(mdView, changes);
-	let noticeMsg = TodotxtCodeblocksPlugin.NAME + ' SAVING\n';
+	let noticeMsg = 'Saving changes...\n';
 	changes.filter((c) => c.insert).forEach((c) => (noticeMsg += `- ${c.insert}\n`));
-	new Notice(noticeMsg, 2500);
+	notice(noticeMsg, Level.INFO, 2500);
 }
 
 export function findLine(el: Element, view: EditorView): Line {

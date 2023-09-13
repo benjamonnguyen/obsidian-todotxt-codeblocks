@@ -1,7 +1,6 @@
-import { Notice } from 'obsidian';
-import TodotxtCodeblocksPlugin from 'src/main';
 import { TodoItem } from './model';
 import { calculateDate } from './dateUtil';
+import { Level, notice } from './notice';
 
 export enum ExtensionType {
 	DUE = 'due',
@@ -24,8 +23,8 @@ function processDueExtension(item: TodoItem) {
 			if (details) {
 				msg += `\n(${details})`;
 			}
-			// TODO Notice codesmells
-			new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
+			// TODO Notice codesmells - hard to manage triggers at low level
+			notice(msg, Level.INFO, 10000);
 		} catch (e) {
 			handleError(e, item, ext);
 		}
@@ -55,7 +54,7 @@ function invalidateDuplicates(
 		) {
 			const msg = `Invalidated duplicates of ${extType} extension`;
 			console.warn(msg);
-			new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\n' + msg, 10000);
+			notice(msg, Level.WARN, 10000);
 		}
 
 		return { key: extType, value: extensions[0].value };
@@ -69,5 +68,5 @@ function handleError(e: Error, item: TodoItem, extension: { key: string; value: 
 		errMsg += '\nerror: ' + e.message;
 	}
 	console.warn(errMsg);
-	new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\n' + errMsg, 10000);
+	notice(errMsg, Level.WARN, 10000);
 }

@@ -76,7 +76,7 @@ span.todotxt-priority {
 .todotxt-priority-x,
 .todotxt-priority-x:hover {
     color: white;
-    background-color: var(--checklist-done-color);
+    background-color: var(--todotxt-color-gray-400);
 }
 
 .todotxt-link {

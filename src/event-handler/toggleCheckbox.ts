@@ -1,9 +1,9 @@
-import { MarkdownView, Notice, moment } from 'obsidian';
+import { MarkdownView, moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
-import TodotxtCodeblocksPlugin from 'src/main';
 import { TodoItem, TodoList } from 'src/model';
 import { calculateDate } from 'src/dateUtil';
 import { updateView } from 'src/stateEditor';
+import { notice, Level } from 'src/notice';
 
 export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -18,7 +18,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	 * Create a notice and return true.
 	 */
 	if (mdView.getMode() === 'preview') {
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\nCheckbox toggle disabled in Reading View');
+		notice('Checkbox toggle disabled in Reading View', Level.WARN);
 		event.preventDefault();
 		return true;
 	}
@@ -80,11 +80,11 @@ function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | un
 			}
 			msg += `\n(${deets})`;
 		}
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
+		notice(msg, Level.INFO, 10000);
 
 		return newItem;
 	} catch (e) {
 		console.error(e);
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' ERROR\nFailed to create recurring task');
+		notice('Failed to create recurring task', Level.ERR);
 	}
 }
