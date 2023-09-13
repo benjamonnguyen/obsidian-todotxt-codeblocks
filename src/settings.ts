@@ -5,12 +5,14 @@ export interface PluginSettings {
 	sortDefaultOptions: string;
 	applySortDefault: boolean;
 	enableInfoNotices: boolean;
+	defaultPriority: string;
 }
 
 export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	sortDefaultOptions: 'status,prio,completed,due,created',
 	applySortDefault: true,
 	enableInfoNotices: true,
+	defaultPriority: 'none',
 };
 
 export class SettingsTab extends PluginSettingTab {
@@ -26,8 +28,10 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.applySortDefault(containerEl);
-		this.sortDefaultOptions(containerEl);
 		this.enableInfoNotices(containerEl);
+		containerEl.createEl('h3', { text: 'Defaults' });
+		this.sortDefaultOptions(containerEl);
+		this.defaultPriority(containerEl);
 	}
 
 	private applySortDefault(containerEl: HTMLElement): Setting {
@@ -55,6 +59,24 @@ export class SettingsTab extends PluginSettingTab {
 					})
 					.setPlaceholder(DEFAULT_SETTINGS.sortDefaultOptions || ''),
 			);
+	}
+
+	private defaultPriority(containerEl: HTMLElement): Setting {
+		return new Setting(containerEl).setName('Priority').addDropdown((dropDown) => {
+			dropDown
+				.addOptions({
+					none: '(-)',
+					A: '(A)',
+					B: '(B)',
+					C: '(C)',
+					D: '(D)',
+				})
+				.setValue(this.plugin.settings.defaultPriority)
+				.onChange(async (val) => {
+					this.plugin.settings.defaultPriority = val;
+					await this.plugin.saveSettings();
+				});
+		});
 	}
 
 	private enableInfoNotices(containerEl: HTMLElement): Setting {
