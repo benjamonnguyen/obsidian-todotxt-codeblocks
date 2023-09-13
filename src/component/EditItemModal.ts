@@ -81,7 +81,6 @@ export default class EditItemModal extends AutoCompleteableModal {
 		};
 		const addPriorityDropDown = (dropDown: DropdownComponent) => {
 			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
-
 			this.handlePriorityStyle(this.item.priority(), dropDown);
 			dropDown
 				.addOptions({
@@ -118,25 +117,25 @@ export default class EditItemModal extends AutoCompleteableModal {
 	}
 
 	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {
-		// DropDown options carry over color styling for Windows
-		if (!Platform.isWin) {
-			dropDown.selectEl.removeClasses([
-				'todotxt-priority-a',
-				'todotxt-priority-b',
-				'todotxt-priority-c',
-				'todotxt-priority-x',
-			]);
-			if (!priority) {
-				/* empty */
-			} else if (priority === 'A') {
-				dropDown.selectEl.addClass('todotxt-priority-a');
-			} else if (priority === 'B') {
-				dropDown.selectEl.addClass('todotxt-priority-b');
-			} else if (priority === 'C') {
-				dropDown.selectEl.addClass('todotxt-priority-c');
-			} else {
-				dropDown.selectEl.addClass('todotxt-priority-x');
-			}
+		if (Platform.isWin) {
+			dropDown.selectEl.addClass('is-windows');
+		}
+		dropDown.selectEl.removeClasses([
+			'todotxt-priority-a',
+			'todotxt-priority-b',
+			'todotxt-priority-c',
+			'todotxt-priority-x',
+		]);
+		if (!priority) {
+			/* empty */
+		} else if (priority === 'A') {
+			dropDown.selectEl.addClass('todotxt-priority-a');
+		} else if (priority === 'B') {
+			dropDown.selectEl.addClass('todotxt-priority-b');
+		} else if (priority === 'C') {
+			dropDown.selectEl.addClass('todotxt-priority-c');
+		} else {
+			dropDown.selectEl.addClass('todotxt-priority-x');
 		}
 	}
 }

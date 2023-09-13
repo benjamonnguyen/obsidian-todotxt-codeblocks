@@ -248,6 +248,13 @@ button.todotxt-modal-cancel:hover {
     display: block;
 }
 
+.is-windows .theme-dark .todotxt-modal-dropdown {
+    color: white;
+}
+.is-windows .theme-light .todotxt-modal-dropdown {
+    color: black;
+}
+
 /* PROJECT GROUP CONTAINER */
 .project-group-container {
     margin-top: 0.5rem;
