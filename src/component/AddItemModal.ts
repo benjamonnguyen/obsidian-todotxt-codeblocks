@@ -36,10 +36,7 @@ export default class AddItemModal extends EditItemModal {
 		this.item.setPriority(
 			priorityDropDown.getValue() !== 'none' ? priorityDropDown.getValue() : null,
 		);
-		// @ts-ignore
-		if (!this.app.isMobile) {
-			this.handlePriorityStyle(this.item.priority(), priorityDropDown);
-		}
+		this.handlePriorityStyle(this.item.priority(), priorityDropDown);
 	}
 
 	getSubmitButtonText(): string {

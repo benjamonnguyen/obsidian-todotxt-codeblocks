@@ -1,4 +1,11 @@
-import { AbstractTextComponent, App, ButtonComponent, DropdownComponent, Setting } from 'obsidian';
+import {
+	AbstractTextComponent,
+	App,
+	ButtonComponent,
+	DropdownComponent,
+	Platform,
+	Setting,
+} from 'obsidian';
 import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
@@ -75,10 +82,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 		const addPriorityDropDown = (dropDown: DropdownComponent) => {
 			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
 
-			// @ts-ignore
-			if (!this.app.isMobile) {
-				this.handlePriorityStyle(this.item.priority(), dropDown);
-			}
+			this.handlePriorityStyle(this.item.priority(), dropDown);
 			dropDown
 				.addOptions({
 					none: '(-)',
@@ -89,10 +93,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 				})
 				.onChange((val) => {
 					this.item.setPriority(val !== 'none' ? val : null);
-					// @ts-ignore
-					if (!this.app.isMobile) {
-						this.handlePriorityStyle(this.item.priority(), dropDown);
-					}
+					this.handlePriorityStyle(this.item.priority(), dropDown);
 				});
 			const prio = this.item.priority();
 			if (prio) {
@@ -117,22 +118,25 @@ export default class EditItemModal extends AutoCompleteableModal {
 	}
 
 	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {
-		dropDown.selectEl.removeClasses([
-			'todotxt-priority-a',
-			'todotxt-priority-b',
-			'todotxt-priority-c',
-			'todotxt-priority-x',
-		]);
-		if (!priority) {
-			/* empty */
-		} else if (priority === 'A') {
-			dropDown.selectEl.addClass('todotxt-priority-a');
-		} else if (priority === 'B') {
-			dropDown.selectEl.addClass('todotxt-priority-b');
-		} else if (priority === 'C') {
-			dropDown.selectEl.addClass('todotxt-priority-c');
-		} else {
-			dropDown.selectEl.addClass('todotxt-priority-x');
+		// DropDown options carry over color styling for Windows
+		if (!Platform.isWin) {
+			dropDown.selectEl.removeClasses([
+				'todotxt-priority-a',
+				'todotxt-priority-b',
+				'todotxt-priority-c',
+				'todotxt-priority-x',
+			]);
+			if (!priority) {
+				/* empty */
+			} else if (priority === 'A') {
+				dropDown.selectEl.addClass('todotxt-priority-a');
+			} else if (priority === 'B') {
+				dropDown.selectEl.addClass('todotxt-priority-b');
+			} else if (priority === 'C') {
+				dropDown.selectEl.addClass('todotxt-priority-c');
+			} else {
+				dropDown.selectEl.addClass('todotxt-priority-x');
+			}
 		}
 	}
 }
