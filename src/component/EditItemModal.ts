@@ -27,7 +27,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 			]),
 		);
 		this.body = item.getBody();
-		this.item = item;
+		this.item = new TodoItem(item.toString());
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;

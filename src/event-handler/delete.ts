@@ -1,11 +1,10 @@
 import { MarkdownView } from 'obsidian';
 import { ConfirmModal } from 'src/component';
-import { ActionType } from 'src/model';
+import { ActionType, TodoItem } from 'src/model';
 import { findLine, updateView } from 'src/stateEditor';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { SETTINGS_READ_ONLY } from 'src/main';
-import { handleArchive } from './clickArchive';
+import { archiveOrDeleteCompletedTasksModal } from './archive';
 
 export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -19,10 +18,10 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	}
 
 	const action = newTarget.getAttr('action');
+	// @ts-ignore
+	const view = mdView.editor.cm as EditorView;
 	if (action === 'todotxt-delete-item') {
 		const deleteItem = async () => {
-			// @ts-ignore
-			const view = mdView.editor.cm as EditorView;
 			const line = findLine(newTarget, view);
 			updateView(mdView, [{ from: line.from, to: line.to + 1 }]); // +1 to delete entire line
 		};
@@ -33,12 +32,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 			deleteItem();
 		}
 	} else if (action === 'todotxt-delete-items') {
-		// Handle cases where the archive button has not re-rendered
-		if (SETTINGS_READ_ONLY.archiveBehavior === 'archive') {
-			handleArchive(newTarget, mdView);
-		} else if (SETTINGS_READ_ONLY.archiveBehavior === 'delete') {
-			handleDelete(newTarget, mdView);
-		}
+		archiveOrDeleteCompletedTasksModal(findLine(target, view).number, mdView).open();
 	} else {
 		console.error('ActionType.DEL has no implementation for action:', action);
 	}
@@ -46,19 +40,35 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	return true;
 }
 
-export function handleDelete(target: SVGElement | HTMLElement, mdView: MarkdownView) {
-	new ConfirmModal(
+export function deleteCompletedTasksModal(listLine: number, mdView: MarkdownView): ConfirmModal {
+	return new ConfirmModal(
 		mdView.app,
 		'Delete completed tasks?',
 		'Completed tasks will be permanently deleted',
-		async () => {
-			// @ts-ignore
-			const view = mdView.editor.cm as EditorView;
-			const line = findLine(target, view);
-			const { from, to, todoList } = TodoList.from(line.number, view);
-			todoList.removeItems((item) => item.complete());
+		async () =>
+			deleteTasks((item) => item.complete(), mdView, listLine).then((items) =>
+				notice(`Deleted ${items.length} completed tasks`, Level.INFO),
+			),
+	);
+}
+
+export async function deleteTasks(
+	predicate: (item: TodoItem) => boolean,
+	mdView: MarkdownView,
+	...listLines: number[]
+): Promise<TodoItem[]> {
+	const deletedItems: TodoItem[] = [];
+	// @ts-ignore
+	const view = mdView.editor.cm as EditorView;
+
+	listLines.forEach((line) => {
+		const { from, to, todoList } = TodoList.from(line, view);
+		const removedItems = todoList.removeItems(predicate);
+		if (removedItems.length) {
+			deletedItems.push(...removedItems);
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
-			notice(`Deleted completed tasks`, Level.INFO);
-		},
-	).open();
+		}
+	});
+
+	return deletedItems;
 }

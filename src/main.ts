@@ -1,6 +1,5 @@
 import { MarkdownView, Plugin } from 'obsidian';
-import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
-import { save } from './stateEditor';
+import { saveChanges, todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
 	toggleProjectGroup,
@@ -12,6 +11,7 @@ import {
 } from './event-handler';
 import { createNewTaskCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
+import { autoArchive } from './event-handler/archive';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -30,13 +30,18 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
-				clickLink(event, mdView) ||
+				const handled =
+					clickLink(event, mdView) ||
 					toggleCheckbox(event, mdView) ||
 					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
 					clickDelete(event, mdView) ||
 					clickArchive(event, mdView);
+
+				if (handled) {
+					autoArchive(mdView);
+				}
 			}
 		});
 		this.registerDomEvent(document, 'keypress', (event: KeyboardEvent) => {
@@ -48,10 +53,16 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		this.registerInterval(
-			window.setInterval(() => {
-				const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				save(mdView!);
-			}, 2000),
+			window.setInterval(
+				() => saveChanges(this.app.workspace.getActiveViewOfType(MarkdownView)),
+				2000,
+			),
+		);
+		this.registerInterval(
+			window.setInterval(
+				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),
+				5 * 60000,
+			),
 		);
 		this.addCommand(createNewTaskCmd);
 	}

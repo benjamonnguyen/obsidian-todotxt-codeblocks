@@ -31,12 +31,18 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
 
 		new EditItemModal(mdView.app, item, todoList, (result) => {
+			if (item.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {
+			if (
+				currLangLine.title === result.title &&
+				currLangLine.sortOrdersToString() === result.sortOrders
+			)
+				return;
 			const newLangLine = LanguageLine.from(currLangLine.toString()).langLine;
 			newLangLine.title = result.title;
 			newLangLine.sortFieldToOrder.clear();

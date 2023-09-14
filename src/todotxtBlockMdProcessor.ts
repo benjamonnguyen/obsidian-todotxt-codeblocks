@@ -1,9 +1,10 @@
-import { MarkdownPostProcessorContext } from 'obsidian';
+import { MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
 import { LanguageLine, TodoList, TodoItem } from './model';
 import { notice, Level } from './notice';
+import { findLine, updateView } from './stateEditor';
 
 // line 0 is langLine
-export const UNSAVED_ITEMS: { listId: string; line: number; newText?: string }[] = [];
+const UNSAVED_ITEMS: { listId: string; line: number; newText?: string }[] = [];
 
 export function todotxtBlockProcessor(
 	source: string,
@@ -49,4 +50,34 @@ export function todotxtBlockProcessor(
 
 	// Render todo list.
 	el.appendChild(todoList.render());
+}
+
+export function saveChanges(mdView: MarkdownView | null) {
+	if (!mdView || !UNSAVED_ITEMS || !UNSAVED_ITEMS.length) return;
+	// State changes do not persist to EditorView in Reading mode.
+	if (mdView.getMode() === 'preview') return;
+	// @ts-ignore
+	const view = mdView.editor.cm as EditorView;
+
+	const items = [...UNSAVED_ITEMS];
+	UNSAVED_ITEMS.length = 0;
+	const changes: { from: number; to: number; insert?: string }[] = [];
+
+	items.forEach(({ listId, line, newText }) => {
+		const list = document.getElementById(listId);
+		if (!list) return;
+		const listLine = findLine(list, view);
+
+		const itemLine = view.state.doc.line(listLine.number + line);
+		if (newText) {
+			changes.push({ from: itemLine.from, to: itemLine.to, insert: newText });
+		} else {
+			changes.push({ from: itemLine.from, to: itemLine.to + 1 });
+		}
+	});
+
+	updateView(mdView, changes);
+	let noticeMsg = 'Saving changes...\n';
+	changes.filter((c) => c.insert).forEach((c) => (noticeMsg += `- ${c.insert}\n`));
+	notice(noticeMsg, Level.INFO, 2500);
 }

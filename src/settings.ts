@@ -1,12 +1,16 @@
 import { PluginSettingTab, App, Setting } from 'obsidian';
 import TodotxtCodeblocksPlugin from './main';
 
+export type Priority = 'A' | 'B' | 'C' | 'D' | 'none';
+export type ArchiveBehavior = 'archive' | 'delete';
+
 export interface PluginSettings {
 	sortDefaultOptions: string;
 	applySortDefault: boolean;
 	enableInfoNotices: boolean;
-	defaultPriority: string;
-	archiveBehavior: string;
+	defaultPriority: Priority;
+	archiveBehavior: ArchiveBehavior;
+	autoArchiveThreshold: number;
 }
 
 export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
@@ -15,6 +19,7 @@ export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	enableInfoNotices: true,
 	defaultPriority: 'none',
 	archiveBehavior: 'archive',
+	autoArchiveThreshold: -1,
 };
 
 export class SettingsTab extends PluginSettingTab {
@@ -29,6 +34,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.containerEl.empty();
 
 		this.archiveBehaviorDropDown();
+		this.autoArchiveThresholdSlider();
 		this.applySortDefault();
 		this.enableInfoNotices();
 		this.containerEl.createEl('h3', { text: 'Defaults' });
@@ -39,7 +45,7 @@ export class SettingsTab extends PluginSettingTab {
 	private applySortDefault(): Setting {
 		return new Setting(this.containerEl)
 			.setName('Apply "sort:default" option automatically')
-			.setDesc('Applies "sort:default" if no sort options are provided')
+			.setDesc('Applies "sort:default" if no sort options are provided.')
 			.addToggle((toggle) => {
 				toggle.setValue(this.plugin.settings.applySortDefault).onChange(async (value) => {
 					this.plugin.settings.applySortDefault = value;
@@ -51,7 +57,7 @@ export class SettingsTab extends PluginSettingTab {
 	private sortDefaultOptions(): Setting {
 		return new Setting(this.containerEl)
 			.setName('"sort:default" options')
-			.setDesc('Comma delimited list of sort options to apply for "sort:default"')
+			.setDesc('Comma delimited list of sort options to apply for "sort:default".')
 			.addTextArea((text) =>
 				text
 					.setValue(this.plugin.settings.sortDefaultOptions)
@@ -75,6 +81,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 				.setValue(this.plugin.settings.defaultPriority)
 				.onChange(async (val) => {
+					// @ts-ignore
 					this.plugin.settings.defaultPriority = val;
 					await this.plugin.saveSettings();
 				});
@@ -95,7 +102,7 @@ export class SettingsTab extends PluginSettingTab {
 	private archiveBehaviorDropDown(): Setting {
 		return new Setting(this.containerEl)
 			.setName('Archive behavior')
-			.setDesc('What happens when you click on the list archive button')
+			.setDesc('What happens when you click on the list archive button.')
 			.addDropdown((dropDown) => {
 				dropDown
 					.addOptions({
@@ -104,9 +111,28 @@ export class SettingsTab extends PluginSettingTab {
 					})
 					.setValue(this.plugin.settings.archiveBehavior)
 					.onChange(async (val) => {
+						// @ts-ignore
 						this.plugin.settings.archiveBehavior = val;
 						await this.plugin.saveSettings();
 					});
+			});
+	}
+
+	private autoArchiveThresholdSlider(): Setting {
+		return new Setting(this.containerEl)
+			.setName('Auto-archive threshold')
+			.setDesc(
+				'Archives tasks when their completed date is older than [X] days. Threshold of -1 disables auto-archiving.',
+			)
+			.addSlider((slider) => {
+				slider
+					.setLimits(-1, 30, 1)
+					.setValue(this.plugin.settings.autoArchiveThreshold)
+					.onChange(async (val) => {
+						this.plugin.settings.autoArchiveThreshold = val;
+						await this.plugin.saveSettings();
+					});
+				slider.setDynamicTooltip();
 			});
 	}
 }
