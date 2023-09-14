@@ -24,11 +24,14 @@ If your plugin does not need CSS, delete this file.
   --todotxt-color-indigo-200: rgb(199 210 254);
   --todotxt-color-indigo-900: rgb(49 46 129);
   --todotxt-color-orange-300: rgb(253 186 116);
+  --todotxt-color-orange-med: rgb(255, 147, 32);
   --todotxt-color-orange-600: #EA580C;
   --todotxt-color-red-300: rgb(252 165 165);
+  --todotxt-color-red-med: rgb(255, 85, 85);
   --todotxt-color-red-600: #DC2626;
   --todotxt-color-red-700: rgb(185 28 28);
   --todotxt-color-sky-300: #7DD3FC;
+  --todotxt-color-sky-med: #21b8fe;
   --todotxt-color-sky-600: rgb(2 132 199);
   --todotxt-color-slate-700: rgb(51 65 85);
 }
@@ -248,10 +251,19 @@ button.todotxt-modal-cancel:hover {
     display: block;
 }
 
-.is-windows .theme-dark .todotxt-modal-dropdown {
+.theme-dark select.is-windows.todotxt-modal-dropdown-priority {
     color: white;
 }
-.is-windows .theme-light .todotxt-modal-dropdown {
+.theme-dark select.is-windows.todotxt-priority-a {
+    background-color: var(--todotxt-color-red-med);
+}
+.theme-dark select.is-windows.todotxt-priority-b {
+    background-color: var(--todotxt-color-orange-med);
+}
+.theme-dark select.is-windows.todotxt-priority-c {
+    background-color: var(--todotxt-color-sky-med);
+}
+.theme-light select.is-windows.todotxt-modal-dropdown-priority {
     color: black;
 }
 
