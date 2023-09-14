@@ -21,7 +21,7 @@ export default class TodoList implements ViewModel {
 
 	constructor(langLine: LanguageLine, items: TodoItem[]) {
 		this.id = `list-${randomUUID()}`;
-		this.#langLine = langLine;
+		this.setLanguageLine(langLine);
 		this.#items = items;
 		this.#projectGroups = this.buildProjectGroups();
 		this.#orderedContexts = this.getContextOrder(this.#langLine.sortFieldToOrder.get('ctx'));
@@ -136,12 +136,21 @@ export default class TodoList implements ViewModel {
 		this.sort();
 	}
 
+	edit(itemIdx: number, newItem: TodoItem) {
+		const currItem = this.#items.at(itemIdx);
+		if (currItem) {
+			this.#items[itemIdx] = newItem;
+		}
+		this.sort();
+	}
+
 	languageLine(): LanguageLine {
-		return Object.freeze({ ...this.#langLine }) as LanguageLine;
+		return this.#langLine;
 	}
 
 	setLanguageLine(langLine: LanguageLine) {
-		this.#langLine = langLine;
+		// @ts-ignore
+		this.#langLine = Object.freeze(langLine);
 	}
 
 	projectGroups(): ProjectGroupContainer[] {

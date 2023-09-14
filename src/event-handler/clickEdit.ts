@@ -31,24 +31,24 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
 
 		new EditItemModal(mdView.app, item, todoList, (result) => {
-			todoList.items()[itemIdx] = result;
-			todoList.sort();
+			todoList.edit(itemIdx, result);
 			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
 	} else if (action === EditListOptionsModal.ID) {
-		new EditListOptionsModal(this.app, todoList.languageLine(), (result) => {
-			const langLine = todoList.languageLine();
-			langLine.title = result.title;
-			langLine.sortFieldToOrder.clear();
+		const currLangLine = todoList.languageLine();
+		new EditListOptionsModal(this.app, currLangLine, (result) => {
+			const newLangLine = LanguageLine.from(currLangLine.toString()).langLine;
+			newLangLine.title = result.title;
+			newLangLine.sortFieldToOrder.clear();
 			result.sortOrders
 				.split(' ')
 				.map((sortOrder) => LanguageLine.handleSort(sortOrder))
 				.forEach((res) => {
 					if (!(res instanceof Error)) {
-						langLine.sortFieldToOrder.set(res.field, res.order);
+						newLangLine.sortFieldToOrder.set(res.field, res.order);
 					}
 				});
-			todoList.setLanguageLine(langLine);
+			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
 			// Add newline to force codeblock to re-render
 			updateView(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
