@@ -8,6 +8,7 @@ import {
 	clickAdd,
 	clickDelete,
 	clickLink,
+	clickArchive,
 } from './event-handler';
 import { createNewTaskCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
@@ -34,7 +35,8 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
-					clickDelete(event, mdView);
+					clickDelete(event, mdView) ||
+					clickArchive(event, mdView);
 			}
 		});
 		this.registerDomEvent(document, 'keypress', (event: KeyboardEvent) => {

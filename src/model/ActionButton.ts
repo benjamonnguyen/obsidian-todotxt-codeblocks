@@ -37,6 +37,7 @@ export class ActionButton implements ViewModel {
 }
 
 export class ActionType {
+	// https://www.snoweb-svg.com/
 	static EDIT = new ActionType('edit', {
 		strokeLinecap: 'round',
 		strokeLinejoin: 'round',
@@ -53,6 +54,12 @@ export class ActionType {
 		strokeLinecap: 'round',
 		strokeLinejoin: 'round',
 		d: 'M50,18.8V50m0,0V81.2M50,50H81.2M50,50H18.8',
+	});
+
+	static ARCHIVE = new ActionType('archive', {
+		strokeLinecap: 'round',
+		strokeLinejoin: 'round',
+		d: 'M25,35.7H75m-50,0a7.1,7.1,0,0,1,0-14.2H75a7.1,7.1,0,0,1,0,14.2m-50,0V71.4a7.1,7.1,0,0,0,7.2,7.1H67.8A7.1,7.1,0,0,0,75,71.4V35.7M42.9,50H57.1',
 	});
 
 	pathAttrs: { [key: string]: string | number | boolean | null };

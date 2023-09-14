@@ -6,6 +6,7 @@ export interface PluginSettings {
 	applySortDefault: boolean;
 	enableInfoNotices: boolean;
 	defaultPriority: string;
+	archiveBehavior: string;
 }
 
 export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
@@ -13,6 +14,7 @@ export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	applySortDefault: true,
 	enableInfoNotices: true,
 	defaultPriority: 'none',
+	archiveBehavior: 'archive',
 };
 
 export class SettingsTab extends PluginSettingTab {
@@ -24,18 +26,18 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const { containerEl } = this;
-		containerEl.empty();
+		this.containerEl.empty();
 
-		this.applySortDefault(containerEl);
-		this.enableInfoNotices(containerEl);
-		containerEl.createEl('h3', { text: 'Defaults' });
-		this.sortDefaultOptions(containerEl);
-		this.defaultPriority(containerEl);
+		this.archiveBehaviorDropDown();
+		this.applySortDefault();
+		this.enableInfoNotices();
+		this.containerEl.createEl('h3', { text: 'Defaults' });
+		this.sortDefaultOptions();
+		this.defaultPriority();
 	}
 
-	private applySortDefault(containerEl: HTMLElement): Setting {
-		return new Setting(containerEl)
+	private applySortDefault(): Setting {
+		return new Setting(this.containerEl)
 			.setName('Apply "sort:default" option automatically')
 			.setDesc('Applies "sort:default" if no sort options are provided')
 			.addToggle((toggle) => {
@@ -46,8 +48,8 @@ export class SettingsTab extends PluginSettingTab {
 			});
 	}
 
-	private sortDefaultOptions(containerEl: HTMLElement): Setting {
-		return new Setting(containerEl)
+	private sortDefaultOptions(): Setting {
+		return new Setting(this.containerEl)
 			.setName('"sort:default" options')
 			.setDesc('Comma delimited list of sort options to apply for "sort:default"')
 			.addTextArea((text) =>
@@ -61,8 +63,8 @@ export class SettingsTab extends PluginSettingTab {
 			);
 	}
 
-	private defaultPriority(containerEl: HTMLElement): Setting {
-		return new Setting(containerEl).setName('Priority').addDropdown((dropDown) => {
+	private defaultPriority(): Setting {
+		return new Setting(this.containerEl).setName('Priority').addDropdown((dropDown) => {
 			dropDown
 				.addOptions({
 					none: '(-)',
@@ -79,12 +81,32 @@ export class SettingsTab extends PluginSettingTab {
 		});
 	}
 
-	private enableInfoNotices(containerEl: HTMLElement): Setting {
-		return new Setting(containerEl).setName('Enable INFO level notices').addToggle((toggle) => {
-			toggle.setValue(this.plugin.settings.enableInfoNotices).onChange(async (value) => {
-				this.plugin.settings.enableInfoNotices = value;
-				await this.plugin.saveSettings();
+	private enableInfoNotices(): Setting {
+		return new Setting(this.containerEl)
+			.setName('Enable INFO level notices')
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.enableInfoNotices).onChange(async (value) => {
+					this.plugin.settings.enableInfoNotices = value;
+					await this.plugin.saveSettings();
+				});
 			});
-		});
+	}
+
+	private archiveBehaviorDropDown(): Setting {
+		return new Setting(this.containerEl)
+			.setName('Archive behavior')
+			.setDesc('What happens when you click on the list archive button')
+			.addDropdown((dropDown) => {
+				dropDown
+					.addOptions({
+						archive: 'Move completed tasks to archive.todotxt file',
+						delete: 'Delete completed tasks permanently',
+					})
+					.setValue(this.plugin.settings.archiveBehavior)
+					.onChange(async (val) => {
+						this.plugin.settings.archiveBehavior = val;
+						await this.plugin.saveSettings();
+					});
+			});
 	}
 }

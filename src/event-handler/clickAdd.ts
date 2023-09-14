@@ -20,8 +20,7 @@ export default function clickAdd(target: EventTarget, mdView: MarkdownView): boo
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
 	new AddItemModal(mdView.app, new TodoItem(''), todoList, (result) => {
-		todoList.items.push(result);
-		todoList.sort();
+		todoList.add(result);
 		updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 	}).open();
 

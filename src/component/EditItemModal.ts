@@ -22,8 +22,8 @@ export default class EditItemModal extends AutoCompleteableModal {
 		super(
 			app,
 			new Map([
-				['+', todoList.projectGroups.map((group) => group.name)],
-				['@', [...todoList.orderedContexts]],
+				['+', todoList.projectGroups().map((group) => group.name)],
+				['@', todoList.orderedContexts()],
 			]),
 		);
 		this.body = item.getBody();

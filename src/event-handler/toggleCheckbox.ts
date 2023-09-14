@@ -34,7 +34,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	const listLine = view.state.doc.lineAt(pos);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	const item = todoList.items.at(parseInt(itemIdx));
+	const item = todoList.items().at(parseInt(itemIdx));
 	if (item) {
 		if (item.complete()) {
 			item.clearCompleted();
@@ -46,7 +46,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 			if (recExt.at(0)) {
 				const recurringTask = createRecurringTask(recExt[0].value, item);
 				if (recurringTask) {
-					todoList.items.push(recurringTask);
+					todoList.add(recurringTask);
 				}
 			}
 		}
