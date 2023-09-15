@@ -34,13 +34,17 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	const listLine = view.state.doc.lineAt(pos);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	const item = todoList.items().at(parseInt(itemIdx));
+	const idx = parseInt(itemIdx);
+	const item = todoList.items().at(idx);
 	if (item) {
 		if (item.complete()) {
 			item.clearCompleted();
 			item.setComplete(false);
+			todoList.sort();
 		} else {
+			todoList.removeItem(idx);
 			item.setCompleted(new Date());
+			todoList.add(item);
 			// if rec extension exists, automatically add new item with due and rec ext
 			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
 			if (recExt.at(0)) {
@@ -52,7 +56,6 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 		}
 	}
 
-	todoList.sort();
 	event.preventDefault();
 	updateView(mdView, [{ from, to, insert: todoList.toString() }]);
 	return true;
@@ -67,7 +70,7 @@ function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | un
 				? moment(originalItem.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value)
 				: null,
 		);
-		const newItem = new TodoItem('-');
+		const newItem = new TodoItem('');
 		newItem.setPriority(originalItem.priority());
 		newItem.setBody(originalItem.getBody());
 		newItem.setExtension(ExtensionType.DUE, date);

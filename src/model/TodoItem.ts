@@ -9,11 +9,10 @@ export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
 	static ID_REGEX = /^item-\S+-(\d+)$/;
 
-	private id: string | undefined;
+	#id: string | undefined;
 
-	constructor(text: string, idx: number | undefined = undefined) {
+	constructor(text: string) {
 		super(text);
-		if (idx !== undefined) this.setIdx(idx);
 	}
 
 	setBody(body: string): void {
@@ -25,11 +24,11 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	render(): HTMLElement {
-		if (!this.id) throw 'No id!';
+		if (!this.#id) throw 'No id!';
 
 		const item = document.createElement('div');
 		item.addClass(this.getHtmlCls());
-		item.id = this.id;
+		item.id = this.#id;
 
 		const checkbox = item.createEl('input', {
 			type: 'checkbox',
@@ -62,7 +61,7 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	getId(): string | undefined {
-		return this.id;
+		return this.#id;
 	}
 
 	getHtmlCls(): string {
@@ -70,12 +69,12 @@ export default class TodoItem extends Item implements ViewModel {
 	}
 
 	setIdx(idx: number) {
-		this.id = 'item-' + randomUUID() + '-' + idx;
+		this.#id = 'item-' + randomUUID() + '-' + idx;
 	}
 
 	getIdx(): number | undefined {
-		if (this.id) {
-			const idx = this.id.match(TodoItem.ID_REGEX)?.at(1);
+		if (this.#id) {
+			const idx = this.#id.match(TodoItem.ID_REGEX)?.at(1);
 			if (idx) {
 				return parseInt(idx);
 			}

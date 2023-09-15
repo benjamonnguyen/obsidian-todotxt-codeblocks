@@ -7,6 +7,7 @@ import { AddItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
 import { SETTINGS_READ_ONLY } from 'src/main';
+import { DEFAULT_SETTINGS } from 'src/settings';
 
 export default class TodoList implements ViewModel {
 	// "n/c" will respresent order for items with no context (ex. sort:ctx:a,b,n/c,c)
@@ -116,6 +117,13 @@ export default class TodoList implements ViewModel {
 		return removedItems;
 	}
 
+	removeItem(idx: number): TodoItem | undefined {
+		const removedItem = this.#items.splice(idx, 1).first();
+		this.#projectGroups = this.buildProjectGroups();
+
+		return removedItem;
+	}
+
 	add(item: TodoItem) {
 		this.#items.push(item);
 		item.projects().forEach((proj) => {
@@ -163,17 +171,20 @@ export default class TodoList implements ViewModel {
 
 	sort() {
 		const ASC = 'asc';
-		const sortDefaultOptions = getSortDefaultOptions(this.#langLine.sortFieldToOrder);
+		const defaultSortFieldToOrder = this.defaultSortFieldToOrder();
+		const statusSortOrder =
+			this.#langLine.sortFieldToOrder.get('status') || defaultSortFieldToOrder.get('status');
 
 		const createdSortOrder =
-			this.#langLine.sortFieldToOrder.get('created') || sortDefaultOptions.has('created')
-				? []
-				: undefined;
+			this.#langLine.sortFieldToOrder.get('created') || defaultSortFieldToOrder.get('created');
 		if (createdSortOrder) {
 			this.#items.sort((a, b) => {
+				if (statusSortOrder && (a.complete() || b.complete())) {
+					return 0;
+				}
+
 				const aDate = moment(a.created());
 				const bDate = moment(b.created());
-
 				if (!createdSortOrder.length || createdSortOrder.first()! === ASC) {
 					return aDate.diff(bDate, 'd');
 				}
@@ -183,10 +194,14 @@ export default class TodoList implements ViewModel {
 		// console.log("createdOrder", this.items.map(item => item.body()));
 
 		const ctxSortOrder =
-			this.#langLine.sortFieldToOrder.get('ctx') || sortDefaultOptions.has('ctx') ? [] : undefined;
+			this.#langLine.sortFieldToOrder.get('ctx') || defaultSortFieldToOrder.get('ctx');
 		this.#orderedContexts = this.getContextOrder(ctxSortOrder);
 		if (ctxSortOrder) {
 			this.#items.sort((a, b) => {
+				if (statusSortOrder && (a.complete() || b.complete())) {
+					return 0;
+				}
+
 				let aScore = Number.MAX_VALUE;
 				if (a.contexts().length) {
 					a.contexts().forEach(
@@ -211,9 +226,13 @@ export default class TodoList implements ViewModel {
 		// console.log("ctxOrder", this.items.map(item => item.body()));
 
 		const dueSortOrder =
-			this.#langLine.sortFieldToOrder.get('due') || sortDefaultOptions.has('due') ? [] : undefined;
+			this.#langLine.sortFieldToOrder.get('due') || defaultSortFieldToOrder.get('due');
 		if (dueSortOrder) {
 			this.#items.sort((a, b) => {
+				if (statusSortOrder && (a.complete() || b.complete())) {
+					return 0;
+				}
+
 				const aDueExtValue = a.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value;
 				const bDueExtValue = b.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value;
 				const aDate = aDueExtValue ? moment(aDueExtValue) : moment(new Date(8640000000000000));
@@ -228,11 +247,13 @@ export default class TodoList implements ViewModel {
 		// console.log("dueOrder", this.items.map(item => item.body()));
 
 		const prioritySortOrder =
-			this.#langLine.sortFieldToOrder.get('prio') || sortDefaultOptions.has('prio')
-				? []
-				: undefined;
+			this.#langLine.sortFieldToOrder.get('prio') || defaultSortFieldToOrder.get('prio');
 		if (prioritySortOrder) {
 			this.#items.sort((a, b) => {
+				if (statusSortOrder && (a.complete() || b.complete())) {
+					return 0;
+				}
+
 				const aScore = a.priority()?.charCodeAt(0) || Number.MAX_VALUE;
 				const bScore = b.priority()?.charCodeAt(0) || Number.MAX_VALUE;
 				if (!prioritySortOrder.length || prioritySortOrder.first()! === ASC) {
@@ -244,11 +265,13 @@ export default class TodoList implements ViewModel {
 		// console.log("prioOrder", this.items.map(item => item.body()));
 
 		const completedSortOrder =
-			this.#langLine.sortFieldToOrder.get('completed') || sortDefaultOptions.has('completed')
-				? []
-				: undefined;
+			this.#langLine.sortFieldToOrder.get('completed') || defaultSortFieldToOrder.get('completed');
 		if (completedSortOrder) {
 			this.#items.sort((a, b) => {
+				if (statusSortOrder && (a.complete() || b.complete())) {
+					return 0;
+				}
+
 				const aDate = moment(a.completed());
 				const bDate = moment(b.completed());
 
@@ -260,10 +283,6 @@ export default class TodoList implements ViewModel {
 		}
 		// console.log("completedOrder", this.items.map(item => item.body()));
 
-		const statusSortOrder =
-			this.#langLine.sortFieldToOrder.get('status') || sortDefaultOptions.has('status')
-				? []
-				: undefined;
 		if (statusSortOrder) {
 			this.#items.sort((a, b) => {
 				const aScore = a.complete() ? 1 : 0;
@@ -316,6 +335,31 @@ export default class TodoList implements ViewModel {
 		for (const [i, item] of this.#items.entries()) {
 			item.setIdx(i);
 		}
+	}
+
+	private defaultSortFieldToOrder(): Map<string, string[]> {
+		const defaultSortFieldToOrder: Map<string, string[]> = new Map();
+		if (
+			this.#langLine.sortFieldToOrder.get('default') ||
+			(SETTINGS_READ_ONLY.applySortDefault && !this.#langLine.sortFieldToOrder.size)
+		) {
+			const invalidOptions: string[] = [];
+			const sortDefaultOptions =
+				SETTINGS_READ_ONLY.sortDefaultOptions || DEFAULT_SETTINGS.sortDefaultOptions;
+			for (const opt of sortDefaultOptions.split(' ')) {
+				const res = LanguageLine.handleSort(opt);
+				if (res instanceof Error) {
+					invalidOptions.push(opt);
+				} else {
+					defaultSortFieldToOrder.set(res.field, res.order);
+				}
+			}
+			if (invalidOptions.length) {
+				console.warn('Invalid "sort:default" options: ' + invalidOptions);
+			}
+		}
+
+		return defaultSortFieldToOrder;
 	}
 
 	private buildProjectGroups(): ProjectGroupContainer[] {
@@ -378,28 +422,4 @@ export default class TodoList implements ViewModel {
 
 		return contextOrder.concat(remainingContexts);
 	}
-}
-
-function getSortDefaultOptions(sortFieldToOrder: Map<string, string[]>): Set<string> {
-	const sortDefaultOptions: Set<string> = new Set();
-	if (
-		sortFieldToOrder.get('default') ||
-		(SETTINGS_READ_ONLY.applySortDefault && !sortFieldToOrder.size)
-	) {
-		const invalidOptions: string[] = [];
-		for (let opt of SETTINGS_READ_ONLY.sortDefaultOptions.split(',')) {
-			opt = opt.trimStart(); // in case user adds space after commas
-			const res = LanguageLine.handleSort('sort:' + opt);
-			if (res instanceof Error) {
-				invalidOptions.push(opt);
-			} else {
-				sortDefaultOptions.add(opt);
-			}
-		}
-		if (invalidOptions.length) {
-			console.error('Invalid "sort:default" options: ' + invalidOptions);
-		}
-	}
-
-	return sortDefaultOptions;
 }

@@ -13,8 +13,8 @@ export interface PluginSettings {
 	autoArchiveThreshold: number;
 }
 
-export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
-	sortDefaultOptions: 'status,prio,completed,due,created',
+export const DEFAULT_SETTINGS: PluginSettings = {
+	sortDefaultOptions: 'sort:status sort:prio sort:completed sort:due sort:created',
 	applySortDefault: true,
 	enableInfoNotices: true,
 	defaultPriority: 'none',
@@ -57,7 +57,7 @@ export class SettingsTab extends PluginSettingTab {
 	private sortDefaultOptions(): Setting {
 		return new Setting(this.containerEl)
 			.setName('"sort:default" options')
-			.setDesc('Comma delimited list of sort options to apply for "sort:default".')
+			.setDesc('Sort options to apply when using "sort:default".')
 			.addTextArea((text) =>
 				text
 					.setValue(this.plugin.settings.sortDefaultOptions)
