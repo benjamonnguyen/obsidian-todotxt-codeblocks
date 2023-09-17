@@ -1,7 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
-import { updateView } from 'src/stateEditor';
+import { updateDocument } from 'src/stateEditor';
 import { ActionType } from 'src/model';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -33,7 +33,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		new EditItemModal(mdView.app, item, todoList, (result) => {
 			if (item.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
@@ -57,7 +57,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
 			// Add newline to force codeblock to re-render
-			updateView(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);

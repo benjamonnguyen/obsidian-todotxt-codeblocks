@@ -3,7 +3,7 @@ import { ConfirmModal } from 'src/component';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { ActionType, TodoItem, TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { findLine, updateView } from 'src/stateEditor';
+import { findLine, updateDocument } from 'src/stateEditor';
 import { deleteCompletedTasksModal, deleteTasks } from './delete';
 
 export function clickArchive(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -17,14 +17,9 @@ export function clickArchive(event: MouseEvent, mdView: MarkdownView): boolean {
 		return false;
 	}
 
-	const action = newTarget.getAttr('action');
-	if (action === 'todotxt-archive-items') {
-		// @ts-ignore
-		const listLine = findLine(target, mdView.editor.cm as EditorView);
-		archiveOrDeleteCompletedTasksModal(listLine.number, mdView).open();
-	} else {
-		console.error('ActionType.ARCHIVE has no implementation for action:', action);
-	}
+	// @ts-ignore
+	const listLine = findLine(target, mdView.editor.cm as EditorView);
+	archiveOrDeleteCompletedTasksModal(listLine.number, mdView).open();
 
 	return true;
 }
@@ -67,7 +62,7 @@ export async function archiveTasks(
 		const { from, to, todoList } = TodoList.from(line, view);
 		archivedItems.push(...todoList.removeItems(predicate));
 		if (archivedItems.length) {
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 		}
 	});
 
@@ -106,5 +101,9 @@ export function autoArchive(mdView: MarkdownView | null) {
 	} else {
 		throw new Error('No implementation for archiveBehavior: ' + archiveBehavior);
 	}
-	removedTasks.then((items) => notice(`Auto-archived ${items.length} items`, Level.INFO));
+	removedTasks.then((items) => {
+		if (items.length) {
+			notice(`Auto-archived ${items.length} items`, Level.INFO);
+		}
+	});
 }

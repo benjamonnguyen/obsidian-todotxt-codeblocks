@@ -5,9 +5,9 @@ export default class ConfirmModal extends Modal {
 
 	text: string;
 	subText: string;
-	onSubmit: () => Promise<void>;
+	onSubmit: () => Promise<void> | void;
 
-	constructor(app: App, text: string, subText: string, onSubmit: () => Promise<void>) {
+	constructor(app: App, text: string, subText: string, onSubmit: () => Promise<void> | void) {
 		super(app);
 		this.text = text;
 		this.subText = subText;

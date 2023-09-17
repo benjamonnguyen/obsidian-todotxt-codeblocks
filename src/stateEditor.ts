@@ -36,7 +36,7 @@ export function findLine(el: Element, view: EditorView): Line {
 	return view.state.doc.lineAt(pos);
 }
 
-export function updateView(
+export function updateDocument(
 	mdView: MarkdownView,
 	changes: { from: number; to?: number; insert?: string }[],
 ) {

@@ -1,7 +1,7 @@
 import { MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
 import { LanguageLine, TodoList, TodoItem } from './model';
 import { notice, Level } from './notice';
-import { findLine, updateView } from './stateEditor';
+import { findLine, updateDocument } from './stateEditor';
 
 // line 0 is langLine
 const UNSAVED_ITEMS: { listId: string; line: number; newText?: string }[] = [];
@@ -76,7 +76,7 @@ export function saveChanges(mdView: MarkdownView | null) {
 		}
 	});
 
-	updateView(mdView, changes);
+	updateDocument(mdView, changes);
 	let noticeMsg = 'Saving changes...\n';
 	changes.filter((c) => c.insert).forEach((c) => (noticeMsg += `- ${c.insert}\n`));
 	notice(noticeMsg, Level.INFO, 2500);

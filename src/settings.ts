@@ -102,7 +102,7 @@ export class SettingsTab extends PluginSettingTab {
 	private archiveBehaviorDropDown(): Setting {
 		return new Setting(this.containerEl)
 			.setName('Archive behavior')
-			.setDesc('What happens when you click on the list archive button.')
+			.setDesc('What happens when a task is archived.')
 			.addDropdown((dropDown) => {
 				dropDown
 					.addOptions({
@@ -122,7 +122,7 @@ export class SettingsTab extends PluginSettingTab {
 		return new Setting(this.containerEl)
 			.setName('Auto-archive threshold')
 			.setDesc(
-				'Archives tasks when their completed date is older than [X] days. Threshold of -1 disables auto-archiving.',
+				'Archives tasks when their completed date is older than [X] days. Setting threshold to -1 disables auto-archiving.',
 			)
 			.addSlider((slider) => {
 				slider

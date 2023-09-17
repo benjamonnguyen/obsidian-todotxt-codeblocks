@@ -2,7 +2,7 @@ import { MarkdownView, moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
 import { TodoItem, TodoList } from 'src/model';
 import { calculateDate } from 'src/dateUtil';
-import { updateView } from 'src/stateEditor';
+import { updateDocument } from 'src/stateEditor';
 import { notice, Level } from 'src/notice';
 
 export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -57,7 +57,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	}
 
 	event.preventDefault();
-	updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+	updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 	return true;
 }
 

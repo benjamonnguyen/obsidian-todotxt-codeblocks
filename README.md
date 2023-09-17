@@ -29,6 +29,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - [x] Render Markdown links
 - [x] **Autocompletion** for projects and contexts
 - [x] **Archive** completed tasks to `archive.todotxt` file
+  - [x] **Auto-archive** setting
 - [ ] Configurable defaults
 
 **Commands**

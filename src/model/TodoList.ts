@@ -64,12 +64,16 @@ export default class TodoList implements ViewModel {
 			cls: 'todotxt-list-actions',
 		});
 		actions.append(new ActionButton(ActionType.ADD, AddItemModal.ID, list.id).render());
-		if (SETTINGS_READ_ONLY.archiveBehavior === 'archive') {
+		if (!this.#items.length) {
+			actions.append(new ActionButton(ActionType.DEL, 'todotxt-delete-list', list.id).render());
+		} else if (SETTINGS_READ_ONLY.archiveBehavior === 'archive') {
 			actions.append(
 				new ActionButton(ActionType.ARCHIVE, 'todotxt-archive-items', list.id).render(),
 			);
 		} else if (SETTINGS_READ_ONLY.archiveBehavior === 'delete') {
-			actions.append(new ActionButton(ActionType.DEL, 'todotxt-delete-items', list.id).render());
+			actions.append(
+				new ActionButton(ActionType.ARCHIVE, 'todotxt-delete-items', list.id).render(),
+			);
 		}
 		list.appendChild(this.#langLine.render());
 

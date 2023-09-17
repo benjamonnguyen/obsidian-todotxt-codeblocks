@@ -1,10 +1,10 @@
 import { MarkdownView } from 'obsidian';
+import { EditorView } from '@codemirror/view';
 import { ConfirmModal } from 'src/component';
-import { ActionType, TodoItem } from 'src/model';
-import { findLine, updateView } from 'src/stateEditor';
+import { ActionType, LanguageLine, TodoItem } from 'src/model';
+import { findLine, updateDocument } from 'src/stateEditor';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { archiveOrDeleteCompletedTasksModal } from './archive';
 
 export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -23,7 +23,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	if (action === 'todotxt-delete-item') {
 		const deleteItem = async () => {
 			const line = findLine(newTarget, view);
-			updateView(mdView, [{ from: line.from, to: line.to + 1 }]); // +1 to delete entire line
+			updateDocument(mdView, [{ from: line.from, to: line.to + 1 }]); // +1 to delete entire line
 		};
 		// @ts-ignore
 		if (mdView.app.isMobile) {
@@ -31,8 +31,19 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 		} else {
 			deleteItem();
 		}
-	} else if (action === 'todotxt-delete-items') {
-		archiveOrDeleteCompletedTasksModal(findLine(target, view).number, mdView).open();
+	} else if (action === 'todotxt-delete-list') {
+		new ConfirmModal(mdView.app, 'Remove Todo.txt codeblock?', '', () => {
+			const line = findLine(newTarget, view);
+			const { langLine } = LanguageLine.from(line.text);
+			for (let i = line.number; i < view.state.doc.lines; i++) {
+				const l = view.state.doc.line(i);
+				if (l.text.trimEnd() === '```') {
+					updateDocument(mdView, [{ from: line.from, to: l.to + 1 }]);
+					notice(`Removed Todo.txt codeblock: ${langLine.title} `, Level.INFO);
+					return;
+				}
+			}
+		}).open();
 	} else {
 		console.error('ActionType.DEL has no implementation for action:', action);
 	}
@@ -66,7 +77,7 @@ export async function deleteTasks(
 		const removedItems = todoList.removeItems(predicate);
 		if (removedItems.length) {
 			deletedItems.push(...removedItems);
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 		}
 	});
 
