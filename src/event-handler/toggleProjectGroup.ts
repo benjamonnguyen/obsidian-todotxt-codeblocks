@@ -26,10 +26,10 @@ export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownVi
 	const project = target.labels?.item(0).getText().substring(1);
 	if (!project) return false;
 
-	if (target.getAttr('checked')) {
-		langLine.collapsedProjectGroups.add(project);
-	} else {
+	if (langLine.collapsedProjectGroups.has(project)) {
 		langLine.collapsedProjectGroups.delete(project);
+	} else {
+		langLine.collapsedProjectGroups.add(project);
 	}
 
 	updateDocument(mdView, [{ from: line.from, to: line.to, insert: langLine.toString() }]);
