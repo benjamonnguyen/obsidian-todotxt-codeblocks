@@ -1,33 +1,47 @@
 import { MarkdownView, Plugin } from 'obsidian';
-import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
-import { save } from './stateEditor';
+import { saveChanges, todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
 	toggleProjectGroup,
 	clickEdit,
 	clickAdd,
 	clickDelete,
+	clickLink,
+	clickArchive,
 } from './event-handler';
 import { createNewTaskCmd } from './command';
+import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
+import { autoArchive } from './event-handler/archive';
+
+export let SETTINGS_READ_ONLY: PluginSettings;
 
 export default class TodotxtCodeblocksPlugin extends Plugin {
 	static NAME = 'obsidian-todotxt-codeblocks';
+	settings: PluginSettings;
 
 	async onload() {
+		await this.loadSettings();
+		this.addSettingTab(new SettingsTab(this.app, this));
 		this.registerExtensions(['todotxt'], 'markdown');
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
 		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
 			const { target } = event;
 			if (!target) return;
 
-			if (this.clickLink(event)) return;
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
-				toggleCheckbox(event, mdView) ||
+				const handled =
+					clickLink(event, mdView) ||
+					toggleCheckbox(event, mdView) ||
 					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
-					clickDelete(event, mdView);
+					clickDelete(event, mdView) ||
+					clickArchive(event, mdView);
+
+				if (handled) {
+					autoArchive(mdView);
+				}
 			}
 		});
 		this.registerDomEvent(document, 'keypress', (event: KeyboardEvent) => {
@@ -39,32 +53,35 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		this.registerInterval(
-			window.setInterval(() => {
-				const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				save(mdView!);
-			}, 2000),
+			window.setInterval(
+				() => saveChanges(this.app.workspace.getActiveViewOfType(MarkdownView)),
+				2000,
+			),
+		);
+		this.registerInterval(
+			window.setInterval(
+				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),
+				5 * 60000,
+			),
 		);
 		this.addCommand(createNewTaskCmd);
 	}
 
 	onunload() {}
 
-	private clickLink(event: MouseEvent): boolean {
-		const { target } = event;
-		if (!target || !(target instanceof HTMLSpanElement)) {
-			return false;
-		}
-		const link = target.getAttr('link');
-		if (target.hasClass('todotxt-link') && link) {
-			try {
-				window.open(new URL(link));
-				return true;
-			} catch (_) {
-				/* empty */
-			}
-			this.app.workspace.openLinkText(link, link);
-			return true;
-		}
-		return false;
+	async loadSettings() {
+		/*
+		 * Object.assign() copies the references to any nested properties (shallow copy).
+		 * If your settings object contains nested properties, you need to copy each nested property recursively (deep copy).
+		 * Otherwise, any changes to a nested property will apply do all objects that were copied using Object.assign().
+		 */
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		SETTINGS_READ_ONLY = Object.freeze({ ...this.settings });
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings).then(
+			() => (SETTINGS_READ_ONLY = Object.freeze({ ...this.settings })),
+		);
 	}
 }

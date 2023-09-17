@@ -23,7 +23,7 @@ export default class LanguageLine implements ViewModel {
 
 	private constructor() {}
 
-	static from(line: string): { langLine: LanguageLine; errs: Error[] } {
+	static from(line: string): { langLine: LanguageLine; errors: Error[] } {
 		const langLine = new LanguageLine();
 		const errs: Error[] = [];
 
@@ -53,7 +53,7 @@ export default class LanguageLine implements ViewModel {
 			}
 		}
 
-		return { langLine, errs };
+		return { langLine, errors: errs };
 	}
 
 	render(): HTMLElement {
@@ -71,14 +71,14 @@ export default class LanguageLine implements ViewModel {
 		const parts = [
 			LanguageLine.LANGUAGE_IDENTIFIER,
 			`"${this.title}"`,
-			this.getSortOrders(),
-			this.getCollapsedProjectGroups(),
+			this.sortOrdersToString(),
+			this.collapsedProjectGroupsToString(),
 		];
 
 		return parts.join(' ');
 	}
 
-	getSortOrders(): string {
+	sortOrdersToString(): string {
 		const sortOrders: string[] = [];
 		for (const [field, order] of this.sortFieldToOrder.entries()) {
 			let res = LanguageLine.SORT_PREFIX + field;
@@ -91,7 +91,7 @@ export default class LanguageLine implements ViewModel {
 		return sortOrders.join(' ');
 	}
 
-	getCollapsedProjectGroups(): string {
+	collapsedProjectGroupsToString(): string {
 		return this.collapsedProjectGroups.size
 			? LanguageLine.COLLAPSE_PREFIX + Array.from(this.collapsedProjectGroups).join(',')
 			: '';

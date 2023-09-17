@@ -1,4 +1,11 @@
-import { AbstractTextComponent, App, ButtonComponent, DropdownComponent, Setting } from 'obsidian';
+import {
+	AbstractTextComponent,
+	App,
+	ButtonComponent,
+	DropdownComponent,
+	Platform,
+	Setting,
+} from 'obsidian';
 import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
@@ -10,18 +17,17 @@ export default class EditItemModal extends AutoCompleteableModal {
 	onSubmit: (result: TodoItem) => void;
 	input: Setting;
 	submit: Setting;
-	textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
 
 	constructor(app: App, item: TodoItem, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
 		super(
 			app,
 			new Map([
-				['+', todoList.projectGroups.map((group) => group.name)],
-				['@', [...todoList.orderedContexts]],
+				['+', todoList.projectGroups().map((group) => group.name)],
+				['@', todoList.orderedContexts()],
 			]),
 		);
 		this.body = item.getBody();
-		this.item = item;
+		this.item = new TodoItem(item.toString());
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
@@ -31,9 +37,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	onOpen() {
 		this.render();
-		this.textComponent.inputEl.focus();
-		this.textComponent.inputEl.select();
-		this.textComponent.inputEl.selectionStart = this.body.length;
+		// this.textComponent.inputEl.focus();
+		// this.textComponent.inputEl.select();
+		// this.textComponent.inputEl.selectionStart = this.body.length;
 	}
 
 	onClose() {
@@ -64,7 +70,6 @@ export default class EditItemModal extends AutoCompleteableModal {
 		const handleText = (
 			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 		) => {
-			this.textComponent = textComponent;
 			textComponent.setValue(this.body);
 			textComponent.onChange((text) => {
 				this.submit.components
@@ -75,27 +80,8 @@ export default class EditItemModal extends AutoCompleteableModal {
 			});
 		};
 		const addPriorityDropDown = (dropDown: DropdownComponent) => {
-			const handlePriorityStyle = (priority: string | null, dropDown: DropdownComponent) => {
-				dropDown.selectEl.removeClasses([
-					'todotxt-priority-a',
-					'todotxt-priority-b',
-					'todotxt-priority-c',
-					'todotxt-priority-x',
-				]);
-				if (!priority) {
-					/* empty */
-				} else if (priority === 'A') {
-					dropDown.selectEl.addClass('todotxt-priority-a');
-				} else if (priority === 'B') {
-					dropDown.selectEl.addClass('todotxt-priority-b');
-				} else if (priority === 'C') {
-					dropDown.selectEl.addClass('todotxt-priority-c');
-				} else {
-					dropDown.selectEl.addClass('todotxt-priority-x');
-				}
-			};
 			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
-			handlePriorityStyle(this.item.priority(), dropDown);
+			this.handlePriorityStyle(this.item.priority(), dropDown);
 			dropDown
 				.addOptions({
 					none: '(-)',
@@ -106,7 +92,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 				})
 				.onChange((val) => {
 					this.item.setPriority(val !== 'none' ? val : null);
-					handlePriorityStyle(this.item.priority(), dropDown);
+					this.handlePriorityStyle(this.item.priority(), dropDown);
 				});
 			const prio = this.item.priority();
 			if (prio) {
@@ -128,5 +114,28 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	getSubmitButtonText(): string {
 		return 'Edit';
+	}
+
+	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {
+		if (Platform.isWin) {
+			dropDown.selectEl.addClass('is-windows');
+		}
+		dropDown.selectEl.removeClasses([
+			'todotxt-priority-a',
+			'todotxt-priority-b',
+			'todotxt-priority-c',
+			'todotxt-priority-x',
+		]);
+		if (!priority) {
+			/* empty */
+		} else if (priority === 'A') {
+			dropDown.selectEl.addClass('todotxt-priority-a');
+		} else if (priority === 'B') {
+			dropDown.selectEl.addClass('todotxt-priority-b');
+		} else if (priority === 'C') {
+			dropDown.selectEl.addClass('todotxt-priority-c');
+		} else {
+			dropDown.selectEl.addClass('todotxt-priority-x');
+		}
 	}
 }

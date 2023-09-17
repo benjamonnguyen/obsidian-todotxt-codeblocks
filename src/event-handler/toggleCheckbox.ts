@@ -1,9 +1,9 @@
-import { MarkdownView, Notice, moment } from 'obsidian';
+import { MarkdownView, moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
-import TodotxtCodeblocksPlugin from 'src/main';
 import { TodoItem, TodoList } from 'src/model';
 import { calculateDate } from 'src/dateUtil';
-import { updateView } from 'src/stateEditor';
+import { updateDocument } from 'src/stateEditor';
+import { notice, Level } from 'src/notice';
 
 export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -18,7 +18,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	 * Create a notice and return true.
 	 */
 	if (mdView.getMode() === 'preview') {
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' WARNING\nCheckbox toggle disabled in Reading View');
+		notice('Checkbox toggle disabled in Reading View', Level.WARN);
 		event.preventDefault();
 		return true;
 	}
@@ -34,27 +34,30 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	const listLine = view.state.doc.lineAt(pos);
 
 	const { todoList, from, to } = TodoList.from(listLine.number, view);
-	const item = todoList.items.at(parseInt(itemIdx));
+	const idx = parseInt(itemIdx);
+	const item = todoList.items().at(idx);
 	if (item) {
 		if (item.complete()) {
 			item.clearCompleted();
 			item.setComplete(false);
+			todoList.sort();
 		} else {
+			todoList.removeItem(idx);
 			item.setCompleted(new Date());
+			todoList.add(item);
 			// if rec extension exists, automatically add new item with due and rec ext
 			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
 			if (recExt.at(0)) {
 				const recurringTask = createRecurringTask(recExt[0].value, item);
 				if (recurringTask) {
-					todoList.items.push(recurringTask);
+					todoList.add(recurringTask);
 				}
 			}
 		}
 	}
 
-	todoList.sort();
 	event.preventDefault();
-	updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+	updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 	return true;
 }
 
@@ -67,7 +70,7 @@ function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | un
 				? moment(originalItem.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value)
 				: null,
 		);
-		const newItem = new TodoItem('-');
+		const newItem = new TodoItem('');
 		newItem.setPriority(originalItem.priority());
 		newItem.setBody(originalItem.getBody());
 		newItem.setExtension(ExtensionType.DUE, date);
@@ -80,11 +83,11 @@ function createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | un
 			}
 			msg += `\n(${deets})`;
 		}
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' INFO\n' + msg, 10000);
+		notice(msg, Level.INFO, 10000);
 
 		return newItem;
 	} catch (e) {
 		console.error(e);
-		new Notice(TodotxtCodeblocksPlugin.NAME + ' ERROR\nFailed to create recurring task');
+		notice('Failed to create recurring task', Level.ERR);
 	}
 }

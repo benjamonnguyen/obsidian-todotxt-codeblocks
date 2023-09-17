@@ -1,4 +1,11 @@
+import {
+	AbstractTextComponent,
+	DropdownComponent,
+	TextAreaComponent,
+	TextComponent,
+} from 'obsidian';
 import EditItemModal from './EditItemModal';
+import { SETTINGS_READ_ONLY } from 'src/main';
 
 export default class AddItemModal extends EditItemModal {
 	static ID = 'todotxt-add-item-modal';
@@ -13,9 +20,23 @@ export default class AddItemModal extends EditItemModal {
 
 	onOpen() {
 		super.onOpen();
-		this.textComponent.setPlaceholder(
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const textComponent = this.input.components.find(
+			(comp) => comp instanceof TextComponent || comp instanceof TextAreaComponent,
+		)! as AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
+		textComponent.setPlaceholder(
 			AddItemModal.placeholders[Math.floor(Math.random() * AddItemModal.placeholders.length)],
 		);
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const priorityDropDown = this.input.components.find(
+			(comp) => comp instanceof DropdownComponent,
+		) as DropdownComponent;
+		priorityDropDown.setValue(SETTINGS_READ_ONLY.defaultPriority);
+		this.item.setPriority(
+			priorityDropDown.getValue() !== 'none' ? priorityDropDown.getValue() : null,
+		);
+		this.handlePriorityStyle(this.item.priority(), priorityDropDown);
 	}
 
 	getSubmitButtonText(): string {

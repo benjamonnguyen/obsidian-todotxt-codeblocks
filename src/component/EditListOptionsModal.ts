@@ -1,6 +1,6 @@
-import { App, Modal, Setting, Notice } from 'obsidian';
-import TodotxtCodeblocksPlugin from 'src/main';
+import { App, Modal, Setting } from 'obsidian';
 import { LanguageLine } from 'src/model';
+import { Level, notice } from 'src/notice';
 
 export class EditListOptionsModal extends Modal {
 	static ID = 'todotxt-edit-list-options-modal';
@@ -14,7 +14,7 @@ export class EditListOptionsModal extends Modal {
 		onSubmit: (result: EditListOptionsModalResult) => void,
 	) {
 		super(app);
-		this.result = { title: currentLangLine.title, sortOrders: currentLangLine.getSortOrders() };
+		this.result = { title: currentLangLine.title, sortOrders: currentLangLine.sortOrdersToString() };
 		this.onSubmit = onSubmit;
 	}
 
@@ -57,7 +57,7 @@ export class EditListOptionsModal extends Modal {
 					if (errs.length) {
 						let errMsg = '';
 						errs.forEach((e) => (errMsg += `- ${e.message}\n`));
-						new Notice(TodotxtCodeblocksPlugin.NAME + ' ERROR\n' + errMsg, 15000);
+						notice(errMsg, Level.ERR, 15000);
 					} else {
 						this.close();
 						this.onSubmit(this.result);

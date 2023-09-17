@@ -1,7 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
-import { updateView } from 'src/stateEditor';
+import { updateDocument } from 'src/stateEditor';
 import { ActionType } from 'src/model';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
@@ -31,25 +31,33 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
 
 		new EditItemModal(mdView.app, item, todoList, (result) => {
-			todoList.items[itemIdx] = result;
-			todoList.sort();
-			updateView(mdView, [{ from, to, insert: todoList.toString() }]);
+			if (item.toString() === result.toString()) return;
+			todoList.edit(itemIdx, result);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
 		}).open();
 	} else if (action === EditListOptionsModal.ID) {
-		new EditListOptionsModal(this.app, todoList.langLine, (result) => {
-			todoList.langLine.title = result.title;
-			todoList.langLine.sortFieldToOrder.clear();
+		const currLangLine = todoList.languageLine();
+		new EditListOptionsModal(this.app, currLangLine, (result) => {
+			if (
+				currLangLine.title === result.title &&
+				currLangLine.sortOrdersToString() === result.sortOrders
+			)
+				return;
+			const newLangLine = LanguageLine.from(currLangLine.toString()).langLine;
+			newLangLine.title = result.title;
+			newLangLine.sortFieldToOrder.clear();
 			result.sortOrders
 				.split(' ')
 				.map((sortOrder) => LanguageLine.handleSort(sortOrder))
 				.forEach((res) => {
 					if (!(res instanceof Error)) {
-						todoList.langLine.sortFieldToOrder.set(res.field, res.order);
+						newLangLine.sortFieldToOrder.set(res.field, res.order);
 					}
 				});
+			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
 			// Add newline to force codeblock to re-render
-			updateView(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
+			updateDocument(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);
