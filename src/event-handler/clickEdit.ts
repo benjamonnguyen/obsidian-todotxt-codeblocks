@@ -28,13 +28,16 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			return true;
 		}
 		const itemIdx = parseInt(itemId);
-		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
+		const itemText = view.state.doc.line(listLine.number + 1 + itemIdx).text;
 
-		new EditItemModal(mdView.app, item, todoList, (result) => {
-			if (item.toString() === result.toString()) return;
+		const editModal = new EditItemModal(mdView.app, itemText, todoList, (result) => {
+			if (itemText.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
 			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
-		}).open();
+		});
+		editModal.open();
+		editModal.textComponent.inputEl.select();
+		editModal.textComponent.inputEl.selectionStart = editModal.item.getBody().length;
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {

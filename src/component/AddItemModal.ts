@@ -1,11 +1,13 @@
 import {
 	AbstractTextComponent,
+	App,
 	DropdownComponent,
 	TextAreaComponent,
 	TextComponent,
 } from 'obsidian';
 import EditItemModal from './EditItemModal';
 import { SETTINGS_READ_ONLY } from 'src/main';
+import { TodoList, TodoItem } from 'src/model';
 
 export default class AddItemModal extends EditItemModal {
 	static ID = 'todotxt-add-item-modal';
@@ -17,6 +19,10 @@ export default class AddItemModal extends EditItemModal {
 		'Fix parsing @bug +obsidian-todotxt-codeblocks due:0',
 		'Ship new @feature +obsidian-todotxt-codeblocks due:2040-08-06',
 	];
+
+	constructor(app: App, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
+		super(app, '', todoList, onSubmit);
+	}
 
 	onOpen() {
 		super.onOpen();

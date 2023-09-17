@@ -13,12 +13,17 @@ export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'todotxt-edit-item-modal';
 
 	item: TodoItem;
-	body: string;
 	onSubmit: (result: TodoItem) => void;
 	input: Setting;
+	textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
 	submit: Setting;
 
-	constructor(app: App, item: TodoItem, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
+	constructor(
+		app: App,
+		itemText: string,
+		todoList: TodoList,
+		onSubmit: (result: TodoItem) => void,
+	) {
 		super(
 			app,
 			new Map([
@@ -26,8 +31,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 				['@', todoList.orderedContexts()],
 			]),
 		);
-		this.body = item.getBody();
-		this.item = new TodoItem(item.toString());
+		this.item = new TodoItem(itemText);
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
@@ -37,9 +41,6 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	onOpen() {
 		this.render();
-		// this.textComponent.inputEl.focus();
-		// this.textComponent.inputEl.select();
-		// this.textComponent.inputEl.selectionStart = this.body.length;
 	}
 
 	onClose() {
@@ -57,11 +58,11 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.submit.addButton((btn) =>
 			btn
 				.setButtonText(this.getSubmitButtonText())
-				.setDisabled(!this.body.length)
+				.setDisabled(!this.item.getBody().length)
 				.setCta()
 				.onClick(() => {
 					this.close();
-					this.item.setBody(this.body);
+					this.item.setBody(this.textComponent.getValue());
 					this.onSubmit(this.item);
 				}),
 		);
@@ -70,12 +71,12 @@ export default class EditItemModal extends AutoCompleteableModal {
 		const handleText = (
 			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 		) => {
-			textComponent.setValue(this.body);
+			this.textComponent = textComponent;
+			textComponent.setValue(this.item.getBody());
 			textComponent.onChange((text) => {
 				this.submit.components
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
-				this.body = text;
 				this.suggest(text, textComponent);
 			});
 		};
