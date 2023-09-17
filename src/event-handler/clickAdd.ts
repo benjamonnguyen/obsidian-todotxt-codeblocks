@@ -1,7 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { AddItemModal } from 'src/component';
 import { TodoList, TodoItem } from 'src/model';
-import { findLine, updateDocument } from 'src/stateEditor';
+import { findLine, updateDocument } from 'src/documentUtil';
 
 export default function clickAdd(target: EventTarget, mdView: MarkdownView): boolean {
 	if (!target || !(target instanceof SVGElement)) {

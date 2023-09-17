@@ -2,7 +2,7 @@ import { MarkdownView } from 'obsidian';
 import { EditorView } from '@codemirror/view';
 import { ConfirmModal } from 'src/component';
 import { ActionType, LanguageLine, TodoItem } from 'src/model';
-import { findLine, updateDocument } from 'src/stateEditor';
+import { findLine, updateDocument } from 'src/documentUtil';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
 

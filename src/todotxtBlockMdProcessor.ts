@@ -1,7 +1,7 @@
 import { MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
 import { LanguageLine, TodoList, TodoItem } from './model';
 import { notice, Level } from './notice';
-import { findLine, updateDocument } from './stateEditor';
+import { findLine, updateDocument } from './documentUtil';
 
 // line 0 is langLine
 const UNSAVED_ITEMS: { listId: string; line: number; newText?: string }[] = [];

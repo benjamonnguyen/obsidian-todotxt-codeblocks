@@ -3,7 +3,7 @@ import { ConfirmModal } from 'src/component';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { ActionType, TodoItem, TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { findLine, updateDocument } from 'src/stateEditor';
+import { findLine, updateDocument } from 'src/documentUtil';
 import { deleteCompletedTasksModal, deleteTasks } from './delete';
 
 export function clickArchive(event: MouseEvent, mdView: MarkdownView): boolean {

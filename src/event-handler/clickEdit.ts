@@ -1,7 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
-import { updateDocument } from 'src/stateEditor';
+import { updateDocument } from 'src/documentUtil';
 import { ActionType } from 'src/model';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
