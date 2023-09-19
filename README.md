@@ -30,10 +30,11 @@ Add yours tasks to a `todotxt` codeblock to get started!
 - [x] **Autocompletion** for projects and contexts
 - [x] **Archive** completed tasks to `archive.todotxt` file
   - [x] **Auto-archive** setting
-- [ ] Configurable defaults
+- [x] Configurable defaults
 
 **Commands**
 - [x] `Create new task in focused list`
+- [x] `Undo previous user action`
 
 **Extensions**
   - [x] `due:` (Due date)

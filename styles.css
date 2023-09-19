@@ -42,8 +42,14 @@ If your plugin does not need CSS, delete this file.
     border: 1px solid var(--text-faint);
 }
 
-.is-phone .todotxt-list-title {
-    margin-block-start: 1.5rem;
+.todotxt-language-line {
+    display: inline-flex;
+    margin-block-start: var(--p-spacing);
+    margin-block-end: var(--p-spacing);
+}
+h2.todotxt-list-title {
+    margin-block-start: 0;
+    margin-block-end: 0;
 }
 
 .todotxt-item {
@@ -174,7 +180,7 @@ span.todotxt-list-actions {
 }
 
 .markdown-source-view .todotxt-item:hover svg.todotxt-action-btn,
-.markdown-source-view .todotxt-list-title:hover svg.todotxt-action-btn {
+.markdown-source-view .todotxt-language-line:hover svg.todotxt-action-btn {
     color: var(--text-muted);
     transition: all .15s ease;
 }
