@@ -42,6 +42,7 @@ export function update(
 			if (forceRender) text += '\n';
 			return { from, to, insert: text };
 		}),
+		scrollIntoView: true,
 	});
 	if (listLineToPreserveState) {
 		const startState = getListStateAtLine(listLineToPreserveState, transaction.startState.doc)
