@@ -1,6 +1,8 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import { TodoItem, ActionButton } from './model';
+import { Text } from '@codemirror/state';
+import { State } from './stateEditor';
 
 export function findLine(el: Element, view: EditorView): Line {
 	const pos = view.posAtDOM(el);
@@ -32,4 +34,23 @@ export function findLine(el: Element, view: EditorView): Line {
 	}
 
 	return view.state.doc.lineAt(pos);
+}
+
+export function getListStateAtLine(line: number, doc: Text): State | undefined {
+	const text: string[] = [];
+	const from = doc.line(line).from;
+	if (!from) return;
+	let to = from;
+	for (let i = line; i < doc.lines; i++) {
+		const currLine = doc.line(i);
+		if (currLine.text.trimEnd() === '```') {
+			return {
+				from,
+				to,
+				text: text.join('\n'),
+			};
+		}
+		to = currLine.to;
+		text.push(currLine.text);
+	}
 }

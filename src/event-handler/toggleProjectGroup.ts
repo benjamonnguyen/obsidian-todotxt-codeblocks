@@ -1,6 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { ProjectGroupContainer, LanguageLine } from 'src/model';
-import { updateDocument, findLine } from 'src/documentUtil';
+import { findLine } from 'src/documentUtil';
+import { update } from 'src/stateEditor';
 
 export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -32,6 +33,6 @@ export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownVi
 		langLine.collapsedProjectGroups.add(project);
 	}
 
-	updateDocument(mdView, [{ from: line.from, to: line.to, insert: langLine.toString() }]);
+	update(mdView, [{ from: line.from, to: line.to, text: langLine.toString() }]);
 	return true;
 }
