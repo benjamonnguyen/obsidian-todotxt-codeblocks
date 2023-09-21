@@ -3,8 +3,9 @@ import { ConfirmModal } from 'src/component';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { ActionType, TodoItem, TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { findLine, updateDocument } from 'src/stateEditor';
+import { findLine } from 'src/documentUtil';
 import { deleteCompletedTasksModal, deleteTasks } from './delete';
+import { update } from 'src/stateEditor';
 
 export function clickArchive(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -62,7 +63,7 @@ export async function archiveTasks(
 		const { from, to, todoList } = TodoList.from(line, view);
 		archivedItems.push(...todoList.removeItems(predicate));
 		if (archivedItems.length) {
-			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
+			update(mdView, [{ from, to, text: todoList.toString() }]);
 		}
 	});
 
@@ -83,7 +84,7 @@ export function autoArchive(mdView: MarkdownView | null) {
 	const autoArchiveThreshold = SETTINGS_READ_ONLY.autoArchiveThreshold;
 	if (!mdView || autoArchiveThreshold === -1) return;
 
-	const listEls = document.getElementsByClassName(TodoList.HTML_CLS);
+	const listEls = mdView.contentEl.getElementsByClassName(TodoList.HTML_CLS);
 	const listLines = Array.from(listEls).map(
 		(target) =>
 			// @ts-ignore

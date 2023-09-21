@@ -5,7 +5,8 @@ import { EditListOptionsModal } from 'src/component';
 
 export default class LanguageLine implements ViewModel {
 	private static REGEX = /^```todotxt(?: "([^"]*)")?/;
-	static HTML_CLS = 'todotxt-list-title';
+	static HTML_CLS = 'todotxt-language-line';
+	static TITLE_HTML_CLS = 'todotxt-list-title';
 	static LANGUAGE_IDENTIFIER = '```todotxt';
 	static SORT_PREFIX = 'sort:';
 	static COLLAPSE_PREFIX = 'collapse:';
@@ -57,23 +58,30 @@ export default class LanguageLine implements ViewModel {
 	}
 
 	render(): HTMLElement {
+		const header = document.createElement('span');
+		header.addClass(LanguageLine.HTML_CLS);
+
 		const title = document.createElement('h2');
-		title.addClass(this.getHtmlCls());
+		title.addClass(LanguageLine.TITLE_HTML_CLS);
 		title.id = this.id;
 		title.setText(this.title);
 
-		title.appendChild(new ActionButton(ActionType.EDIT, EditListOptionsModal.ID, this.id).render());
+		header.append(
+			title,
+			new ActionButton(ActionType.EDIT, EditListOptionsModal.ID, this.id).render(),
+		);
 
-		return title;
+		return header;
 	}
 
 	toString() {
-		const parts = [
-			LanguageLine.LANGUAGE_IDENTIFIER,
-			`"${this.title}"`,
-			this.sortOrdersToString(),
-			this.collapsedProjectGroupsToString(),
-		];
+		const parts = [LanguageLine.LANGUAGE_IDENTIFIER, `"${this.title}"`];
+		if (this.sortFieldToOrder.size) {
+			parts.push(this.sortOrdersToString());
+		}
+		if (this.collapsedProjectGroups.size) {
+			parts.push(this.collapsedProjectGroupsToString());
+		}
 
 		return parts.join(' ');
 	}

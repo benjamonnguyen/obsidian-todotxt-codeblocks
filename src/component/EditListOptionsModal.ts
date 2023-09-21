@@ -14,7 +14,10 @@ export class EditListOptionsModal extends Modal {
 		onSubmit: (result: EditListOptionsModalResult) => void,
 	) {
 		super(app);
-		this.result = { title: currentLangLine.title, sortOrders: currentLangLine.sortOrdersToString() };
+		this.result = {
+			title: currentLangLine.title,
+			sortOrders: currentLangLine.sortOrdersToString(),
+		};
 		this.onSubmit = onSubmit;
 	}
 

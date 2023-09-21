@@ -9,7 +9,7 @@ import {
 	clickLink,
 	clickArchive,
 } from './event-handler';
-import { createNewTaskCmd } from './command';
+import { createNewTaskCmd, undoUserActionCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
 
@@ -44,7 +44,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				}
 			}
 		});
-		this.registerDomEvent(document, 'keypress', (event: KeyboardEvent) => {
+		this.registerDomEvent(document, 'keyup', (event: KeyboardEvent) => {
 			if (event.key === 'Enter') {
 				const actionBtn = document
 					.getElementsByClassName('mod-cta')
@@ -65,6 +65,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			),
 		);
 		this.addCommand(createNewTaskCmd);
+		this.addCommand(undoUserActionCmd);
 	}
 
 	onunload() {}

@@ -1,8 +1,8 @@
 import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
-import { updateDocument } from 'src/stateEditor';
 import { ActionType } from 'src/model';
+import { update } from 'src/stateEditor';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -28,13 +28,16 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			return true;
 		}
 		const itemIdx = parseInt(itemId);
-		const item = new TodoItem(view.state.doc.line(listLine.number + 1 + itemIdx).text);
+		const itemText = view.state.doc.line(listLine.number + 1 + itemIdx).text;
 
-		new EditItemModal(mdView.app, item, todoList, (result) => {
-			if (item.toString() === result.toString()) return;
+		const editModal = new EditItemModal(mdView.app, itemText, todoList, (result) => {
+			if (itemText.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
-			updateDocument(mdView, [{ from, to, insert: todoList.toString() }]);
-		}).open();
+			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number);
+		});
+		editModal.open();
+		editModal.textComponent.inputEl.select();
+		editModal.textComponent.inputEl.selectionStart = editModal.item.getBody().length;
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {
@@ -56,8 +59,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 				});
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
-			// Add newline to force codeblock to re-render
-			updateDocument(mdView, [{ from, to, insert: todoList.toString() + '\n' }]);
+			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number, true);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);
