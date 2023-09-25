@@ -16,7 +16,7 @@ import { autoArchive } from './event-handler/archive';
 export let SETTINGS_READ_ONLY: PluginSettings;
 
 export default class TodotxtCodeblocksPlugin extends Plugin {
-	static NAME = 'obsidian-todotxt-codeblocks';
+	static NAME = 'Todo.txt Codeblocks';
 	settings: PluginSettings;
 
 	async onload() {

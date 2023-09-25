@@ -4,7 +4,7 @@ import { clickAdd } from 'src/event-handler';
 import { Level, notice } from 'src/notice';
 
 export default {
-	id: 'create-new-todotxt-task-cmd',
+	id: 'create-new-task',
 	name: 'Create new task in focused list',
 	editorCallback: (_: Editor, view: MarkdownView) => {
 		const addBtn = Array.from(view.contentEl.getElementsByClassName('todotxt-action-btn'))
