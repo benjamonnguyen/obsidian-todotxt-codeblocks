@@ -1,6 +1,7 @@
-import { AbstractTextComponent, App, Modal } from 'obsidian';
+import { AbstractTextComponent, App } from 'obsidian';
+import { TodotxtModal } from './TodotxtModal';
 
-export default abstract class AutoCompleteableModal extends Modal {
+export default abstract class AutoCompleteableModal extends TodotxtModal {
 	private prefixToSuggestionOptions: Map<string, string[]>;
 	private prevTextLength = 0;
 	private prevSelectedWord = '';

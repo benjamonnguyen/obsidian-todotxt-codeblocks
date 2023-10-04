@@ -1,8 +1,9 @@
-import { App, Modal, Setting } from 'obsidian';
+import { App, Setting } from 'obsidian';
 import { LanguageLine } from 'src/model';
 import { Level, notice } from 'src/notice';
+import { TodotxtModal } from './TodotxtModal';
 
-export class EditListOptionsModal extends Modal {
+export class EditListOptionsModal extends TodotxtModal {
 	static ID = 'todotxt-edit-list-options-modal';
 
 	result: EditListOptionsModalResult;

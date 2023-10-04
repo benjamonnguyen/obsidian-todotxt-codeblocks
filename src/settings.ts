@@ -49,7 +49,7 @@ export class SettingsTab extends PluginSettingTab {
 			.addToggle((toggle) => {
 				toggle.setValue(this.plugin.settings.applySortDefault).onChange(async (value) => {
 					this.plugin.settings.applySortDefault = value;
-					await this.plugin.saveSettings();
+					this.plugin.saveSettings();
 				});
 			});
 	}
@@ -63,7 +63,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.sortDefaultOptions)
 					.onChange(async (value) => {
 						this.plugin.settings.sortDefaultOptions = value;
-						await this.plugin.saveSettings();
+						this.plugin.saveSettings();
 					})
 					.setPlaceholder(DEFAULT_SETTINGS.sortDefaultOptions || ''),
 			);
@@ -83,7 +83,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange(async (val) => {
 					// @ts-ignore
 					this.plugin.settings.defaultPriority = val;
-					await this.plugin.saveSettings();
+					this.plugin.saveSettings();
 				});
 		});
 	}
@@ -94,7 +94,7 @@ export class SettingsTab extends PluginSettingTab {
 			.addToggle((toggle) => {
 				toggle.setValue(this.plugin.settings.enableInfoNotices).onChange(async (value) => {
 					this.plugin.settings.enableInfoNotices = value;
-					await this.plugin.saveSettings();
+					this.plugin.saveSettings();
 				});
 			});
 	}
@@ -113,7 +113,7 @@ export class SettingsTab extends PluginSettingTab {
 					.onChange(async (val) => {
 						// @ts-ignore
 						this.plugin.settings.archiveBehavior = val;
-						await this.plugin.saveSettings();
+						this.plugin.saveSettings();
 					});
 			});
 	}
@@ -130,7 +130,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.autoArchiveThreshold)
 					.onChange(async (val) => {
 						this.plugin.settings.autoArchiveThreshold = val;
-						await this.plugin.saveSettings();
+						this.plugin.saveSettings();
 					});
 				slider.setDynamicTooltip();
 			});

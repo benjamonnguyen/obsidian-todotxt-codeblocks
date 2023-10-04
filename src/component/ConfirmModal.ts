@@ -1,6 +1,7 @@
-import { App, Modal, Setting } from 'obsidian';
+import { App, Setting } from 'obsidian';
+import { TodotxtModal } from './TodotxtModal';
 
-export default class ConfirmModal extends Modal {
+export default class ConfirmModal extends TodotxtModal {
 	static ID = 'todotxt-confirm-modal';
 
 	text: string;

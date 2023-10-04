@@ -44,14 +44,6 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				}
 			}
 		});
-		this.registerDomEvent(document, 'keyup', (event: KeyboardEvent) => {
-			if (event.key === 'Enter') {
-				const actionBtn = document
-					.getElementsByClassName('mod-cta')
-					.item(0) as HTMLButtonElement | null;
-				actionBtn?.click();
-			}
-		});
 		this.registerInterval(
 			window.setInterval(
 				() => saveChanges(this.app.workspace.getActiveViewOfType(MarkdownView)),
@@ -81,8 +73,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-		await this.saveData(this.settings).then(
-			() => (SETTINGS_READ_ONLY = Object.freeze({ ...this.settings })),
-		);
+		this.saveData(this.settings);
+		SETTINGS_READ_ONLY = Object.freeze({ ...this.settings });
 	}
 }
