@@ -40,7 +40,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - [x] `due:` (Due date)
   - [x] `rec:` (Recurrence frequency)
 
-**Language line options**
+**Language line options** (not yet implemented)
   - [ ] `get:` Query for existing Todo.txt tasks and move to current codeblock
   - [ ] `link:` Link a *.todotxt file to the todotxt codeblock
   - [ ] `filter:`
