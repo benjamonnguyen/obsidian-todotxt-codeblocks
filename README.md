@@ -35,6 +35,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
 **Commands**
 - [x] `Create new task in focused list`
 - [x] `Undo previous user action`
+- [x] `New codeblock at cursor`
 
 **Extensions**
   - [x] `due:` (Due date)
