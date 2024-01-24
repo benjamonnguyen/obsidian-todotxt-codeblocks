@@ -9,7 +9,7 @@ import {
 	clickLink,
 	clickArchive,
 } from './event-handler';
-import { createNewTaskCmd, undoUserActionCmd } from './command';
+import { createNewTaskCmd, newCodeblockAtCursorCmd, undoUserActionCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
 
@@ -58,6 +58,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 		);
 		this.addCommand(createNewTaskCmd);
 		this.addCommand(undoUserActionCmd);
+		this.addCommand(newCodeblockAtCursorCmd);
 	}
 
 	onunload() {}
