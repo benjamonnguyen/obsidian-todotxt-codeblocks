@@ -22,7 +22,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
-		this.registerExtensions(['todotxt'], 'markdown');
+		this.registerExtensions(['txt'], 'markdown');
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
 		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
 			const { target } = event;

@@ -18,6 +18,7 @@ export class EditListOptionsModal extends TodotxtModal {
 		this.result = {
 			title: currentLangLine.title,
 			sortOrders: currentLangLine.sortOrdersToString(),
+			source: currentLangLine.source,
 		};
 		this.onSubmit = onSubmit;
 	}
@@ -40,8 +41,17 @@ export class EditListOptionsModal extends TodotxtModal {
 		sortOrdersOption.setName('Sort options');
 		sortOrdersOption.addText((text) => {
 			text.setValue(this.result.sortOrders);
-			text.setPlaceholder('sort:default');
+			text.setPlaceholder('sort:status sort:created:desc');
 			text.onChange((val) => (this.result.sortOrders = val));
+		});
+
+		const sourceOption = new Setting(contentEl);
+		sourceOption.settingEl.addClasses(['todotxt-modal-input', 'todotxt-modal-input-3-4']);
+		sourceOption.setName('Source');
+		sourceOption.addText((text) => {
+			text.setValue(this.result.source);
+			text.setPlaceholder('path/to/*.txt');
+			text.onChange((val) => (this.result.source = val));
 		});
 
 		const submit = new Setting(contentEl).addButton((btn) =>
@@ -80,4 +90,5 @@ export class EditListOptionsModal extends TodotxtModal {
 export type EditListOptionsModalResult = {
 	title: string;
 	sortOrders: string;
+	source: string;
 };
