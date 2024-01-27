@@ -24,6 +24,9 @@ export default class TodoList implements ViewModel {
 		this.id = `list-${randomUUID()}`;
 		this.setLanguageLine(langLine);
 		this.#items = items;
+		for (const [i, item] of items.entries()) {
+			item.setIdx(i);
+		}
 		this.#projectGroups = this.buildProjectGroups();
 		this.#orderedContexts = this.getContextOrder(this.#langLine.sortFieldToOrder.get('ctx'));
 	}
@@ -40,8 +43,8 @@ export default class TodoList implements ViewModel {
 		const items: TodoItem[] = [];
 		while (i < view.state.doc.lines) {
 			const line = view.state.doc.line(i++);
-			if (line.text.trimEnd() === '```') break;
 			to = line.to;
+			if (line.text.trimEnd() === '```') break;
 			if (line.text.trim()) {
 				items.push(new TodoItem(line.text));
 			}
@@ -97,6 +100,7 @@ export default class TodoList implements ViewModel {
 	toString(): string {
 		let res = this.#langLine.toString() + '\n';
 		res += this.#items.map((item) => item.toString()).join('\n');
+		res += '\n```';
 
 		return res;
 	}

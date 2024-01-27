@@ -33,7 +33,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const editModal = new EditItemModal(mdView.app, itemText, todoList, (result) => {
 			if (itemText.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
-			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number);
+			update(from, to, todoList);
 		});
 		editModal.open();
 		editModal.textComponent.inputEl.select();
@@ -41,13 +41,9 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {
-			if (
-				currLangLine.title === result.title &&
-				currLangLine.sortOrdersToString() === result.sortOrders
-			)
-				return;
 			const newLangLine = LanguageLine.from(currLangLine.toString()).langLine;
 			newLangLine.title = result.title;
+			newLangLine.source = result.source;
 			newLangLine.sortFieldToOrder.clear();
 			result.sortOrders
 				.split(' ')
@@ -59,7 +55,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 				});
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
-			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number, true);
+			update(from, to, todoList);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);

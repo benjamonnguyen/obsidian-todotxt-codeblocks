@@ -3,7 +3,7 @@
 ## Description
 A codeblock alternative to mvgrimes's [obsidian-todotxt-plugin](https://github.com/mvgrimes/obsidian-todotxt-plugin) based on the [Todo.txt specs](https://github.com/todotxt/todo.txt).
 
-Add yours tasks to a `todotxt` codeblock to get started!
+Add your tasks to a `todotxt` codeblock to get started!
 
 <img src="assets/demo.gif" />
 
@@ -28,7 +28,7 @@ Add yours tasks to a `todotxt` codeblock to get started!
   - [x] Edit, add, delete buttons
   - [x] Render Markdown links
 - [x] **Autocompletion** for projects and contexts
-- [x] **Archive** completed tasks to `archive.todotxt` file
+- [x] **Archive** completed tasks to `archive.txt` file
   - [x] **Auto-archive** setting
 - [x] Configurable defaults
 

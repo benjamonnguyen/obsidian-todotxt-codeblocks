@@ -1,5 +1,5 @@
 import { MarkdownView, Plugin } from 'obsidian';
-import { saveChanges, todotxtBlockProcessor } from './todotxtBlockMdProcessor';
+import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
 	toggleProjectGroup,
@@ -9,9 +9,14 @@ import {
 	clickLink,
 	clickArchive,
 } from './event-handler';
-import { createNewTaskCmd, newCodeblockAtCursorCmd, undoUserActionCmd } from './command';
+import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
+import { SOURCEPATH_TO_LISTID, readFromFile } from './link';
+import { TodoItem, TodoList } from './model';
+import { findLine } from './documentUtil';
+import { update } from './stateEditor';
+import { Level, notice } from './notice';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -22,7 +27,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
-		this.registerExtensions(['todotxt'], 'markdown');
+		this.registerExtensions(['txt'], 'markdown');
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
 		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
 			const { target } = event;
@@ -44,11 +49,35 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				}
 			}
 		});
+		// @ts-ignore
+		const cm = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor.cm as EditorView;
 		this.registerInterval(
-			window.setInterval(
-				() => saveChanges(this.app.workspace.getActiveViewOfType(MarkdownView)),
-				2000,
-			),
+			window.setInterval(async () => {
+				for (const [src, id] of SOURCEPATH_TO_LISTID) {
+					const el = document.getElementById(id);
+					if (!el) return;
+					const line = findLine(el, cm);
+					const { from, to, todoList } = TodoList.from(line.number, cm);
+					const langLine = todoList.languageLine();
+					const codeblock = todoList
+						.items()
+						.map((item) => item.toString())
+						.join('\n');
+					const file = await readFromFile(src);
+					if (codeblock != file) {
+						const newTodoList = new TodoList(
+							langLine,
+							file
+								.split('\n')
+								.filter((line) => !!line)
+								.map((line) => new TodoItem(line)),
+						);
+						newTodoList.sort();
+						update(from, to, newTodoList);
+						notice(`synchronized ${langLine.title} with linked file: ${src}`, Level.INFO);
+					}
+				}
+			}, 5000),
 		);
 		this.registerInterval(
 			window.setInterval(
@@ -57,7 +86,6 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			),
 		);
 		this.addCommand(createNewTaskCmd);
-		this.addCommand(undoUserActionCmd);
 		this.addCommand(newCodeblockAtCursorCmd);
 	}
 

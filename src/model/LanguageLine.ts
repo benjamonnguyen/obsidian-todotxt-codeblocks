@@ -10,6 +10,7 @@ export default class LanguageLine implements ViewModel {
 	static LANGUAGE_IDENTIFIER = '```todotxt';
 	static SORT_PREFIX = 'sort:';
 	static COLLAPSE_PREFIX = 'collapse:';
+	static SOURCE_PREFIX = 'src:';
 	static STR_ARR_SORT_FIELDS = new Set(['proj', 'ctx', 'default']);
 	static ASC_DESC_SORT_FIELDS = new Set(['status', 'prio', 'created', 'completed', 'due']);
 	static ALL_SORT_FIELDS = Array.from(LanguageLine.STR_ARR_SORT_FIELDS).concat(
@@ -21,6 +22,7 @@ export default class LanguageLine implements ViewModel {
 	collapsedProjectGroups: Set<string> = new Set();
 	sortFieldToOrder: Map<string, string[]> = new Map();
 	filterKVs: string[] = [];
+	source = '';
 
 	private constructor() {}
 
@@ -49,9 +51,17 @@ export default class LanguageLine implements ViewModel {
 				} else {
 					langLine.sortFieldToOrder.set(res.field, res.order);
 				}
-			} else if (str.startsWith('filter:')) {
-				// this.filterKVs.push(...str.substring(7).split(","));
+			} else if (str.startsWith(this.SOURCE_PREFIX)) {
+				const res = this.extractSource(str);
+				if (res instanceof Error) {
+					errs.push(res);
+				} else {
+					langLine.source = res;
+				}
 			}
+			// else if (str.startsWith('filter:')) {
+			// this.filterKVs.push(...str.substring(7).split(","));
+			// }
 		}
 
 		return { langLine, errors: errs };
@@ -81,6 +91,9 @@ export default class LanguageLine implements ViewModel {
 		}
 		if (this.collapsedProjectGroups.size) {
 			parts.push(this.collapsedProjectGroupsToString());
+		}
+		if (this.source) {
+			parts.push(LanguageLine.SOURCE_PREFIX + this.source);
 		}
 
 		return parts.join(' ');
@@ -138,5 +151,14 @@ export default class LanguageLine implements ViewModel {
 		}
 
 		return { field, order: order?.filter((o) => o.length) || [] };
+	}
+
+	static extractSource(str: string): string | Error {
+		const parts = str.split(':');
+		if (parts.length != 2 || !parts[1].endsWith('.txt')) {
+			return new SyntaxError(`"${str}" does not follow syntax "src:<path/to/*.txt">`);
+		}
+
+		return parts[1];
 	}
 }
