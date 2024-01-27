@@ -34,7 +34,6 @@ Add your tasks to a `todotxt` codeblock to get started!
 
 **Commands**
 - [x] `Create new task in focused list`
-- [x] `Undo previous user action`
 - [x] `New codeblock at cursor`
 
 **Extensions**
@@ -43,7 +42,7 @@ Add your tasks to a `todotxt` codeblock to get started!
 
 **Language line options** (not yet implemented)
   - [ ] `get:` Query for existing Todo.txt tasks and move to current codeblock
-  - [ ] `link:` Link a *.todotxt file to the todotxt codeblock
+  - [x] `src:` Link a *.txt file to the todotxt codeblock
   - [ ] `filter:`
 
 ## Extensions
