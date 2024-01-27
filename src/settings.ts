@@ -106,7 +106,7 @@ export class SettingsTab extends PluginSettingTab {
 			.addDropdown((dropDown) => {
 				dropDown
 					.addOptions({
-						archive: 'Move completed tasks to archive.todotxt file',
+						archive: 'Move completed tasks to archive.txt file',
 						delete: 'Delete completed tasks permanently',
 					})
 					.setValue(this.plugin.settings.archiveBehavior)

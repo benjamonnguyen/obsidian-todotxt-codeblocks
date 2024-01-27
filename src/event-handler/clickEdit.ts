@@ -33,7 +33,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const editModal = new EditItemModal(mdView.app, itemText, todoList, (result) => {
 			if (itemText.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
-			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number);
+			update(from, to, todoList);
 		});
 		editModal.open();
 		editModal.textComponent.inputEl.select();
@@ -55,7 +55,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 				});
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
-			update(mdView, [{ from, to, text: todoList.toString() }], listLine.number, true);
+			update(from, to, todoList);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);

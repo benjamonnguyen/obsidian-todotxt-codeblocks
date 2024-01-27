@@ -24,6 +24,9 @@ export default class TodoList implements ViewModel {
 		this.id = `list-${randomUUID()}`;
 		this.setLanguageLine(langLine);
 		this.#items = items;
+		for (const [i, item] of items.entries()) {
+			item.setIdx(i);
+		}
 		this.#projectGroups = this.buildProjectGroups();
 		this.#orderedContexts = this.getContextOrder(this.#langLine.sortFieldToOrder.get('ctx'));
 	}

@@ -34,10 +34,10 @@ export function archiveOrDeleteCompletedTasksModal(
 		return new ConfirmModal(
 			mdView.app,
 			'Archive completed tasks?',
-			'Completed tasks will be moved to archive.todotxt',
+			'Completed tasks will be moved to archive.txt',
 			async () =>
 				archiveTasks((item) => item.complete(), mdView, listLine).then((items) =>
-					notice(`Moved ${items.length} completed tasks to archive.todotxt`, Level.INFO),
+					notice(`Moved ${items.length} completed tasks to archive.txt`, Level.INFO),
 				),
 		);
 	} else if (archiveBehavior === 'delete') {
@@ -54,8 +54,8 @@ export async function archiveTasks(
 ): Promise<TodoItem[]> {
 	const archivedItems: TodoItem[] = [];
 	const archiveFile =
-		(mdView.app.vault.getAbstractFileByPath('archive.todotxt') as TFile) ||
-		(await mdView.app.vault.create('archive.todotxt', ''));
+		(mdView.app.vault.getAbstractFileByPath('archive.txt') as TFile) ||
+		(await mdView.app.vault.create('archive.txt', ''));
 	// @ts-ignore
 	const view = mdView.editor.cm as EditorView;
 
@@ -63,7 +63,7 @@ export async function archiveTasks(
 		const { from, to, todoList } = TodoList.from(line, view);
 		archivedItems.push(...todoList.removeItems(predicate));
 		if (archivedItems.length) {
-			update(mdView, [{ from, to, text: todoList.toString() }]);
+			update(from, to, todoList);
 		}
 	});
 

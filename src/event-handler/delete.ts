@@ -1,7 +1,7 @@
 import { MarkdownView } from 'obsidian';
 import { EditorView } from '@codemirror/view';
 import { ConfirmModal } from 'src/component';
-import { ActionType, LanguageLine, TodoItem } from 'src/model';
+import { ActionType, TodoItem } from 'src/model';
 import { findLine } from 'src/documentUtil';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
@@ -22,14 +22,22 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	// @ts-ignore
 	const view = mdView.editor.cm as EditorView;
 	if (action === 'todotxt-delete-item') {
-		const deleteItem = async () => {
-			const line = findLine(newTarget, view);
-			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
-			let listLine = 0;
-			if (listEl) {
-				listLine = findLine(listEl, view).number;
+		const deleteItem = () => {
+			const id = newTarget.matchParent('.' + TodoItem.HTML_CLS)?.id;
+			const itemIdx = id?.match(TodoItem.ID_REGEX)?.at(1);
+			if (!itemIdx) {
+				notice('Item element has invalid id', Level.ERR);
+				return;
 			}
-			update(mdView, [{ from: line.from, to: line.to + 1 }], listLine); // +1 to delete entire line
+			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
+			if (!listEl) {
+				notice('Cannot find todoList', Level.ERR);
+				return;
+			}
+			const line = findLine(listEl, view).number;
+			const { from, to, todoList } = TodoList.from(line, view);
+			todoList.removeItem(parseInt(itemIdx));
+			update(from, to, todoList);
 		};
 		// @ts-ignore
 		if (mdView.app.isMobile) {
@@ -39,16 +47,25 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 		}
 	} else if (action === 'todotxt-delete-list') {
 		new ConfirmModal(mdView.app, 'Remove Todo.txt codeblock?', '', () => {
-			const listLine = findLine(newTarget, view);
-			const { langLine } = LanguageLine.from(listLine.text);
-			for (let i = listLine.number; i < view.state.doc.lines; i++) {
-				const l = view.state.doc.line(i);
+			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
+			if (!listEl) {
+				notice('Cannot find todoList', Level.ERR);
+				return;
+			}
+			const line = findLine(listEl, view).number;
+			const { from, todoList } = TodoList.from(line, view);
+			let i = line;
+			let to = 0;
+			while (i < view.state.doc.lines) {
+				const l = view.state.doc.line(i++);
+				to = l.to;
 				if (l.text.trimEnd() === '```') {
-					update(mdView, [{ from: listLine.from, to: l.to + 1 }], listLine.number);
-					notice(`Removed Todo.txt codeblock: ${langLine.title} `, Level.INFO);
-					return;
+					break;
 				}
 			}
+			update(from, to, todoList, true);
+			notice(`Removed Todo.txt codeblock: ${todoList.languageLine().title} `, Level.INFO);
+			return;
 		}).open();
 	} else {
 		console.error('ActionType.DEL has no implementation for action:', action);
@@ -83,7 +100,7 @@ export async function deleteTasks(
 		const removedItems = todoList.removeItems(predicate);
 		if (removedItems.length) {
 			deletedItems.push(...removedItems);
-			update(mdView, [{ from, to, text: todoList.toString() }], line);
+			update(from, to, todoList);
 		}
 	});
 

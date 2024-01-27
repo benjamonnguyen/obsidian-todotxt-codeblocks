@@ -57,7 +57,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	}
 
 	event.preventDefault();
-	update(mdView, [{ from, to, text: todoList.toString() }], listLine.number);
+	update(from, to, todoList);
 	return true;
 }
 
