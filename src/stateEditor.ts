@@ -27,12 +27,12 @@ export function update(from: number, to: number, list: TodoList, del = false) {
 	// @ts-ignore
 	const cm = app.workspace.activeEditor.editor.cm as EditorView;
 
-	//
+	// update editor
 	const insert = del ? undefined : list.toString();
 	const transaction = cm.state.update({ changes: { from, to, insert } });
 	cm.dispatch(transaction);
 
-	//
+	// update linked file
 	const langLine = list.languageLine();
 	if (langLine.source) {
 		const data = del

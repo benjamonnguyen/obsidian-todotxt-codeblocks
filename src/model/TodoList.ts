@@ -43,8 +43,8 @@ export default class TodoList implements ViewModel {
 		const items: TodoItem[] = [];
 		while (i < view.state.doc.lines) {
 			const line = view.state.doc.line(i++);
-			if (line.text.trimEnd() === '```') break;
 			to = line.to;
+			if (line.text.trimEnd() === '```') break;
 			if (line.text.trim()) {
 				items.push(new TodoItem(line.text));
 			}
@@ -100,6 +100,7 @@ export default class TodoList implements ViewModel {
 	toString(): string {
 		let res = this.#langLine.toString() + '\n';
 		res += this.#items.map((item) => item.toString()).join('\n');
+		res += '\n```';
 
 		return res;
 	}

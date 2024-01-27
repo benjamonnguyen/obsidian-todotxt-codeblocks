@@ -53,16 +53,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 				return;
 			}
 			const line = findLine(listEl, view).number;
-			const { from, todoList } = TodoList.from(line, view);
-			let i = line;
-			let to = 0;
-			while (i < view.state.doc.lines) {
-				const l = view.state.doc.line(i++);
-				to = l.to;
-				if (l.text.trimEnd() === '```') {
-					break;
-				}
-			}
+			const { from, to, todoList } = TodoList.from(line, view);
 			update(from, to, todoList, true);
 			notice(`Removed Todo.txt codeblock: ${todoList.languageLine().title} `, Level.INFO);
 			return;
