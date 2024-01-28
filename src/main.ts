@@ -12,6 +12,7 @@ import {
 import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
+import { synchronize } from './link';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -45,7 +46,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		// @ts-ignore
-		this.registerInterval(window.setInterval(synchronize, 2000));
+		this.registerInterval(window.setInterval(synchronize, 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

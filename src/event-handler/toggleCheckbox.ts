@@ -37,14 +37,12 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	const idx = parseInt(itemIdx);
 	const item = todoList.items().at(idx);
 	if (item) {
+		todoList.removeItem(idx);
 		if (item.complete()) {
 			item.clearCompleted();
 			item.setComplete(false);
-			todoList.sort();
 		} else {
-			todoList.removeItem(idx);
 			item.setCompleted(new Date());
-			todoList.add(item);
 			// if rec extension exists, automatically add new item with due and rec ext
 			const recExt = item.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
 			if (recExt.at(0)) {
@@ -54,6 +52,8 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 				}
 			}
 		}
+		todoList.add(item);
+		todoList.sort();
 	}
 
 	event.preventDefault();

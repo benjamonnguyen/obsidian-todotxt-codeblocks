@@ -252,7 +252,10 @@ export default class TodoList implements ViewModel {
 				return bDate.diff(aDate, 'd');
 			});
 		}
-		// console.log("dueOrder", this.items.map(item => item.body()));
+		// console.log(
+		// 	'dueOrder',
+		// 	this.items().map((item) => item.toString()),
+		// );
 
 		const prioritySortOrder =
 			this.#langLine.sortFieldToOrder.get('prio') || defaultSortFieldToOrder.get('prio');
@@ -270,7 +273,10 @@ export default class TodoList implements ViewModel {
 				return bScore - aScore;
 			});
 		}
-		// console.log("prioOrder", this.items.map(item => item.body()));
+		// console.log(
+		// 	'prioOrder',
+		// 	this.items().map((item) => item.toString()),
+		// );
 
 		const completedSortOrder =
 			this.#langLine.sortFieldToOrder.get('completed') || defaultSortFieldToOrder.get('completed');
