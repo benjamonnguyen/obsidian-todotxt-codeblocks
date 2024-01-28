@@ -2,7 +2,7 @@ import { MarkdownView } from 'obsidian';
 import { EditItemModal, EditListOptionsModal } from 'src/component';
 import { TodoList, TodoItem, LanguageLine } from 'src/model';
 import { ActionType } from 'src/model';
-import { update } from 'src/stateEditor';
+import { UpdateOption, update } from 'src/stateEditor';
 
 export default function clickEdit(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -55,7 +55,11 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 				});
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
-			update(from, to, todoList);
+			const opts: UpdateOption[] = [UpdateOption.FORCE_RENDER];
+			if (!currLangLine.source && newLangLine.source) {
+				opts.push(UpdateOption.NO_WRITE);
+			}
+			update(from, to, todoList, ...opts);
 		}).open();
 	} else {
 		console.error('ActionType.EDIT has no implementation for action:', action);

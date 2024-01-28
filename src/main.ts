@@ -12,11 +12,6 @@ import {
 import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
-import { SOURCEPATH_TO_LISTID, readFromFile } from './link';
-import { TodoItem, TodoList } from './model';
-import { findLine } from './documentUtil';
-import { update } from './stateEditor';
-import { Level, notice } from './notice';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -50,35 +45,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		// @ts-ignore
-		const cm = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor.cm as EditorView;
-		this.registerInterval(
-			window.setInterval(async () => {
-				for (const [src, id] of SOURCEPATH_TO_LISTID) {
-					const el = document.getElementById(id);
-					if (!el) return;
-					const line = findLine(el, cm);
-					const { from, to, todoList } = TodoList.from(line.number, cm);
-					const langLine = todoList.languageLine();
-					const codeblock = todoList
-						.items()
-						.map((item) => item.toString())
-						.join('\n');
-					const file = await readFromFile(src);
-					if (codeblock != file) {
-						const newTodoList = new TodoList(
-							langLine,
-							file
-								.split('\n')
-								.filter((line) => !!line)
-								.map((line) => new TodoItem(line)),
-						);
-						newTodoList.sort();
-						update(from, to, newTodoList);
-						notice(`synchronized ${langLine.title} with linked file: ${src}`, Level.INFO);
-					}
-				}
-			}, 5000),
-		);
+		this.registerInterval(window.setInterval(synchronize, 2000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

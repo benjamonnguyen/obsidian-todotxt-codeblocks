@@ -5,7 +5,7 @@ import { ActionType, TodoItem } from 'src/model';
 import { findLine } from 'src/documentUtil';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { update } from 'src/stateEditor';
+import { UpdateOption, update } from 'src/stateEditor';
 
 export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	const { target } = event;
@@ -54,7 +54,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 			}
 			const line = findLine(listEl, view).number;
 			const { from, to, todoList } = TodoList.from(line, view);
-			update(from, to, todoList, true);
+			update(from, to, todoList, UpdateOption.DELETE);
 			notice(`Removed Todo.txt codeblock: ${todoList.languageLine().title} `, Level.INFO);
 			return;
 		}).open();

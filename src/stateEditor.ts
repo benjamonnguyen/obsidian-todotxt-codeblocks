@@ -2,24 +2,34 @@ import { EditorView } from '@codemirror/view';
 import { TodoList } from './model';
 import { writeToFile } from './link';
 
-/*
-Codeblocks only re-render if there is a change between the fences.
-The forceRender flag adds a newline to ChangeSpec.insert which will trigger
-todotxtBlockMdProcessor to re-render the codeblock and remove the newline.
-*/
-export function update(from: number, to: number, list: TodoList, del = false) {
+export enum UpdateOption {
+	DELETE,
+	/*
+	Codeblocks only re-render if there is a change between the fences.
+	The FORCE_RENDER option adds an extra newline to ChangeSpec.insert which will trigger
+	todotxtBlockMdProcessor to re-render the codeblock.
+	*/
+	FORCE_RENDER,
+	NO_WRITE,
+}
+export function update(from: number, to: number, list: TodoList, ...options: UpdateOption[]) {
 	// @ts-ignore
 	const cm = app.workspace.activeEditor.editor.cm as EditorView;
 
 	// update editor
-	const insert = del ? undefined : list.toString();
-	const transaction = cm.state.update({ changes: { from, to, insert } });
-	cm.dispatch(transaction);
+	const insert = options.contains(UpdateOption.DELETE) ? undefined : list.toString();
+	if (options.contains(UpdateOption.FORCE_RENDER)) {
+		cm.dispatch({ changes: { from, to } });
+		cm.dispatch({ changes: { from, insert } });
+	} else {
+		cm.dispatch({ changes: { from, to, insert } });
+	}
 
 	// update linked file
+	if (options.contains(UpdateOption.NO_WRITE)) return;
 	const langLine = list.languageLine();
 	if (langLine.source) {
-		const data = del
+		const data = options.contains(UpdateOption.DELETE)
 			? ''
 			: list
 					.items()

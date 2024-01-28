@@ -2,7 +2,7 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
 import { LanguageLine, TodoList, TodoItem } from './model';
 import { notice, Level } from './notice';
-import { SOURCEPATH_TO_LISTID } from './link';
+import { link } from './link';
 
 export function todotxtBlockProcessor(
 	source: string,
@@ -28,6 +28,6 @@ export function todotxtBlockProcessor(
 
 	// Register links
 	if (langLine.source) {
-		SOURCEPATH_TO_LISTID.set(langLine.source, todoList.getId());
+		link(langLine.source, todoList.getId());
 	}
 }
