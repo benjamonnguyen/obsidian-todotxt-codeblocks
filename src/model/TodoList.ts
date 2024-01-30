@@ -37,7 +37,12 @@ export default class TodoList implements ViewModel {
 	): { todoList: TodoList; from: number; to: number; errors: Error[] } {
 		let i = lineNumber;
 		const firstLine = view.state.doc.line(i++);
-		const { langLine, errors } = LanguageLine.from(firstLine.text);
+		const res = LanguageLine.from(firstLine.text);
+		if (res instanceof Error) {
+			console.log('ERROR: TodoList.from:', res.message);
+			return {} as any;
+		}
+		const { langLine, errors } = res;
 
 		let to: number = firstLine.to;
 		const items: TodoItem[] = [];

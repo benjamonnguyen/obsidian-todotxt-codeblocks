@@ -23,7 +23,12 @@ export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownVi
 	// @ts-ignore
 	const view = mdView.editor.cm as EditorView;
 	const line = findLine(target, view);
-	const { langLine } = LanguageLine.from(line.text);
+	const res = LanguageLine.from(line.text);
+	if (res instanceof Error) {
+		console.log('ERROR: toggleProjectGroup:', res.message);
+		return true;
+	}
+	const { langLine } = res;
 	const project = target.labels?.item(0).getText().substring(1);
 	if (!project) return false;
 

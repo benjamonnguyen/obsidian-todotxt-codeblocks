@@ -12,7 +12,6 @@ import {
 import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
-import { synchronize } from './link';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -23,14 +22,21 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
-		this.registerExtensions(['txt'], 'markdown');
+		try {
+			this.registerExtensions(['txt'], 'markdown');
+		} catch (_) {
+			/* empty */
+		}
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
-		this.registerDomEvent(document, 'click', (event: MouseEvent) => {
+		this.registerDomEvent(document, 'click', async (event: MouseEvent) => {
 			const { target } = event;
 			if (!target) return;
 
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
+				// if (TodoList.from(target as Element) instanceof Error) return;
+				// await synchronize();
+
 				const handled =
 					clickLink(event, mdView) ||
 					toggleCheckbox(event, mdView) ||
@@ -46,7 +52,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		// @ts-ignore
-		this.registerInterval(window.setInterval(synchronize, 5000));
+		// this.registerInterval(window.setInterval(synchronize, 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

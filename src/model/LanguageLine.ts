@@ -26,13 +26,13 @@ export default class LanguageLine implements ViewModel {
 
 	private constructor() {}
 
-	static from(line: string): { langLine: LanguageLine; errors: Error[] } {
+	static from(line: string): { langLine: LanguageLine; errors: Error[] } | Error {
 		const langLine = new LanguageLine();
 		const errs: Error[] = [];
 
 		const match = LanguageLine.REGEX.exec(line);
 		if (!match) {
-			throw 'Invalid line: ' + line;
+			return new Error('Invalid line: ' + line);
 		}
 		langLine.title = match?.at(1) || `Todo.txt (${moment().format('YYYY-MM-DD')})`;
 		langLine.id = randomUUID();

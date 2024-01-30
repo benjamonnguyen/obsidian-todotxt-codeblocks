@@ -13,7 +13,12 @@ export function todotxtBlockProcessor(
 
 	// Parse language line.
 	const languageLine = info.text.split('\n', info.lineStart + 1).last()!;
-	const { langLine, errors: errs } = LanguageLine.from(languageLine);
+	const res = LanguageLine.from(languageLine);
+	if (res instanceof Error) {
+		console.log('ERROR:', res.message);
+		return;
+	}
+	const { langLine, errors: errs } = res;
 	if (errs.length) {
 		let errMsg = '';
 		errs.forEach((e) => (errMsg += `- ${e.message}\n`));
