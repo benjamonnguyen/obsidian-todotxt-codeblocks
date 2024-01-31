@@ -18,7 +18,8 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	const view = mdView.editor.cm as EditorView;
 	const pos = view.posAtDOM(editBtnEl);
 	const listLine = view.state.doc.lineAt(pos);
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
+	const el = editBtnEl.matchParent('.' + TodoList.HTML_CLS);
+	const { todoList, from, to } = TodoList.from(el!);
 
 	const action = editBtnEl.getAttr('action');
 	if (action === EditItemModal.ID) {
@@ -41,7 +42,12 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {
-			const newLangLine = LanguageLine.from(currLangLine.toString()).langLine;
+			const res = LanguageLine.from(currLangLine.toString());
+			if (res instanceof Error) {
+				console.log('ERROR: clickEdit:', res.message);
+				return true;
+			}
+			const newLangLine = res.langLine;
 			newLangLine.title = result.title;
 			newLangLine.source = result.source;
 			newLangLine.sortFieldToOrder.clear();

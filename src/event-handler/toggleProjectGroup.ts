@@ -20,10 +20,13 @@ export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownVi
 		event.preventDefault();
 		return true;
 	}
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
-	const line = findLine(target, view);
-	const { langLine } = LanguageLine.from(line.text);
+	const line = findLine(target);
+	const res = LanguageLine.from(line.text);
+	if (res instanceof Error) {
+		console.log('ERROR: toggleProjectGroup:', res.message);
+		return true;
+	}
+	const { langLine } = res;
 	const project = target.labels?.item(0).getText().substring(1);
 	if (!project) return false;
 
@@ -33,7 +36,7 @@ export default function toggleProjectGroup(event: MouseEvent, mdView: MarkdownVi
 		langLine.collapsedProjectGroups.add(project);
 	}
 
-	const { from, to, todoList } = TodoList.from(line.number, view);
+	const { from, to, todoList } = TodoList.from(target);
 	const newList = new TodoList(langLine, todoList.items());
 	update(from, to, newList);
 	return true;

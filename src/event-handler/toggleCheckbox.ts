@@ -23,17 +23,14 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 		return true;
 	}
 
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
 	const itemIdx = itemEl.id.match(TodoItem.ID_REGEX)?.at(1);
 	if (!itemIdx) {
 		console.error('Item element has invalid id: ' + itemEl.id);
 		return true;
 	}
-	const pos = view.posAtDOM(itemEl);
-	const listLine = view.state.doc.lineAt(pos);
 
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
+	const el = itemEl.matchParent('.' + TodoList.HTML_CLS);
+	const { todoList, from, to } = TodoList.from(el!);
 	const idx = parseInt(itemIdx);
 	const item = todoList.items().at(idx);
 	if (item) {

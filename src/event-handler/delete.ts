@@ -1,8 +1,6 @@
 import { MarkdownView } from 'obsidian';
-import { EditorView } from '@codemirror/view';
 import { ConfirmModal } from 'src/component';
 import { ActionType, TodoItem } from 'src/model';
-import { findLine } from 'src/documentUtil';
 import { TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
 import { UpdateOption, update } from 'src/stateEditor';
@@ -19,8 +17,6 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	}
 
 	const action = newTarget.getAttr('action');
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
 	if (action === 'todotxt-delete-item') {
 		const deleteItem = () => {
 			const id = newTarget.matchParent('.' + TodoItem.HTML_CLS)?.id;
@@ -34,26 +30,24 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 				notice('Cannot find todoList', Level.ERR);
 				return;
 			}
-			const line = findLine(listEl, view).number;
-			const { from, to, todoList } = TodoList.from(line, view);
+			const { from, to, todoList } = TodoList.from(listEl);
 			todoList.removeItem(parseInt(itemIdx));
 			update(from, to, todoList);
 		};
 		// @ts-ignore
-		if (mdView.app.isMobile) {
+		if (app.isMobile) {
 			new ConfirmModal(mdView.app, 'Delete task?', '', deleteItem).open();
 		} else {
 			deleteItem();
 		}
 	} else if (action === 'todotxt-delete-list') {
-		new ConfirmModal(mdView.app, 'Remove Todo.txt codeblock?', '', () => {
+		new ConfirmModal(app, 'Remove Todo.txt codeblock?', '', () => {
 			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
 			if (!listEl) {
 				notice('Cannot find todoList', Level.ERR);
 				return;
 			}
-			const line = findLine(listEl, view).number;
-			const { from, to, todoList } = TodoList.from(line, view);
+			const { from, to, todoList } = TodoList.from(listEl);
 			update(from, to, todoList, UpdateOption.DELETE);
 			notice(`Removed Todo.txt codeblock: ${todoList.languageLine().title} `, Level.INFO);
 			return;
@@ -65,13 +59,13 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 	return true;
 }
 
-export function deleteCompletedTasksModal(listLine: number, mdView: MarkdownView): ConfirmModal {
+export function deleteCompletedTasksModal(listEl: Element): ConfirmModal {
 	return new ConfirmModal(
-		mdView.app,
+		app,
 		'Delete completed tasks?',
 		'Completed tasks will be permanently deleted',
 		async () =>
-			deleteTasks((item) => item.complete(), mdView, listLine).then((items) =>
+			deleteTasks((item) => item.complete(), listEl).then((items) =>
 				notice(`Deleted ${items.length} completed tasks`, Level.INFO),
 			),
 	);
@@ -79,15 +73,12 @@ export function deleteCompletedTasksModal(listLine: number, mdView: MarkdownView
 
 export async function deleteTasks(
 	predicate: (item: TodoItem) => boolean,
-	mdView: MarkdownView,
-	...listLines: number[]
+	...listEls: Element[]
 ): Promise<TodoItem[]> {
 	const deletedItems: TodoItem[] = [];
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
 
-	listLines.forEach((line) => {
-		const { from, to, todoList } = TodoList.from(line, view);
+	listEls.forEach((el) => {
+		const { from, to, todoList } = TodoList.from(el);
 		const removedItems = todoList.removeItems(predicate);
 		if (removedItems.length) {
 			deletedItems.push(...removedItems);

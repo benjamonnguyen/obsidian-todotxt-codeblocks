@@ -1,9 +1,7 @@
-import { MarkdownView, TFile } from 'obsidian';
+import { TFile } from 'obsidian';
 import { Level, notice } from './notice';
-import { findLine } from './documentUtil';
 import { TodoItem, TodoList } from './model';
 import { update } from './stateEditor';
-import { EditorView } from '@codemirror/view';
 
 const SOURCEPATH_TO_LISTID = new Map<string, string>();
 
@@ -21,16 +19,16 @@ export async function readFromFile(path: string): Promise<string | Error> {
 	}
 }
 
-export function writeToFile(path: string, data: string) {
+export async function writeToFile(path: string, data: string) {
 	const file = app.vault.getAbstractFileByPath(path) as TFile;
 	if (file) {
-		app.vault.modify(file, data);
+		await app.vault.modify(file, data);
 	} else {
-		app.vault
-			.create(path, data)
-			.catch(() =>
-				notice('failed write to *.txt file: missing folder(s) in path: ' + path, Level.ERR, 10000),
-			);
+		try {
+			await app.vault.create(path, data);
+		} catch (_) {
+			notice('failed write to *.txt file: missing folder(s) in path: ' + path, Level.ERR, 10000);
+		}
 	}
 }
 
@@ -38,13 +36,11 @@ export function link(srcPath: string, listId: string) {
 	SOURCEPATH_TO_LISTID.set(srcPath, listId);
 }
 
-export async function synchronize() {
-	const cm = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor.cm as EditorView;
+export async function synchronize(): Promise<boolean> {
 	for (const [src, id] of SOURCEPATH_TO_LISTID) {
 		const el = document.getElementById(id);
-		if (!el) return;
-		const line = findLine(el, cm);
-		const { from, to, todoList } = TodoList.from(line.number, cm);
+		if (!el) return false;
+		const { from, to, todoList } = TodoList.from(el);
 		const langLine = todoList.languageLine();
 		const codeblock = todoList
 			.items()
@@ -53,7 +49,7 @@ export async function synchronize() {
 		const fileRes = await readFromFile(src);
 		if (fileRes instanceof Error) {
 			SOURCEPATH_TO_LISTID.delete(src);
-			return;
+			return false;
 		}
 		if (codeblock != fileRes) {
 			const newTodoList = new TodoList(
@@ -66,6 +62,8 @@ export async function synchronize() {
 			newTodoList.sort();
 			update(from, to, newTodoList);
 			notice(`synchronized ${langLine.title} with linked file: ${src}`, Level.INFO);
+			return true;
 		}
 	}
+	return false;
 }

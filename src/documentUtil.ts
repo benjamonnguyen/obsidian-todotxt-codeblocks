@@ -1,8 +1,11 @@
 import { EditorView } from '@codemirror/view';
 import { Line } from '@codemirror/state';
 import { TodoItem, ActionButton } from './model';
+import { MarkdownView } from 'obsidian';
 
-export function findLine(el: Element, view: EditorView): Line {
+export function findLine(el: Element): Line {
+	// @ts-ignore
+	const view = app.workspace.getActiveViewOfType(MarkdownView)?.editor?.cm as EditorView;
 	const pos = view.posAtDOM(el);
 	const line = view.state.doc.lineAt(pos);
 	// console.log("pos", pos, "- line", line);
