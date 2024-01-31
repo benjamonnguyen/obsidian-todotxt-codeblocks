@@ -12,6 +12,8 @@ import {
 import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
+import { synchronize } from './link';
+import { TodoList } from './model';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
 
@@ -34,8 +36,13 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 
 			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (mdView) {
-				// if (TodoList.from(target as Element) instanceof Error) return;
-				// await synchronize();
+				if ((target as Element).matchParent('.' + TodoList.HTML_CLS)) {
+					try {
+						if (await synchronize()) return;
+					} catch (_) {
+						/* empty */
+					}
+				}
 
 				const handled =
 					clickLink(event, mdView) ||
@@ -51,8 +58,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				}
 			}
 		});
-		// @ts-ignore
-		// this.registerInterval(window.setInterval(synchronize, 5000));
+		this.registerInterval(window.setInterval(() => synchronize().catch(() => {}), 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

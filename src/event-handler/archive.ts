@@ -3,7 +3,6 @@ import { ConfirmModal } from 'src/component';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { ActionType, TodoItem, TodoList } from 'src/model';
 import { notice, Level } from 'src/notice';
-import { findLine } from 'src/documentUtil';
 import { deleteCompletedTasksModal, deleteTasks } from './delete';
 import { update } from 'src/stateEditor';
 
@@ -17,31 +16,25 @@ export function clickArchive(event: MouseEvent, mdView: MarkdownView): boolean {
 	if (!newTarget || newTarget.getAttr('action-type') !== ActionType.ARCHIVE.name) {
 		return false;
 	}
-
-	// @ts-ignore
-	const listLine = findLine(target, mdView.editor.cm as EditorView);
-	archiveOrDeleteCompletedTasksModal(listLine.number, mdView).open();
+	archiveOrDeleteCompletedTasksModal(target).open();
 
 	return true;
 }
 
-export function archiveOrDeleteCompletedTasksModal(
-	listLine: number,
-	mdView: MarkdownView,
-): ConfirmModal {
+export function archiveOrDeleteCompletedTasksModal(listEl: Element): ConfirmModal {
 	const archiveBehavior = SETTINGS_READ_ONLY.archiveBehavior;
 	if (archiveBehavior === 'archive') {
 		return new ConfirmModal(
-			mdView.app,
+			app,
 			'Archive completed tasks?',
 			'Completed tasks will be moved to archive.txt',
 			async () =>
-				archiveTasks((item) => item.complete(), mdView, listLine).then((items) =>
+				archiveTasks((item) => item.complete(), listEl).then((items) =>
 					notice(`Moved ${items.length} completed tasks to archive.txt`, Level.INFO),
 				),
 		);
 	} else if (archiveBehavior === 'delete') {
-		return deleteCompletedTasksModal(listLine, mdView);
+		return deleteCompletedTasksModal(listEl);
 	} else {
 		throw new Error('No implementation for archiveBehavior: ' + archiveBehavior);
 	}
@@ -49,25 +42,22 @@ export function archiveOrDeleteCompletedTasksModal(
 
 export async function archiveTasks(
 	predicate: (item: TodoItem) => boolean,
-	mdView: MarkdownView,
-	...listLines: number[]
+	...listEls: Element[]
 ): Promise<TodoItem[]> {
 	const archivedItems: TodoItem[] = [];
 	const archiveFile =
-		(mdView.app.vault.getAbstractFileByPath('archive.txt') as TFile) ||
-		(await mdView.app.vault.create('archive.txt', ''));
-	// @ts-ignore
-	const view = mdView.editor.cm as EditorView;
+		(app.vault.getAbstractFileByPath('archive.txt') as TFile) ||
+		(await app.vault.create('archive.txt', ''));
 
-	listLines.forEach((line) => {
-		const { from, to, todoList } = TodoList.from(line, view);
+	listEls.forEach((el) => {
+		const { from, to, todoList } = TodoList.from(el);
 		archivedItems.push(...todoList.removeItems(predicate));
 		if (archivedItems.length) {
 			update(from, to, todoList);
 		}
 	});
 
-	mdView.app.vault.process(archiveFile, (data) => {
+	app.vault.process(archiveFile, (data) => {
 		const res: string[] = [];
 		if (data) {
 			res.push(data);
@@ -84,21 +74,16 @@ export function autoArchive(mdView: MarkdownView | null) {
 	const autoArchiveThreshold = SETTINGS_READ_ONLY.autoArchiveThreshold;
 	if (!mdView || autoArchiveThreshold === -1) return;
 
-	const listEls = mdView.contentEl.getElementsByClassName(TodoList.HTML_CLS);
-	const listLines = Array.from(listEls).map(
-		(target) =>
-			// @ts-ignore
-			findLine(target, mdView.editor.cm as EditorView).number,
-	);
+	const listEls = Array.from(mdView.contentEl.getElementsByClassName(TodoList.HTML_CLS));
 	const predicate = (item: TodoItem) =>
 		item.completed() !== null &&
 		moment().diff(moment(item.completed()), 'd') >= autoArchiveThreshold;
 	let removedTasks: Promise<TodoItem[]>;
 	const archiveBehavior = SETTINGS_READ_ONLY.archiveBehavior;
 	if (archiveBehavior === 'archive') {
-		removedTasks = archiveTasks(predicate, mdView, ...listLines);
+		removedTasks = archiveTasks(predicate, ...listEls);
 	} else if (archiveBehavior === 'delete') {
-		removedTasks = deleteTasks(predicate, mdView, ...listLines);
+		removedTasks = deleteTasks(predicate, ...listEls);
 	} else {
 		throw new Error('No implementation for archiveBehavior: ' + archiveBehavior);
 	}

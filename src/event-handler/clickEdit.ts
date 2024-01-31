@@ -18,7 +18,8 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	const view = mdView.editor.cm as EditorView;
 	const pos = view.posAtDOM(editBtnEl);
 	const listLine = view.state.doc.lineAt(pos);
-	const { todoList, from, to } = TodoList.from(listLine.number, view);
+	const el = editBtnEl.matchParent('.' + TodoList.HTML_CLS);
+	const { todoList, from, to } = TodoList.from(el!);
 
 	const action = editBtnEl.getAttr('action');
 	if (action === EditItemModal.ID) {

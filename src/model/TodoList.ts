@@ -4,10 +4,11 @@ import { v4 as randomUUID } from 'uuid';
 import { LanguageLine } from '.';
 import type { ViewModel } from '.';
 import { AddItemModal } from 'src/component';
-import { moment } from 'obsidian';
+import { MarkdownView, moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
+import { findLine } from 'src/documentUtil';
 
 export default class TodoList implements ViewModel {
 	// "n/c" will respresent order for items with no context (ex. sort:ctx:a,b,n/c,c)
@@ -31,10 +32,11 @@ export default class TodoList implements ViewModel {
 		this.#orderedContexts = this.getContextOrder(this.#langLine.sortFieldToOrder.get('ctx'));
 	}
 
-	static from(
-		lineNumber: number,
-		view: EditorView,
-	): { todoList: TodoList; from: number; to: number; errors: Error[] } {
+	static from(el: Element): { todoList: TodoList; from: number; to: number; errors: Error[] } {
+		const lineNumber = findLine(el).number;
+		// @ts-ignore
+		const view = app.workspace.getActiveViewOfType(MarkdownView)?.editor?.cm as EditorView;
+
 		let i = lineNumber;
 		const firstLine = view.state.doc.line(i++);
 		const res = LanguageLine.from(firstLine.text);
