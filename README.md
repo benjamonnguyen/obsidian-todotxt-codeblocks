@@ -5,6 +5,8 @@ A codeblock alternative to mvgrimes's [obsidian-todotxt-plugin](https://github.c
 
 Add your tasks to a `todotxt` codeblock to get started!
 
+Link your codeblock to an existing *.txt file to synchronize changes.
+
 <img src="assets/demo.gif" />
 
 ## Features
