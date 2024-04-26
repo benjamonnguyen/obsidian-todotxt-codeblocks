@@ -11,6 +11,7 @@ export interface PluginSettings {
 	defaultPriority: Priority;
 	archiveBehavior: ArchiveBehavior;
 	autoArchiveThreshold: number;
+	archiveFilePath: string;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -20,6 +21,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	defaultPriority: 'none',
 	archiveBehavior: 'archive',
 	autoArchiveThreshold: -1,
+	archiveFilePath: 'archive.txt',
 };
 
 export class SettingsTab extends PluginSettingTab {
@@ -35,6 +37,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		this.archiveBehaviorDropDown();
 		this.autoArchiveThresholdSlider();
+		this.archiveFilePath();
 		this.applySortDefault();
 		this.enableInfoNotices();
 		this.containerEl.createEl('h3', { text: 'Defaults' });
@@ -133,6 +136,21 @@ export class SettingsTab extends PluginSettingTab {
 						this.plugin.saveSettings();
 					});
 				slider.setDynamicTooltip();
+			});
+	}
+
+	private archiveFilePath(): Setting {
+		return new Setting(this.containerEl)
+			.setName('Archive file path')
+			.setDesc('Path of txt file tasks are archived to.')
+			.addTextArea((txt) => {
+				txt
+					.setPlaceholder('path/to/*.txt')
+					.setValue(this.plugin.settings.archiveFilePath)
+					.onChange(async (val) => {
+						this.plugin.settings.archiveFilePath = val;
+						this.plugin.saveSettings();
+					});
 			});
 	}
 }
