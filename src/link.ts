@@ -10,6 +10,11 @@ export async function readFromFile(path: string): Promise<string | Error> {
 	if (file) {
 		return app.vault.cachedRead(file);
 	} else {
+		// TODO
+		// const lastSlash = path.lastIndexOf('/');
+		// if (lastSlash >= 0) {
+		// 	await app.vault.createFolder(path.substring(0, lastSlash));
+		// }
 		try {
 			await app.vault.create(path, '');
 		} catch (_) {
