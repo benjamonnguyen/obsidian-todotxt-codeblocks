@@ -336,17 +336,17 @@ export default class TodoList implements ViewModel {
 			let bScore: number | undefined;
 			a.projects().forEach(
 				(proj) =>
-					(aScore = Math.min(
-						this.#projectGroups.findIndex((group) => group.name === proj),
-						aScore === undefined ? Number.MAX_VALUE : aScore,
-					)),
+				(aScore = Math.min(
+					this.#projectGroups.findIndex((group) => group.name === proj),
+					aScore === undefined ? Number.MAX_VALUE : aScore,
+				)),
 			);
 			b.projects().forEach(
 				(proj) =>
-					(bScore = Math.min(
-						this.#projectGroups.findIndex((group) => group.name === proj),
-						bScore === undefined ? Number.MAX_VALUE : bScore,
-					)),
+				(bScore = Math.min(
+					this.#projectGroups.findIndex((group) => group.name === proj),
+					bScore === undefined ? Number.MAX_VALUE : bScore,
+				)),
 			);
 
 			return (aScore || -1) - (bScore || -1);
@@ -370,6 +370,7 @@ export default class TodoList implements ViewModel {
 			for (const opt of sortDefaultOptions.split(' ')) {
 				const res = LanguageLine.handleSort(opt);
 				if (res instanceof Error) {
+					console.warn(res);
 					invalidOptions.push(opt);
 				} else {
 					defaultSortFieldToOrder.set(res.field, res.order);

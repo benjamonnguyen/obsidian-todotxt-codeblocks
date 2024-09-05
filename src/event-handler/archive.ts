@@ -53,6 +53,10 @@ export async function archiveTasks(
 		}
 	});
 
+	if (!archivedItems.length) {
+		return;
+	}
+
 	app.vault.process(f, (data) => {
 		const res: string[] = [];
 		if (data) {
@@ -70,7 +74,7 @@ async function archivalFile(): Promise<TFile | undefined> {
 	const path = SETTINGS_READ_ONLY.archiveFilePath;
 
 	// must use txt extension
-	if (!path.endsWith('.txt')) {
+	if (!/\.txt["']?$/.test(path)) {
 		notice('archive file path must use txt extension', Level.ERR, 10000);
 		return;
 	}

@@ -310,6 +310,7 @@ export class Item {
 				this.#completed = dateFromString(<string>date);
 			}
 			this.#complete = true;
+			this.clearPriority();
 		}
 	}
 

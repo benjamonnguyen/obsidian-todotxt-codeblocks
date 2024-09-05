@@ -18,7 +18,7 @@ export class EditListOptionsModal extends TodotxtModal {
 		this.result = {
 			title: currentLangLine.title,
 			sortOrders: currentLangLine.sortOrdersToString(),
-			source: currentLangLine.source,
+			source: currentLangLine.sourcePath,
 		};
 		this.onSubmit = onSubmit;
 	}
@@ -68,6 +68,11 @@ export class EditListOptionsModal extends TodotxtModal {
 							}
 						}
 					}
+
+					if (!/\.txt["']?$/.test(this.result.source)) {
+						errs.push(new SyntaxError(`"${this.result.source}" does not follow syntax "src:<path/to/*.txt">`));
+					}
+
 					if (errs.length) {
 						let errMsg = '';
 						errs.forEach((e) => (errMsg += `- ${e.message}\n`));

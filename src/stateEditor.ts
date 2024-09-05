@@ -32,9 +32,9 @@ export function update(from: number, to: number, list: TodoList, ...options: Upd
 		const data = options.contains(UpdateOption.DELETE)
 			? ''
 			: list
-					.items()
-					.map((item) => item.toString())
-					.join('\n');
-		writeToFile(langLine.source, data);
+				.items()
+				.map((item) => item.toString())
+				.join('\n');
+		writeToFile(langLine.sourcePath, data);
 	}
 }

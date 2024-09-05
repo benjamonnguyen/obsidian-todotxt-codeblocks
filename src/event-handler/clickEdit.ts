@@ -62,7 +62,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			todoList.setLanguageLine(newLangLine);
 			todoList.sort();
 			const opts: UpdateOption[] = [UpdateOption.FORCE_RENDER];
-			if (!currLangLine.source && newLangLine.source) {
+			if (!currLangLine.sourcePath && newLangLine.sourcePath) {
 				opts.push(UpdateOption.NO_WRITE);
 			}
 			update(from, to, todoList, ...opts);

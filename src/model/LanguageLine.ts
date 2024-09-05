@@ -22,9 +22,9 @@ export default class LanguageLine implements ViewModel {
 	collapsedProjectGroups: Set<string> = new Set();
 	sortFieldToOrder: Map<string, string[]> = new Map();
 	filterKVs: string[] = [];
-	source = '';
+	private _source = '';
 
-	private constructor() {}
+	private constructor() { }
 
 	static from(line: string): { langLine: LanguageLine; errors: Error[] } | Error {
 		const langLine = new LanguageLine();
@@ -37,32 +37,39 @@ export default class LanguageLine implements ViewModel {
 		langLine.title = match?.at(1) || `Todo.txt (${moment().format('YYYY-MM-DD')})`;
 		langLine.id = randomUUID();
 
-		for (const [, str] of line.split(' ').entries()) {
-			if (str.startsWith(LanguageLine.COLLAPSE_PREFIX)) {
-				const collapsedProjs = str.substring(LanguageLine.COLLAPSE_PREFIX.length).split(',');
-				collapsedProjs.forEach((proj) => {
-					if (proj) langLine.collapsedProjectGroups.add(proj);
-				});
-			} else if (str.startsWith(LanguageLine.SORT_PREFIX)) {
-				// Sort ascending by default.
-				const res = LanguageLine.handleSort(str);
-				if (res instanceof Error) {
-					errs.push(res);
-				} else {
-					langLine.sortFieldToOrder.set(res.field, res.order);
-				}
-			} else if (str.startsWith(this.SOURCE_PREFIX)) {
-				const res = this.extractSource(str);
-				if (res instanceof Error) {
-					errs.push(res);
-				} else {
-					langLine.source = res;
-				}
+		const re = /(\w+:)(?:\"(.*?)\"|(\S+))/g;
+		for (const m of line.matchAll(re)) {
+			const key = m[1];
+			const val = m[2] ?? m[3];
+
+			switch (key) {
+				case LanguageLine.COLLAPSE_PREFIX:
+					const collapsedProjs = val.split(',');
+					collapsedProjs.forEach((proj) => {
+						if (proj) langLine.collapsedProjectGroups.add(proj);
+					});
+					continue;
+				case LanguageLine.SORT_PREFIX:
+					// Sort ascending by default.
+					const res = LanguageLine.handleSort(key + val);
+					if (res instanceof Error) {
+						errs.push(res);
+					} else {
+						langLine.sortFieldToOrder.set(res.field, res.order);
+					}
+					continue;
+				case LanguageLine.SOURCE_PREFIX:
+					try {
+						langLine.source = val;
+					} catch (ex) {
+						errs.push(ex);
+					}
+					continue;
 			}
-			// else if (str.startsWith('filter:')) {
-			// this.filterKVs.push(...str.substring(7).split(","));
-			// }
 		}
+		// else if (str.startsWith('filter:')) {
+		// this.filterKVs.push(...str.substring(7).split(","));
+		// }
 
 		return { langLine, errors: errs };
 	}
@@ -92,7 +99,7 @@ export default class LanguageLine implements ViewModel {
 		if (this.collapsedProjectGroups.size) {
 			parts.push(this.collapsedProjectGroupsToString());
 		}
-		if (this.source) {
+		if (this._source) {
 			parts.push(LanguageLine.SOURCE_PREFIX + this.source);
 		}
 
@@ -126,6 +133,24 @@ export default class LanguageLine implements ViewModel {
 		return LanguageLine.HTML_CLS;
 	}
 
+	get source() {
+		return (/\s/.test(this._source) && !/^['"].*['"]$/.test(this._source))
+			? `"${this._source}"`
+			: this._source;
+	}
+
+	get sourcePath() {
+		return this._source;
+	}
+
+	set source(val: string) {
+		if (!/\.txt["']?$/.test(val)) {
+			throw new SyntaxError(`"${val}" does not follow syntax "src:<path/to/*.txt">`);
+		}
+
+		this._source = val;
+	}
+
 	static handleSort(str: string): { field: string; order: string[] } | Error {
 		const segs = Array.from(str.match(/([^:\n\s]+):([^:\n\s]+)(?::([^:\n\s]+))?/)?.values() || []);
 		const field = segs.at(2);
@@ -151,14 +176,5 @@ export default class LanguageLine implements ViewModel {
 		}
 
 		return { field, order: order?.filter((o) => o.length) || [] };
-	}
-
-	static extractSource(str: string): string | Error {
-		const parts = str.split(':');
-		if (parts.length != 2 || !parts[1].endsWith('.txt')) {
-			return new SyntaxError(`"${str}" does not follow syntax "src:<path/to/*.txt">`);
-		}
-
-		return parts[1];
 	}
 }

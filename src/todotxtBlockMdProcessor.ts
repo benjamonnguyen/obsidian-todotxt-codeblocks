@@ -32,7 +32,7 @@ export function todotxtBlockProcessor(
 	el.appendChild(todoList.render());
 
 	// Register links
-	if (langLine.source) {
-		link(langLine.source, todoList.getId());
+	if (langLine.sourcePath) {
+		link(langLine.sourcePath, todoList.getId());
 	}
 }
