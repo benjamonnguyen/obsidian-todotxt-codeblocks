@@ -144,7 +144,7 @@ export default class LanguageLine implements ViewModel {
 	}
 
 	set source(val: string) {
-		if (!/\.txt["']?$/.test(val)) {
+		if (!!val && !/\.txt["']?$/.test(val)) {
 			throw new SyntaxError(`"${val}" does not follow syntax "src:<path/to/*.txt">`);
 		}
 

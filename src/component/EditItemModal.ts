@@ -35,6 +35,11 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
+		// containerEl.addEventListener('click', (e) => {
+		// 	e.preventDefault();
+		// 	e.stopImmediatePropagation();
+		// 	console.log('test');
+		// }); // TODO prevent dismissing keyboard
 		this.input = new Setting(contentEl);
 		this.submit = new Setting(contentEl);
 	}

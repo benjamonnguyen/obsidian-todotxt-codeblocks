@@ -69,7 +69,7 @@ export class EditListOptionsModal extends TodotxtModal {
 						}
 					}
 
-					if (!/\.txt["']?$/.test(this.result.source)) {
+					if (!!this.result.source && !/\.txt["']?$/.test(this.result.source)) {
 						errs.push(new SyntaxError(`"${this.result.source}" does not follow syntax "src:<path/to/*.txt">`));
 					}
 
