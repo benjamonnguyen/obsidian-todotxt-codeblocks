@@ -34,7 +34,6 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	const idx = parseInt(itemIdx);
 	const item = todoList.items().at(idx);
 	if (item) {
-		todoList.removeItem(idx);
 		if (item.complete()) {
 			item.clearCompleted();
 			item.setComplete(false);
@@ -49,8 +48,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 				}
 			}
 		}
-		todoList.add(item);
-		todoList.sort();
+		todoList.edit(idx, item);
 	}
 
 	event.preventDefault();

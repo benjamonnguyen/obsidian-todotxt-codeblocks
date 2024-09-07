@@ -1,9 +1,10 @@
 import { v4 as randomUUID } from 'uuid';
-import { ActionButton, ActionType, type ViewModel } from '.';
+import { ActionButton, ActionType, TodoList, type ViewModel } from '.';
 import { Item } from './Item';
 import { EditItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { processExtensions, ExtensionType } from 'src/extension';
+import { update } from 'src/stateEditor';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
@@ -26,14 +27,14 @@ export default class TodoItem extends Item implements ViewModel {
 	render(): HTMLElement {
 		if (!this.#id) throw 'No id!';
 
-		const item = document.createElement('div');
-		item.addClass(this.getHtmlCls());
-		item.id = this.#id;
+		const itemDiv = document.createElement('div');
+		itemDiv.addClass(this.getHtmlCls());
+		itemDiv.id = this.#id;
 		if (this.complete()) {
-			item.setAttr('checked', true);
+			itemDiv.setAttr('checked', true);
 		}
 
-		const checkbox = item.createEl('input', {
+		const checkbox = itemDiv.createEl('input', {
 			type: 'checkbox',
 			cls: 'task-list-item-checkbox',
 		});
@@ -41,26 +42,30 @@ export default class TodoItem extends Item implements ViewModel {
 
 		const prio = this.priority();
 		if (prio && !this.complete()) {
-			item.createEl('span', {
-				cls: this.getPriorityHtmlClasses(),
-				text: prio,
-			});
+			this.buildPriorityDropDownBadgeHtml(itemDiv);
 		}
 
-		const description = this.buildDescriptionHtml(item);
+		const description = this.buildDescriptionHtml(itemDiv);
 		if (prio && this.complete()) {
 			description.setText(`(${this.priority()}) ` + description.getText());
 		}
 
-		const actions = item.createSpan({
+		const actions = itemDiv.createSpan({
 			cls: 'todotxt-item-actions',
 		});
 		actions.append(
-			new ActionButton(ActionType.EDIT, EditItemModal.ID, item.id).render(),
-			new ActionButton(ActionType.DEL, 'todotxt-delete-item', item.id).render(),
+			new ActionButton(ActionType.EDIT, EditItemModal.ID, itemDiv.id).render(),
+			new ActionButton(ActionType.DEL, 'todotxt-delete-item', itemDiv.id).render(),
 		);
 
-		return item;
+		return itemDiv;
+	}
+
+	asInputText(): string {
+		if (!this.priority()) {
+			return this.getBody();
+		}
+		return `(${this.priority()}) ${this.getBody()}`;
 	}
 
 	getId(): string | undefined {
@@ -229,5 +234,35 @@ export default class TodoItem extends Item implements ViewModel {
 
 			return span;
 		}
+	}
+
+	private buildPriorityDropDownBadgeHtml(div: HTMLDivElement) {
+		const select = div.createEl('select', {
+			cls: this.getPriorityHtmlClasses(),
+		})
+		const opts = [['none', '(-)'], ['A'], ['B'], ['C'], ['D']];
+		opts.forEach(opt => {
+			if (opt.length == 2) {
+				select.add(new Option(opt[1], opt[0], true, !this.priority()));
+			} else {
+				const p = opt[0];
+				select.add(new Option(`(${p})`, p, false, this.priority() === p));
+			}
+		})
+
+		select.addEventListener('change', e => {
+			const t = e.target as HTMLSelectElement;
+			if (t.value === 'none') {
+				this.clearPriority();
+			} else {
+				this.setPriority(t.value);
+			}
+			select.className = '';
+			select.addClasses(this.getPriorityHtmlClasses());
+			const el = select.matchParent('.' + TodoItem.HTML_CLS)!.matchParent('.' + TodoList.HTML_CLS);
+			const { todoList, from, to } = TodoList.from(el!);
+			todoList.edit(this.getIdx()!, this);
+			update(from, to, todoList);
+		});
 	}
 }

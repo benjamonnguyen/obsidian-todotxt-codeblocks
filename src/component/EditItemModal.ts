@@ -136,6 +136,10 @@ export default class EditItemModal extends AutoCompleteableModal {
 	}
 
 	protected updatePriorityDropDown(val: string | null) {
+		// @ts-ignore
+		if (this.app.isMobile) {
+			return;
+		}
 		val = val ?? 'none';
 		if (val === 'none') {
 			this.item.clearPriority();

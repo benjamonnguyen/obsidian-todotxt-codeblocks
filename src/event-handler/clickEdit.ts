@@ -28,6 +28,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			console.error('EditBtn element has invalid target-id:', editBtnEl.id);
 			return true;
 		}
+
 		const itemIdx = parseInt(itemId);
 		const itemText = view.state.doc.line(listLine.number + 1 + itemIdx).text;
 

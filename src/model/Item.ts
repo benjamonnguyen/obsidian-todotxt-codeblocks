@@ -346,10 +346,6 @@ export class Item {
 		this.extensions = extensions;
 	}
 
-	asInputText(): string {
-		return `(${this.priority()}) ${this.getBody()}`;
-	}
-
 	updateFromInputText(text: string) {
 		const updated = new Item(text);
 		this.setPriority(updated.priority());

@@ -46,6 +46,8 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 
 				const handled =
 					clickLink(event, mdView) ||
+					// TODO I think the way I handled priority select change event is a better pattern
+					// since these elements have a reference to the parent TodoItem el and therefore parent TodoList el
 					toggleCheckbox(event, mdView) ||
 					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
