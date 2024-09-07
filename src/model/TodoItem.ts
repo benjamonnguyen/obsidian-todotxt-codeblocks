@@ -29,6 +29,9 @@ export default class TodoItem extends Item implements ViewModel {
 		const item = document.createElement('div');
 		item.addClass(this.getHtmlCls());
 		item.id = this.#id;
+		if (this.complete()) {
+			item.setAttr('checked', true);
+		}
 
 		const checkbox = item.createEl('input', {
 			type: 'checkbox',

@@ -38,7 +38,7 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		});
 		editModal.open();
 		editModal.textComponent.inputEl.select();
-		editModal.textComponent.inputEl.selectionStart = editModal.item.getBody().length;
+		editModal.textComponent.inputEl.selectionStart = editModal.item.asInputText().length;
 	} else if (action === EditListOptionsModal.ID) {
 		const currLangLine = todoList.languageLine();
 		new EditListOptionsModal(this.app, currLangLine, (result) => {

@@ -34,15 +34,16 @@ export default class AddItemModal extends EditItemModal {
 			AddItemModal.placeholders[Math.floor(Math.random() * AddItemModal.placeholders.length)],
 		);
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const priorityDropDown = this.input.components.find(
 			(comp) => comp instanceof DropdownComponent,
 		) as DropdownComponent;
-		priorityDropDown.setValue(SETTINGS_READ_ONLY.defaultPriority);
-		this.item.setPriority(
-			priorityDropDown.getValue() !== 'none' ? priorityDropDown.getValue() : null,
-		);
-		this.handlePriorityStyle(this.item.priority(), priorityDropDown);
+		if (priorityDropDown) {
+			priorityDropDown.setValue(SETTINGS_READ_ONLY.defaultPriority);
+			this.item.setPriority(
+				priorityDropDown.getValue() !== 'none' ? priorityDropDown.getValue() : null,
+			);
+			this.handlePriorityStyle(this.item.priority(), priorityDropDown);
+		}
 	}
 
 	getSubmitButtonText(): string {

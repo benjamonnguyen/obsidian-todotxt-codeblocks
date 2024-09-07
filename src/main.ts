@@ -59,7 +59,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		// TODO configurable sync interval (0 = never)
-		this.registerInterval(window.setInterval(() => synchronize().catch(() => {}), 5000));
+		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),
@@ -70,7 +70,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 		this.addCommand(newCodeblockAtCursorCmd);
 	}
 
-	onunload() {}
+	onunload() { }
 
 	async loadSettings() {
 		/*
