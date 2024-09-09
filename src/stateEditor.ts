@@ -38,3 +38,11 @@ export function update(from: number, to: number, list: TodoList, ...options: Upd
 		writeToFile(langLine.sourcePath, data);
 	}
 }
+
+// TODO can wrap this logic
+// function update(todoItemEl: HTMLElement, newItem: TodoItem) {
+// 	const el = todoItemEl!.matchParent('.' + TodoList.HTML_CLS);
+// 	const { todoList, from, to } = TodoList.from(el!);
+// 	todoList.edit(newItem); // TODO check guarentees of idx
+// 	update(from, to, todoList);
+// }

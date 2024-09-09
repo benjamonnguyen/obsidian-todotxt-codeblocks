@@ -8,8 +8,8 @@ export default class ConfirmModal extends TodotxtModal {
 	subText: string;
 	onSubmit: () => Promise<void> | void;
 
-	constructor(app: App, text: string, subText: string, onSubmit: () => Promise<void> | void) {
-		super(app);
+	constructor(text: string, subText: string, onSubmit: () => Promise<void> | void) {
+		super();
 		this.text = text;
 		this.subText = subText;
 		this.onSubmit = onSubmit;

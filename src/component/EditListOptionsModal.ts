@@ -10,11 +10,10 @@ export class EditListOptionsModal extends TodotxtModal {
 	onSubmit: (result: EditListOptionsModalResult) => void;
 
 	constructor(
-		app: App,
 		currentLangLine: LanguageLine,
 		onSubmit: (result: EditListOptionsModalResult) => void,
 	) {
-		super(app);
+		super();
 		this.result = {
 			title: currentLangLine.title,
 			sortOrders: currentLangLine.sortOrdersToString(),

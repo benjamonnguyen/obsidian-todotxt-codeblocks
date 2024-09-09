@@ -346,6 +346,12 @@ export class Item {
 		this.extensions = extensions;
 	}
 
+	updateFromInputText(text: string) {
+		const updated = new Item(text);
+		this.setPriority(updated.priority());
+		this.setBody(updated.getBody());
+	}
+
 	/**
 	 * Get all of the context tags on the task.
 	 *

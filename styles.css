@@ -8,32 +8,32 @@ If your plugin does not need CSS, delete this file.
 */
 
 :root {
-  --todotxt-color-amber-300: rgb(252 211 77);
-  --todotxt-color-amber-400: rgb(240, 146, 38);
-  --todotxt-color-amber-600: rgb(217 119 6);
-  --todotxt-color-blue-200: rgb(191 219 254);
-  --todotxt-color-blue-300: rgb(147 197 253);
-  --todotxt-color-blue-600: #2563EB;
-  --todotxt-color-gray-100: #f5f5f5;
-  --todotxt-color-gray-200: rgb(229 231 235);
-  --todotxt-color-gray-400: rgb(156 163 175);
-  --todotxt-color-gray-600: rgb(75 85 99);
-  --todotxt-color-gray-700: rgb(55 65 81);
-  --todotxt-color-gray-900: rgb(17 24 39);
-  --todotxt-color-gray-900-9: rgb(17 24 39 / 0.90);
-  --todotxt-color-indigo-200: rgb(199 210 254);
-  --todotxt-color-indigo-900: rgb(49 46 129);
-  --todotxt-color-orange-300: rgb(253 186 116);
-  --todotxt-color-orange-med: rgb(255, 147, 32);
-  --todotxt-color-orange-600: #EA580C;
-  --todotxt-color-red-300: rgb(252 165 165);
-  --todotxt-color-red-med: rgb(255, 85, 85);
-  --todotxt-color-red-600: #DC2626;
-  --todotxt-color-red-700: rgb(185 28 28);
-  --todotxt-color-sky-300: #7DD3FC;
-  --todotxt-color-sky-med: #21b8fe;
-  --todotxt-color-sky-600: rgb(2 132 199);
-  --todotxt-color-slate-700: rgb(51 65 85);
+    --todotxt-color-amber-300: rgb(252 211 77);
+    --todotxt-color-amber-400: rgb(240, 146, 38);
+    --todotxt-color-amber-600: rgb(217 119 6);
+    --todotxt-color-blue-200: rgb(191 219 254);
+    --todotxt-color-blue-300: rgb(147 197 253);
+    --todotxt-color-blue-600: #2563EB;
+    --todotxt-color-gray-100: #f5f5f5;
+    --todotxt-color-gray-200: rgb(229 231 235);
+    --todotxt-color-gray-400: rgb(156 163 175);
+    --todotxt-color-gray-600: rgb(75 85 99);
+    --todotxt-color-gray-700: rgb(55 65 81);
+    --todotxt-color-gray-900: rgb(17 24 39);
+    --todotxt-color-gray-900-9: rgb(17 24 39 / 0.90);
+    --todotxt-color-indigo-200: rgb(199 210 254);
+    --todotxt-color-indigo-900: rgb(49 46 129);
+    --todotxt-color-orange-300: rgb(253 186 116);
+    --todotxt-color-orange-med: rgb(255, 147, 32);
+    --todotxt-color-orange-600: #EA580C;
+    --todotxt-color-red-300: rgb(252 165 165);
+    --todotxt-color-red-med: rgb(255, 85, 85);
+    --todotxt-color-red-600: #DC2626;
+    --todotxt-color-red-700: rgb(185 28 28);
+    --todotxt-color-sky-300: #7DD3FC;
+    --todotxt-color-sky-med: #21b8fe;
+    --todotxt-color-sky-600: rgb(2 132 199);
+    --todotxt-color-slate-700: rgb(51 65 85);
 }
 
 .block-language-todotxt {
@@ -47,6 +47,7 @@ If your plugin does not need CSS, delete this file.
     margin-block-start: var(--p-spacing);
     margin-block-end: var(--p-spacing);
 }
+
 h2.todotxt-list-title {
     margin-block-start: 0;
     margin-block-end: 0;
@@ -59,12 +60,16 @@ h2.todotxt-list-title {
     padding-inline-start: 28px;
 }
 
-span.todotxt-priority {
+select.todotxt-priority {
     border-radius: var(--radius-m);
-    padding: 0.125rem 0.35rem;
-    margin-right: 0.25rem;
-    height: 1rem;
+    padding: 0 0.175rem 0.06rem;
+    margin: 0 0.25rem;
+    height: 1.35rem;
     font-size: small;
+}
+
+select.todotxt-priority:focus {
+    box-shadow: none;
 }
 
 .todotxt-priority-a,
@@ -72,16 +77,19 @@ span.todotxt-priority {
     color: var(--todotxt-color-red-600);
     background-color: var(--todotxt-color-red-300);
 }
+
 .todotxt-priority-b,
 .todotxt-priority-b:hover {
     color: var(--todotxt-color-orange-600);
     background-color: var(--todotxt-color-orange-300);
 }
+
 .todotxt-priority-c,
 .todotxt-priority-c:hover {
     color: var(--todotxt-color-sky-600);
     background-color: var(--todotxt-color-sky-300);
 }
+
 .todotxt-priority-x,
 .todotxt-priority-x:hover {
     color: white;
@@ -92,8 +100,8 @@ span.todotxt-priority {
     cursor: pointer;
 }
 
-input[type="checkbox"]:checked ~ .todotxt-item-description,
-input[type="checkbox"]:checked ~ .todotxt-item-description * {
+input[type="checkbox"]:checked~.todotxt-item-description,
+input[type="checkbox"]:checked~.todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
@@ -101,20 +109,25 @@ input[type="checkbox"]:checked ~ .todotxt-item-description * {
 .theme-light.todotxt-due-later {
     color: #264653;
 }
+
 .theme-dark .todotxt-due-later {
     color: var(--text-muted);
 }
+
 .todotxt-due-today {
     color: #E76F51;
 }
+
 .todotxt-overdue {
     color: var(--todotxt-color-red-700);
 }
+
 .todotxt-due-week {
     color: #E9C46A;
 }
+
 .todotxt-due-month {
-    color: #09C269 
+    color: #09C269
 }
 
 /* .todo-tag {
@@ -168,13 +181,23 @@ svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
     width: calc(var(--icon-size) * 1.35);
 }
 
+.todotxt-item[checked] svg.todotxt-action-btn[action="todotxt-edit-item-modal"] {
+    display: none;
+}
+
 span.todotxt-list-actions {
     position: absolute;
     top: var(--size-2-2);
     right: calc(var(--size-2-2) * 9);
     display: flex;
 }
-.cm-preview-code-block:hover .todotxt-list-actions > svg.todotxt-action-btn {
+
+.cm-preview-code-block:hover .todotxt-list-actions>svg.todotxt-action-btn {
+    color: var(--text-muted);
+    padding: var(--size-2-2) var(--size-2-3);
+}
+
+.cm-preview-code-block:hover .project-group-container label>svg.todotxt-action-btn {
     color: var(--text-muted);
     padding: var(--size-2-2) var(--size-2-3);
 }
@@ -198,6 +221,7 @@ span.todotxt-list-actions {
 .todotxt-modal-input-begin {
     margin-top: 1.5rem;
 }
+
 .is-phone .todotxt-modal-input-begin {
     margin-top: 0;
 }
@@ -211,10 +235,12 @@ button.mod-cta:disabled:hover {
     width: calc(var(--dialog-width) * 0.9);
     max-width: calc(var(--dialog-max-width) * 0.9);
 }
+
 .todotxt-modal-input-3-4 input[type="text"] {
     width: calc(var(--dialog-width) * 0.7);
     max-width: calc(var(--dialog-max-width) * 0.7);
 }
+
 .is-phone .todotxt-modal-input input[type="text"] {
     width: 100%;
     max-width: 100%;
@@ -227,6 +253,7 @@ button.mod-cta:disabled:hover {
 .todotxt-modal-btn {
     padding-bottom: 0;
 }
+
 .is-phone .todotxt-modal-btn {
     padding: 0 !important;
 }
@@ -234,6 +261,7 @@ button.mod-cta:disabled:hover {
 button.todotxt-modal-cancel {
     background-color: var(--text-muted);
 }
+
 button.todotxt-modal-cancel:hover {
     background-color: var(--text-faint);
 }
@@ -244,15 +272,18 @@ button.todotxt-modal-cancel:hover {
     margin-right: 0.4rem;
     text-align: center;
 }
+
 .is-phone select.todotxt-modal-dropdown-priority {
     width: 3.8rem;
     margin-top: 0.25rem;
     float: left;
     height: calc(var(--input-height) * 0.8);
 }
+
 .todotxt-modal-input .setting-item-control {
     display: contents;
 }
+
 .is-phone .todotxt-modal-input .setting-item-control {
     display: block;
 }
@@ -260,15 +291,19 @@ button.todotxt-modal-cancel:hover {
 .theme-dark select.is-windows.todotxt-modal-dropdown-priority {
     color: white;
 }
+
 .theme-dark select.is-windows.todotxt-priority-a {
     background-color: var(--todotxt-color-red-med);
 }
+
 .theme-dark select.is-windows.todotxt-priority-b {
     background-color: var(--todotxt-color-orange-med);
 }
+
 .theme-dark select.is-windows.todotxt-priority-c {
     background-color: var(--todotxt-color-sky-med);
 }
+
 .theme-light select.is-windows.todotxt-modal-dropdown-priority {
     color: black;
 }
@@ -277,9 +312,11 @@ button.todotxt-modal-cancel:hover {
 .project-group-container {
     margin-top: 0.5rem;
 }
-  
+
 .project-group-container label {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: var(--cursor);
     border-radius: var(--radius-m);
     padding: 0.25rem;
@@ -291,15 +328,15 @@ button.todotxt-modal-cancel:hover {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
-  
-.theme-dark .project-group-container label:hover {
+
+:not(.is-phone) .theme-dark .project-group-container label:hover {
     background: var(--todotxt-color-slate-700);
 }
 
-.theme-light .project-group-container label:hover {
+:not(.is-phone) .theme-light .project-group-container label:hover {
     background: var(--todotxt-color-gray-100);
 }
-  
+
 .project-group-container input[type="checkbox"].project-group-checkbox {
     position: absolute;
     left: -9999px;
@@ -310,19 +347,19 @@ button.todotxt-modal-cancel:hover {
     transform: scaleY(0);
 }
 
-input[type="checkbox"].project-group-checkbox:checked ~ .project-group-list,
+input[type="checkbox"].project-group-checkbox:checked~.project-group-list,
 .markdown-reading-view .project-group-list {
     height: 100%;
     transform-origin: top;
     transition: transform 0.05s ease-out;
-    transform: scaleY(1); 
+    transform: scaleY(1);
 }
 
-.theme-light input[type="checkbox"].project-group-checkbox:checked + label {
+.theme-light input[type="checkbox"].project-group-checkbox:checked+label {
     background: var(--todotxt-color-gray-100);
 }
-  
-.theme-dark input[type="checkbox"].project-group-checkbox:checked + label {
+
+.theme-dark input[type="checkbox"].project-group-checkbox:checked+label {
     background: var(--todotxt-color-slate-700);
 }
 

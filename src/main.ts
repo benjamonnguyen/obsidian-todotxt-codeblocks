@@ -2,7 +2,6 @@ import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
-	toggleProjectGroup,
 	clickEdit,
 	clickAdd,
 	clickDelete,
@@ -46,8 +45,9 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 
 				const handled =
 					clickLink(event, mdView) ||
+					// TODO refactor to remove this pattern. Use per element event handlers instead.
+					// see ProjectGroupContainer.render for examples
 					toggleCheckbox(event, mdView) ||
-					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
 					clickDelete(event, mdView) ||
@@ -59,7 +59,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		});
 		// TODO configurable sync interval (0 = never)
-		this.registerInterval(window.setInterval(() => synchronize().catch(() => {}), 5000));
+		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),
@@ -70,7 +70,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 		this.addCommand(newCodeblockAtCursorCmd);
 	}
 
-	onunload() {}
+	onunload() { }
 
 	async loadSettings() {
 		/*

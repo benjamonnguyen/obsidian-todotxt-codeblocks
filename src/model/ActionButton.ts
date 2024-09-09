@@ -1,5 +1,10 @@
 import ViewModel from './ViewModel';
 
+/**
+ * @deprecated since version 0.4.0
+ * Deprecating in favor of ActionButtonV2 to refactor away from
+ * tightly coupled pattern (see event-handler/* and documentUtil.findLine())
+ */
 export class ActionButton implements ViewModel {
 	static HTML_CLASS = 'todotxt-action-btn';
 

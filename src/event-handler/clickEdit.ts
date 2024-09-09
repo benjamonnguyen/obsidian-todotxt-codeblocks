@@ -19,7 +19,9 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 	const pos = view.posAtDOM(editBtnEl);
 	const listLine = view.state.doc.lineAt(pos);
 	const el = editBtnEl.matchParent('.' + TodoList.HTML_CLS);
-	const { todoList, from, to } = TodoList.from(el!);
+	if (!el) {
+		return false;
+	}
 
 	const action = editBtnEl.getAttr('action');
 	if (action === EditItemModal.ID) {
@@ -28,20 +30,24 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 			console.error('EditBtn element has invalid target-id:', editBtnEl.id);
 			return true;
 		}
+
 		const itemIdx = parseInt(itemId);
 		const itemText = view.state.doc.line(listLine.number + 1 + itemIdx).text;
 
-		const editModal = new EditItemModal(mdView.app, itemText, todoList, (result) => {
+		const editModal = new EditItemModal(itemText, el, (result) => {
+			const { todoList, from, to } = TodoList.from(el);
 			if (itemText.toString() === result.toString()) return;
 			todoList.edit(itemIdx, result);
 			update(from, to, todoList);
 		});
 		editModal.open();
 		editModal.textComponent.inputEl.select();
-		editModal.textComponent.inputEl.selectionStart = editModal.item.getBody().length;
+		editModal.textComponent.inputEl.selectionStart = editModal.item.asInputText().length;
 	} else if (action === EditListOptionsModal.ID) {
+		const { todoList } = TodoList.from(el);
 		const currLangLine = todoList.languageLine();
-		new EditListOptionsModal(this.app, currLangLine, (result) => {
+		new EditListOptionsModal(currLangLine, (result) => {
+			const { todoList, from, to } = TodoList.from(el);
 			const res = LanguageLine.from(currLangLine.toString());
 			if (res instanceof Error) {
 				console.log('ERROR: clickEdit:', res.message);
