@@ -13,6 +13,7 @@ export enum UpdateOption {
 	NO_WRITE,
 }
 export function update(from: number, to: number, list: TodoList, ...options: UpdateOption[]) {
+	list.sort();
 	// @ts-ignore
 	const cm = app.workspace.activeEditor.editor.cm as EditorView;
 

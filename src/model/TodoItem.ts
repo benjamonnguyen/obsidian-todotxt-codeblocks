@@ -40,15 +40,7 @@ export default class TodoItem extends Item implements ViewModel {
 		});
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
-		const prio = this.priority();
-		if (prio && !this.complete()) {
-			this.buildPriorityDropDownBadgeHtml(itemDiv);
-		}
-
-		const description = this.buildDescriptionHtml(itemDiv);
-		if (prio && this.complete()) {
-			description.setText(`(${this.priority()}) ` + description.getText());
-		}
+		this.buildDescriptionHtml(itemDiv);
 
 		const actions = itemDiv.createSpan({
 			cls: 'todotxt-item-actions',
@@ -153,6 +145,11 @@ export default class TodoItem extends Item implements ViewModel {
 			cls: 'todotxt-item-description',
 		});
 
+		const prio = this.priority();
+		if (prio && !this.complete()) {
+			this.buildPriorityDropDownBadgeHtml(description);
+		}
+
 		// Word or Markdown link
 		const REGEX = /\[[^[\]()\n]*\]\([^[\]()\n]*\)|\S+/g;
 		const bodyItr = this.getBody().matchAll(REGEX);
@@ -236,17 +233,18 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildPriorityDropDownBadgeHtml(div: HTMLDivElement) {
+	private buildPriorityDropDownBadgeHtml(div: Element) {
 		const select = div.createEl('select', {
 			cls: this.getPriorityHtmlClasses(),
-		})
+		});
+
 		const opts = [['none', '(-)'], ['A'], ['B'], ['C'], ['D']];
 		opts.forEach(opt => {
 			if (opt.length == 2) {
 				select.add(new Option(opt[1], opt[0], true, !this.priority()));
 			} else {
 				const p = opt[0];
-				select.add(new Option(`(${p})`, p, false, this.priority() === p));
+				select.add(new Option(p, p, false, this.priority() === p));
 			}
 		})
 

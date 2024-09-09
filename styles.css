@@ -56,16 +56,19 @@ h2.todotxt-list-title {
 .todotxt-item {
     padding-top: var(--list-spacing);
     padding-bottom: var(--list-spacing);
+    /* for multiline */
     text-indent: -24px;
     padding-inline-start: 28px;
 }
 
 select.todotxt-priority {
     border-radius: var(--radius-m);
-    padding: 0 0.175rem 0.06rem;
-    margin: 0 0.25rem;
-    height: 1.35rem;
+    padding: 0 0.125rem;
+    margin-right: 0.25rem;
+    margin-left: 0.15rem;
+    height: 1.15rem;
     font-size: small;
+    text-align: center;
 }
 
 select.todotxt-priority:focus {
