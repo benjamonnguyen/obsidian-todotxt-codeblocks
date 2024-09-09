@@ -1,6 +1,5 @@
 import {
 	AbstractTextComponent,
-	App,
 	ButtonComponent,
 	DropdownComponent,
 	Platform,
@@ -18,21 +17,22 @@ export default class EditItemModal extends AutoCompleteableModal {
 	textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
 	private _priorityDropDown: DropdownComponent;
 	submit: Setting;
+	protected cursorPos: number;
 
 	constructor(
-		app: App,
 		itemText: string,
-		todoList: TodoList,
+		el: Element,
 		onSubmit: (result: TodoItem) => void,
 	) {
+		const { todoList } = TodoList.from(el);
 		super(
-			app,
 			new Map([
 				['+', todoList.projectGroups().map((group) => group.name)],
 				['@', todoList.orderedContexts()],
 			]),
 		);
 		this.item = new TodoItem(itemText);
+		this.cursorPos = itemText.length;
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
@@ -72,30 +72,36 @@ export default class EditItemModal extends AutoCompleteableModal {
 			textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 		) => {
 			this.textComponent = textComponent;
-			textComponent.setValue(this.item.asInputText());
 			textComponent.onChange((text) => {
 				this.submit.components
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
 				this.suggest(text, textComponent);
-				this.item.updateFromInputText(text);
-				this.updatePriorityDropDown(this.item.priority());
+				this.persistInput(text)
 			});
+			textComponent.setValue(this.item.asInputText());
 		};
 		const addPriorityDropDown = (dropDown: DropdownComponent) => {
 			this._priorityDropDown = dropDown;
 			dropDown.selectEl.addClasses(['todotxt-modal-dropdown', 'todotxt-modal-dropdown-priority']);
+			const opts = {
+				none: '(-)',
+				A: '(A)',
+				B: '(B)',
+				C: '(C)',
+				D: '(D)',
+			};
 			dropDown
-				.addOptions({
-					none: '(-)',
-					A: '(A)',
-					B: '(B)',
-					C: '(C)',
-					D: '(D)',
-				})
+				.addOptions(opts)
 				.onChange((val) => {
+					if (this.item.priority() === null && val !== 'none') {
+						this.cursorPos += 4;
+					} else if (this.item.priority() !== null && val === 'none') {
+						this.cursorPos = Math.max(this.cursorPos - 4, 0);
+					}
 					this.updatePriorityDropDown(val);
 					this.textComponent.setValue(this.item.asInputText());
+					this.persistInput(this.item.asInputText(), this.cursorPos);
 				});
 			this.updatePriorityDropDown(this.item.priority());
 		};
@@ -110,6 +116,18 @@ export default class EditItemModal extends AutoCompleteableModal {
 
 	getSubmitButtonText(): string {
 		return 'Edit';
+	}
+
+	persistInput(text: string, cursorPos: number | null = null) {
+		this.textComponent.setValue(text);
+		this.item.updateFromInputText(text);
+		this.updatePriorityDropDown(this.item.priority());
+		if (cursorPos !== null) {
+			this.textComponent.inputEl.focus();
+			this.textComponent.inputEl.setSelectionRange(cursorPos, cursorPos);
+		}
+
+		this.cursorPos = cursorPos ?? this.textComponent.inputEl.selectionStart ?? 0;
 	}
 
 	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {

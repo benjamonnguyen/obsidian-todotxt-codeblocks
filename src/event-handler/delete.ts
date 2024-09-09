@@ -36,12 +36,12 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 		};
 		// @ts-ignore
 		if (app.isMobile) {
-			new ConfirmModal(mdView.app, 'Delete task?', '', deleteItem).open();
+			new ConfirmModal('Delete task?', '', deleteItem).open();
 		} else {
 			deleteItem();
 		}
 	} else if (action === 'todotxt-delete-list') {
-		new ConfirmModal(app, 'Remove Todo.txt codeblock?', '', () => {
+		new ConfirmModal('Remove Todo.txt codeblock?', '', () => {
 			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
 			if (!listEl) {
 				notice('Cannot find todoList', Level.ERR);
@@ -61,7 +61,6 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 
 export function deleteCompletedTasksModal(listEl: Element): ConfirmModal {
 	return new ConfirmModal(
-		app,
 		'Delete completed tasks?',
 		'Completed tasks will be permanently deleted',
 		async () =>

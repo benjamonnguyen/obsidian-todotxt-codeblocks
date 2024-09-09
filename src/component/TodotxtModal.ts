@@ -1,7 +1,7 @@
-import { App, Modal } from 'obsidian';
+import { Modal } from 'obsidian';
 
 export abstract class TodotxtModal extends Modal {
-	constructor(app: App) {
+	constructor() {
 		super(app);
 		// this.modalEl.addClass('todotxt-modal');
 		this.scope.register([], 'Enter', (evt: KeyboardEvent) => {

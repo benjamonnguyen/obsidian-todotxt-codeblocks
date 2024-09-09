@@ -7,8 +7,8 @@ export default abstract class AutoCompleteableModal extends TodotxtModal {
 	private prevSelectedWord = '';
 	private filteredSuggestions: string[] | null = null;
 
-	constructor(app: App, prefixToSuggestionOptions: Map<string, string[]>) {
-		super(app);
+	constructor(prefixToSuggestionOptions: Map<string, string[]>) {
+		super();
 		this.prefixToSuggestionOptions = new Map(prefixToSuggestionOptions.entries());
 	}
 

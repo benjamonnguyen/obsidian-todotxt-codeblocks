@@ -25,7 +25,6 @@ export function archiveOrDeleteCompletedTasksModal(listEl: Element): ConfirmModa
 	const archiveBehavior = SETTINGS_READ_ONLY.archiveBehavior;
 	if (archiveBehavior === 'archive') {
 		return new ConfirmModal(
-			app,
 			'Archive completed tasks?',
 			'Completed tasks will be moved to archive.txt',
 			() => archiveTasks((item) => item.complete(), listEl),

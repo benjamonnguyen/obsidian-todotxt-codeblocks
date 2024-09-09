@@ -1,13 +1,12 @@
 import {
 	AbstractTextComponent,
-	App,
 	DropdownComponent,
 	TextAreaComponent,
 	TextComponent,
 } from 'obsidian';
 import EditItemModal from './EditItemModal';
 import { SETTINGS_READ_ONLY } from 'src/main';
-import { TodoList, TodoItem } from 'src/model';
+import { TodoItem } from 'src/model';
 
 export default class AddItemModal extends EditItemModal {
 	static ID = 'todotxt-add-item-modal';
@@ -20,29 +19,27 @@ export default class AddItemModal extends EditItemModal {
 		'Ship new @feature +obsidian-todotxt-codeblocks due:2040-08-06',
 	];
 
-	constructor(app: App, todoList: TodoList, onSubmit: (result: TodoItem) => void) {
-		super(app, '', todoList, onSubmit);
+	constructor(el: Element,
+		onSubmit: (result: TodoItem) => void) {
+		super('', el, onSubmit);
 	}
 
 	onOpen() {
 		super.onOpen();
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const textComponent = this.input.components.find(
-			(comp) => comp instanceof TextComponent || comp instanceof TextAreaComponent,
-		)! as AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
-		textComponent.setPlaceholder(
-			AddItemModal.placeholders[Math.floor(Math.random() * AddItemModal.placeholders.length)],
-		);
-
 		const priorityDropDown = this.input.components.find(
 			(comp) => comp instanceof DropdownComponent,
 		) as DropdownComponent;
 		if (priorityDropDown) {
-			priorityDropDown.setValue(SETTINGS_READ_ONLY.defaultPriority);
-			this.item.setPriority(
-				priorityDropDown.getValue() !== 'none' ? priorityDropDown.getValue() : null,
+			this.updatePriorityDropDown(SETTINGS_READ_ONLY.defaultPriority);
+		}
+
+		const textComponent = this.input.components.find(
+			(comp) => comp instanceof TextComponent || comp instanceof TextAreaComponent,
+		)! as AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
+		if (textComponent) {
+			textComponent.setPlaceholder(
+				AddItemModal.placeholders[Math.floor(Math.random() * AddItemModal.placeholders.length)],
 			);
-			this.handlePriorityStyle(this.item.priority(), priorityDropDown);
 		}
 	}
 
