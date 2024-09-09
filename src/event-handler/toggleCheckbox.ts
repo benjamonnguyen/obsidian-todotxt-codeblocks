@@ -48,7 +48,6 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 				}
 			}
 		}
-		todoList.edit(idx, item);
 	}
 
 	event.preventDefault();
