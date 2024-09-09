@@ -2,7 +2,6 @@ import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
-	toggleProjectGroup,
 	clickEdit,
 	clickAdd,
 	clickDelete,
@@ -46,10 +45,9 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 
 				const handled =
 					clickLink(event, mdView) ||
-					// TODO I think the way I handled priority select change event is a better pattern
-					// since these elements have a reference to the parent TodoItem el and therefore parent TodoList el
+					// TODO refactor to remove this pattern. Use per element event handlers instead.
+					// see ProjectGroupContainer.render for examples
 					toggleCheckbox(event, mdView) ||
-					toggleProjectGroup(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
 					clickDelete(event, mdView) ||

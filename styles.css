@@ -197,6 +197,11 @@ span.todotxt-list-actions {
     padding: var(--size-2-2) var(--size-2-3);
 }
 
+.cm-preview-code-block:hover .project-group-container label>svg.todotxt-action-btn {
+    color: var(--text-muted);
+    padding: var(--size-2-2) var(--size-2-3);
+}
+
 .markdown-source-view .todotxt-item:hover svg.todotxt-action-btn,
 .markdown-source-view .todotxt-language-line:hover svg.todotxt-action-btn {
     color: var(--text-muted);
@@ -309,7 +314,9 @@ button.todotxt-modal-cancel:hover {
 }
 
 .project-group-container label {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: var(--cursor);
     border-radius: var(--radius-m);
     padding: 0.25rem;
@@ -322,7 +329,7 @@ button.todotxt-modal-cancel:hover {
     text-decoration: var(--checklist-done-decoration);
 }
 
-body:not(.is-phone) .theme-dark .project-group-container label:hover {
+:not(.is-phone) .theme-dark .project-group-container label:hover {
     background: var(--todotxt-color-slate-700);
 }
 
