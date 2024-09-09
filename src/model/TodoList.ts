@@ -325,8 +325,8 @@ export default class TodoList implements ViewModel {
 			let bScore = projectOrder.findIndex((proj) => proj === b.name);
 
 			if (statusSortOrder) {
-				if (a.isCompleted) aScore += this.#projectGroups.length;
-				if (b.isCompleted) bScore += this.#projectGroups.length;
+				if (a.isCompleted()) aScore += this.#projectGroups.length;
+				if (b.isCompleted()) bScore += this.#projectGroups.length;
 			}
 
 			return aScore - bScore;
