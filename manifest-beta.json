@@ -1,0 +1,11 @@
+{
+	"id": "todotxt-codeblocks",
+	"name": "TodoTxt Codeblocks",
+	"version": "0.4.2-beta",
+	"minAppVersion": "0.15.0",
+	"description": "Manage your tasks inside codeblocks according to the Todo.txt specification.",
+	"author": "Benjamin Nguyen",
+	"authorUrl": "https://github.com/benjamonnguyen",
+	"fundingUrl": "https://www.buymeacoffee.com/benjamonn",
+	"isDesktopOnly": false
+}
