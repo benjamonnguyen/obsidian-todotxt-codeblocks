@@ -1,5 +1,5 @@
 import { EditorView } from '@codemirror/view';
-import { TodoList } from './model';
+import { TodoItem, TodoList } from './model';
 import { writeToFile } from './link';
 
 export enum UpdateOption {
@@ -38,6 +38,22 @@ export function update(from: number, to: number, list: TodoList, ...options: Upd
 				.join('\n');
 		writeToFile(langLine.sourcePath, data);
 	}
+}
+
+export function updateTodoItemFromEl(childEl: Element, updatedItem: TodoItem): Error | undefined {
+	if (updatedItem.idx === undefined) {
+		return new Error('updateTodoItemFromEl: newItem must have index');
+	}
+
+	const todoListEl = childEl.matchParent('.' + TodoList.HTML_CLS);
+	if (!todoListEl) {
+		return new Error(`childEl { id: ${childEl.id}, cls: ${childEl.className} } does not have todoListEl ancestor`);
+	}
+
+	const { todoList, from, to } = TodoList.from(todoListEl);
+	todoList.removeItem(updatedItem.idx);
+	todoList.add(updatedItem);
+	update(from, to, todoList);
 }
 
 // TODO can wrap this logic

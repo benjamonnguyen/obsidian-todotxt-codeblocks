@@ -5,15 +5,15 @@ export class ActionButtonV2 implements ViewModel {
 	static HTML_CLASS = 'todotxt-action-btn';
 
 	type: ActionType;
-	id: string;
+	clickHandler: (e: MouseEvent) => any;
 
-	constructor(type: ActionType, id: string) {
+	constructor(type: ActionType, clickHandler: (e: MouseEvent) => any) {
 		this.type = type;
-		this.id = id;
+		this.clickHandler = clickHandler;
 	}
 	render(): Element {
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		svg.addClass(this.getHtmlCls());
+		svg.addClass(this.htmlCls);
 		svg.setAttrs({
 			viewBox: '0 0 100 100',
 			stroke: 'currentColor',
@@ -24,12 +24,16 @@ export class ActionButtonV2 implements ViewModel {
 		path.setAttrs(this.type.pathAttrs);
 		svg.appendChild(path);
 
+		svg.addEventListener('click', this.clickHandler);
+
 		return svg;
 	}
-	getId(): string | undefined {
-		throw new Error('Method not implemented.');
+
+	get id(): null {
+		return null;
 	}
-	getHtmlCls(): string {
+
+	get htmlCls(): string {
 		return ActionButtonV2.HTML_CLASS;
 	}
 }

@@ -1,19 +1,25 @@
 import { v4 as randomUUID } from 'uuid';
-import { ActionButton, ActionType, TodoList, type ViewModel } from '.';
+import { ActionButton, ActionType, type ViewModel } from '.';
 import { Item } from './Item';
 import { EditItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { processExtensions, ExtensionType } from 'src/extension';
-import { update } from 'src/stateEditor';
+import { updateTodoItemFromEl } from 'src/stateEditor';
+import { ActionButtonV2 } from './ActionButtonV2';
+import { DEFAULT_SETTINGS } from 'src/settings';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
 	static ID_REGEX = /^item-\S+-(\d+)$/;
 
-	#id: string | undefined;
+	#id: string;
 
 	constructor(text: string) {
 		super(text);
+	}
+
+	get htmlCls(): string {
+		return TodoItem.HTML_CLS;
 	}
 
 	setBody(body: string): void {
@@ -45,6 +51,13 @@ export default class TodoItem extends Item implements ViewModel {
 		const actions = itemDiv.createSpan({
 			cls: 'todotxt-item-actions',
 		});
+		if (this.priority() === null && !this.complete()) {
+			const prioritizeBtn = new ActionButtonV2(
+				ActionType.ADD,
+				e => this.prioritize(e),
+			).render();
+			actions.append(prioritizeBtn);
+		}
 		actions.append(
 			new ActionButton(ActionType.EDIT, EditItemModal.ID, itemDiv.id).render(),
 			new ActionButton(ActionType.DEL, 'todotxt-delete-item', itemDiv.id).render(),
@@ -60,7 +73,7 @@ export default class TodoItem extends Item implements ViewModel {
 		return `(${this.priority()}) ${this.getBody()}`;
 	}
 
-	getId(): string | undefined {
+	get id(): string {
 		return this.#id;
 	}
 
@@ -68,11 +81,14 @@ export default class TodoItem extends Item implements ViewModel {
 		return TodoItem.HTML_CLS;
 	}
 
-	setIdx(idx: number) {
-		this.#id = 'item-' + randomUUID() + '-' + idx;
+	set idx(i: number | undefined) {
+		if (i === undefined) {
+			return;
+		}
+		this.#id = 'item-' + randomUUID() + '-' + i;
 	}
 
-	getIdx(): number | undefined {
+	get idx(): number | undefined {
 		if (this.#id) {
 			const idx = this.#id.match(TodoItem.ID_REGEX)?.at(1);
 			if (idx) {
@@ -257,10 +273,13 @@ export default class TodoItem extends Item implements ViewModel {
 			}
 			select.className = '';
 			select.addClasses(this.getPriorityHtmlClasses());
-			const el = select.matchParent('.' + TodoItem.HTML_CLS)!.matchParent('.' + TodoList.HTML_CLS);
-			const { todoList, from, to } = TodoList.from(el!);
-			todoList.edit(this.getIdx()!, this);
-			update(from, to, todoList);
+			updateTodoItemFromEl(t, this);
 		});
+	}
+
+	private prioritize(e: MouseEvent) {
+		const t = e.target as SVGElement;
+		this.setPriority(DEFAULT_SETTINGS.defaultPriority ?? 'A');
+		updateTodoItemFromEl(t, this);
 	}
 }

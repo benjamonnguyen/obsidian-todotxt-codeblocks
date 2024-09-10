@@ -69,10 +69,7 @@ select.todotxt-priority {
     height: 1.15rem;
     font-size: small;
     text-align: center;
-}
-
-.is-phone select.todotxt-priority {
-    text-align: center;
+    text-align-last: center;
 }
 
 select.todotxt-priority:focus {
@@ -170,8 +167,8 @@ svg.todotxt-action-btn {
     width: var(--icon-size);
 }
 
-svg.todotxt-action-btn[action="todotxt-edit-item-modal"],
-svg.todotxt-action-btn[action="todotxt-delete-item"] {
+
+.todotxt-list-actions>svg.todotxt-action-btn {
     padding: 0.1rem;
     margin-left: 0.15rem;
     margin-right: -0.15rem;

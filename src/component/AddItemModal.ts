@@ -29,9 +29,6 @@ export default class AddItemModal extends EditItemModal {
 		const priorityDropDown = this.input.components.find(
 			(comp) => comp instanceof DropdownComponent,
 		) as DropdownComponent;
-		if (priorityDropDown) {
-			this.updatePriorityDropDown(SETTINGS_READ_ONLY.defaultPriority);
-		}
 
 		const textComponent = this.input.components.find(
 			(comp) => comp instanceof TextComponent || comp instanceof TextAreaComponent,

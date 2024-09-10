@@ -37,7 +37,8 @@ export default function clickEdit(event: MouseEvent, mdView: MarkdownView): bool
 		const editModal = new EditItemModal(itemText, el, (result) => {
 			const { todoList, from, to } = TodoList.from(el);
 			if (itemText.toString() === result.toString()) return;
-			todoList.edit(itemIdx, result);
+			todoList.removeItem(itemIdx);
+			todoList.add(result);
 			update(from, to, todoList);
 		});
 		editModal.open();

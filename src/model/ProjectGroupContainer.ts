@@ -10,7 +10,6 @@ export default class ProjectGroupContainer implements ViewModel {
 	static LIST_CLS = 'project-group-list';
 	static CHECKBOX_CLS = 'project-group-checkbox';
 
-	private _id: string;
 	items: TodoItem[];
 	name: string;
 	isCollapsed: boolean;
@@ -19,6 +18,10 @@ export default class ProjectGroupContainer implements ViewModel {
 		this.name = name;
 		this.items = items;
 		this.isCollapsed = isCollapsed;
+	}
+
+	get htmlCls(): string {
+		return ProjectGroupContainer.HTML_CLS;
 	}
 
 	render(): HTMLElement {
@@ -46,15 +49,16 @@ export default class ProjectGroupContainer implements ViewModel {
 		});
 
 		//
-		const addBtn = new ActionButtonV2(ActionType.ADD, this._id).render();
-		addBtn.addEventListener('click', e => {
-			const todoListEl = container.matchParent('.' + TodoList.HTML_CLS)!;
-			this.addProjectItem(todoListEl);
-			if (checkbox.checked) {
-				e.stopPropagation();
-				e.preventDefault();
-			}
-		});
+		const addBtn = new ActionButtonV2(
+			ActionType.ADD,
+			e => {
+				const todoListEl = container.matchParent('.' + TodoList.HTML_CLS)!;
+				this.addProjectItem(todoListEl);
+				if (checkbox.checked) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+			}).render();
 		label.append(addBtn);
 
 		const list = container.createDiv({
@@ -65,8 +69,8 @@ export default class ProjectGroupContainer implements ViewModel {
 		return container;
 	}
 
-	getId(): string {
-		return this._id;
+	get id(): null {
+		return null;
 	}
 
 	getHtmlCls(): string {

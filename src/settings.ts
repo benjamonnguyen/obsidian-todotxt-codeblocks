@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	sortDefaultOptions: 'sort:status sort:prio sort:completed sort:due sort:created',
 	applySortDefault: true,
 	enableInfoNotices: true,
-	defaultPriority: 'none',
+	defaultPriority: 'A',
 	archiveBehavior: 'archive',
 	autoArchiveThreshold: -1,
 	archiveFilePath: 'archive.txt',
@@ -76,7 +76,6 @@ export class SettingsTab extends PluginSettingTab {
 		return new Setting(this.containerEl).setName('Priority').addDropdown((dropDown) => {
 			dropDown
 				.addOptions({
-					none: '(-)',
 					A: '(A)',
 					B: '(B)',
 					C: '(C)',

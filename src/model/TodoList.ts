@@ -15,21 +15,29 @@ export default class TodoList implements ViewModel {
 	private static NO_CONTEXT = 'n/c';
 	static HTML_CLS = 'todotxt-list';
 
-	private id: string;
+	private _id: string;
 	#langLine: LanguageLine;
 	#items: TodoItem[];
 	#projectGroups: ProjectGroupContainer[];
 	#orderedContexts: string[];
 
 	constructor(langLine: LanguageLine, items: TodoItem[]) {
-		this.id = `list-${randomUUID()}`;
+		this._id = `list-${randomUUID()}`;
 		this.setLanguageLine(langLine);
 		this.#items = items;
 		for (const [i, item] of items.entries()) {
-			item.setIdx(i);
+			item.idx = i;
 		}
 		this.#projectGroups = this.buildProjectGroups();
 		this.#orderedContexts = this.getContextOrder(this.#langLine.sortFieldToOrder.get('ctx'));
+	}
+
+	get id(): string {
+		return this._id;
+	}
+
+	get htmlCls(): string {
+		return TodoList.HTML_CLS;
 	}
 
 	static from(el: Element): { todoList: TodoList; from: number; to: number; errors: Error[] } {
@@ -65,9 +73,11 @@ export default class TodoList implements ViewModel {
 		};
 	}
 
+	// static fromChild(el: Element)
+
 	render(): HTMLElement {
 		const list = document.createElement('div');
-		list.addClass(this.getHtmlCls());
+		list.addClass(this.htmlCls);
 		list.id = this.id;
 
 		const actions = list.createSpan({
@@ -94,14 +104,6 @@ export default class TodoList implements ViewModel {
 		this.#projectGroups.forEach((projGroup) => list.appendChild(projGroup.render()));
 
 		return list;
-	}
-
-	getId(): string {
-		return this.id;
-	}
-
-	getHtmlCls(): string {
-		return TodoList.HTML_CLS;
 	}
 
 	toString(): string {
@@ -156,14 +158,6 @@ export default class TodoList implements ViewModel {
 				);
 			}
 		});
-		this.sort();
-	}
-
-	edit(itemIdx: number, newItem: TodoItem) {
-		const currItem = this.#items.at(itemIdx);
-		if (currItem) {
-			this.#items[itemIdx] = newItem;
-		}
 		this.sort();
 	}
 
@@ -354,7 +348,7 @@ export default class TodoList implements ViewModel {
 		// console.log("projOrder", this.items.map(item => item.body()));
 
 		for (const [i, item] of this.#items.entries()) {
-			item.setIdx(i);
+			item.idx = i;
 		}
 	}
 

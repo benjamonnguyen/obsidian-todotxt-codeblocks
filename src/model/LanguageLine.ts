@@ -17,7 +17,7 @@ export default class LanguageLine implements ViewModel {
 		...LanguageLine.ASC_DESC_SORT_FIELDS,
 	);
 
-	private id: string;
+	private _id: string;
 	title: string;
 	collapsedProjectGroups: Set<string> = new Set();
 	sortFieldToOrder: Map<string, string[]> = new Map();
@@ -25,6 +25,14 @@ export default class LanguageLine implements ViewModel {
 	private _source = '';
 
 	private constructor() { }
+
+	get id(): string {
+		return this._id
+	}
+
+	get htmlCls(): string {
+		return LanguageLine.HTML_CLS;
+	}
 
 	static from(line: string): { langLine: LanguageLine; errors: Error[] } | Error {
 		const langLine = new LanguageLine();
@@ -35,7 +43,7 @@ export default class LanguageLine implements ViewModel {
 			return new Error('Invalid line: ' + line);
 		}
 		langLine.title = match?.at(1) || `Todo.txt (${moment().format('YYYY-MM-DD')})`;
-		langLine.id = randomUUID();
+		langLine._id = randomUUID();
 
 		const re = /(\w+:)(?:\"(.*?)\"|(\S+))/g;
 		for (const m of line.matchAll(re)) {
@@ -80,12 +88,12 @@ export default class LanguageLine implements ViewModel {
 
 		const title = document.createElement('h2');
 		title.addClass(LanguageLine.TITLE_HTML_CLS);
-		title.id = this.id;
+		title.id = this._id;
 		title.setText(this.title);
 
 		header.append(
 			title,
-			new ActionButton(ActionType.EDIT, EditListOptionsModal.ID, this.id).render(),
+			new ActionButton(ActionType.EDIT, EditListOptionsModal.ID, this._id).render(),
 		);
 
 		return header;
@@ -123,14 +131,6 @@ export default class LanguageLine implements ViewModel {
 		return this.collapsedProjectGroups.size
 			? LanguageLine.COLLAPSE_PREFIX + Array.from(this.collapsedProjectGroups).join(',')
 			: '';
-	}
-
-	getId(): string {
-		return this.id;
-	}
-
-	getHtmlCls(): string {
-		return LanguageLine.HTML_CLS;
 	}
 
 	get source() {

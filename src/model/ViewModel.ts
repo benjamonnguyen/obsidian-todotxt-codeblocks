@@ -1,5 +1,5 @@
 export default interface ViewModel {
 	render(): Element;
-	getId(): string | undefined;
-	getHtmlCls(): string;
+	get id(): string | null;
+	get htmlCls(): string;
 }

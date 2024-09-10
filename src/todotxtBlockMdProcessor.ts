@@ -33,6 +33,6 @@ export function todotxtBlockProcessor(
 
 	// Register links
 	if (langLine.sourcePath) {
-		link(langLine.sourcePath, todoList.getId());
+		link(langLine.sourcePath, todoList.id);
 	}
 }
