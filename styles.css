@@ -71,6 +71,10 @@ select.todotxt-priority {
     text-align: center;
 }
 
+.is-phone select.todotxt-priority {
+    text-align: left;
+}
+
 select.todotxt-priority:focus {
     box-shadow: none;
 }
@@ -274,13 +278,6 @@ button.todotxt-modal-cancel:hover {
     padding-left: 0.4rem;
     margin-right: 0.4rem;
     text-align: center;
-}
-
-.is-phone select.todotxt-modal-dropdown-priority {
-    width: 3.8rem;
-    margin-top: 0.25rem;
-    float: left;
-    height: calc(var(--input-height) * 0.8);
 }
 
 .todotxt-modal-input .setting-item-control {
