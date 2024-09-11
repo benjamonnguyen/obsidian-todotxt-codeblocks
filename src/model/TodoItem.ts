@@ -33,37 +33,32 @@ export default class TodoItem extends Item implements ViewModel {
 	render(): HTMLElement {
 		if (!this.#id) throw 'No id!';
 
-		const itemDiv = document.createElement('div');
-		itemDiv.addClass(this.getHtmlCls());
-		itemDiv.id = this.#id;
+		const div = document.createElement('div');
+		div.addClass(this.getHtmlCls());
+		div.id = this.#id;
 		if (this.complete()) {
-			itemDiv.setAttr('checked', true);
+			div.setAttr('checked', true);
 		}
 
-		const checkbox = itemDiv.createEl('input', {
+		const checkbox = div.createEl('input', {
 			type: 'checkbox',
 			cls: 'task-list-item-checkbox',
 		});
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
-		this.buildDescriptionHtml(itemDiv);
+		const itemContent = div.createSpan();
 
-		const actions = itemDiv.createSpan({
-			cls: 'todotxt-item-actions',
-		});
-		if (this.priority() === null && !this.complete()) {
-			const prioritizeBtn = new ActionButtonV2(
-				ActionType.ADD,
-				e => this.prioritize(e),
-			).render();
-			actions.append(prioritizeBtn);
+		const prio = this.priority();
+		if (prio && !this.complete()) {
+			itemContent.append(this.buildPriorityDropDownBadgeHtml());
 		}
-		actions.append(
-			new ActionButton(ActionType.EDIT, EditItemModal.ID, itemDiv.id).render(),
-			new ActionButton(ActionType.DEL, 'todotxt-delete-item', itemDiv.id).render(),
+
+		itemContent.append(
+			this.buildDescriptionHtml(),
+			this.buildActions(),
 		);
 
-		return itemDiv;
+		return div;
 	}
 
 	asInputText(): string {
@@ -156,16 +151,9 @@ export default class TodoItem extends Item implements ViewModel {
 		return [letterCls, 'todotxt-priority'];
 	}
 
-	private buildDescriptionHtml(itemEl: HTMLElement): HTMLElement {
-		const description = itemEl.createSpan({
-			cls: 'todotxt-item-description',
-		});
-
-		const prio = this.priority();
-		if (prio && !this.complete()) {
-			this.buildPriorityDropDownBadgeHtml(description);
-		}
-
+	private buildDescriptionHtml(): HTMLElement {
+		const description = document.createElement('span');
+		description.className = 'todotxt-item-description';
 		// Word or Markdown link
 		const REGEX = /\[[^[\]()\n]*\]\([^[\]()\n]*\)|\S+/g;
 		const bodyItr = this.getBody().matchAll(REGEX);
@@ -249,11 +237,28 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildPriorityDropDownBadgeHtml(div: Element) {
-		const select = div.createEl('select', {
-			cls: this.getPriorityHtmlClasses(),
-		});
+	private buildActions(): HTMLSpanElement {
+		const actions = document.createElement('span');
+		actions.className = 'todotxt-item-actions';
 
+		if (this.priority() === null && !this.complete()) {
+			const prioritizeBtn = new ActionButtonV2(
+				ActionType.STAR,
+				e => this.prioritize(e),
+			).render();
+			actions.append(prioritizeBtn);
+		}
+		actions.append(
+			new ActionButton(ActionType.EDIT, EditItemModal.ID, this.id).render(),
+			new ActionButton(ActionType.DEL, 'todotxt-delete-item', this.id).render(),
+		);
+
+		return actions;
+	}
+
+	private buildPriorityDropDownBadgeHtml(): HTMLSelectElement {
+		const select = document.createElement('select');
+		select.addClasses(this.getPriorityHtmlClasses());
 		const opts = [['none', '(-)'], ['A'], ['B'], ['C'], ['D']];
 		opts.forEach(opt => {
 			if (opt.length == 2) {
@@ -275,6 +280,8 @@ export default class TodoItem extends Item implements ViewModel {
 			select.addClasses(this.getPriorityHtmlClasses());
 			updateTodoItemFromEl(t, this);
 		});
+
+		return select;
 	}
 
 	private prioritize(e: MouseEvent) {

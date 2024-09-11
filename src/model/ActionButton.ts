@@ -26,7 +26,7 @@ export class ActionButton implements ViewModel {
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.addClass(this.htmlCls);
 		svg.setAttrs({
-			viewBox: '0 0 100 100',
+			viewBox: this.type.viewBox,
 			stroke: 'currentColor',
 			'action-type': this.type.name,
 			action: this.action,
@@ -42,6 +42,14 @@ export class ActionButton implements ViewModel {
 
 export class ActionType {
 	// https://www.snoweb-svg.com/
+	static STAR = new ActionType('star', {
+		strokeLinecap: 'round',
+		strokeLinejoin: 'round',
+		d: 'M46.9,23A3.3,3.3,0,0,1,51,20.9,3.4,3.4,0,0,1,53.1,23l5,15.4a3.2,3.2,0,0,0,3.1,2.2H77.3a3.2,3.2,0,0,1,3.2,3.3,3.3,3.3,0,0,1-1.3,2.6L66.2,56A3.3,3.3,0,0,0,65,59.6l4.9,15.3A3.3,3.3,0,0,1,67.7,79a3.2,3.2,0,0,1-2.8-.5l-13-9.4a3,3,0,0,0-3.8,0l-13,9.4a3.3,3.3,0,0,1-4.6-.8,3.4,3.4,0,0,1-.4-2.8L35,59.6A3.3,3.3,0,0,0,33.8,56l-13-9.5a3.4,3.4,0,0,1-.7-4.6,3.3,3.3,0,0,1,2.6-1.3H38.8a3.2,3.2,0,0,0,3.1-2.2Z',
+	},
+		'7 7 86 86',
+	)
+
 	static EDIT = new ActionType('edit', {
 		strokeLinecap: 'round',
 		strokeLinejoin: 'round',
@@ -68,9 +76,15 @@ export class ActionType {
 
 	pathAttrs: { [key: string]: string | number | boolean | null };
 	name: string;
+	viewBox: string;
 
-	constructor(name: string, pathAttrs: { [key: string]: string | number | boolean | null }) {
+	constructor(
+		name: string,
+		pathAttrs: { [key: string]: string | number | boolean | null },
+		viewBox: string = '0 0 100 100',
+	) {
 		this.name = name;
 		this.pathAttrs = pathAttrs;
+		this.viewBox = viewBox;
 	}
 }

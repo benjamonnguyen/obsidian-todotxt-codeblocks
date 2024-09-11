@@ -15,7 +15,7 @@ export class ActionButtonV2 implements ViewModel {
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.addClass(this.htmlCls);
 		svg.setAttrs({
-			viewBox: '0 0 100 100',
+			viewBox: this.type.viewBox,
 			stroke: 'currentColor',
 			'action-type': this.type.name,
 			'target-id': this.id,

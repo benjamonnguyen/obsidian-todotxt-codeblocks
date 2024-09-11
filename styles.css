@@ -61,11 +61,16 @@ h2.todotxt-list-title {
     padding-inline-start: 28px;
 }
 
+.todotxt-item .todotxt-priority {
+    top: -0.1em;
+    position: relative;
+    border-radius: var(--radius-s);
+}
+
 select.todotxt-priority {
     border-radius: var(--radius-m);
     padding: 0 0.125rem;
-    margin-right: 0.25rem;
-    margin-left: 0.15rem;
+    margin-right: 0.3rem;
     height: 1.15rem;
     font-size: small;
     text-align: center;
@@ -102,6 +107,10 @@ select.todotxt-priority:focus {
 
 .todotxt-link {
     cursor: pointer;
+}
+
+input.task-list-item-checkbox {
+    margin-inline-end: 0.35rem !important;
 }
 
 input[type="checkbox"]:checked~.todotxt-item-description,
@@ -167,14 +176,13 @@ svg.todotxt-action-btn {
     width: var(--icon-size);
 }
 
-
-.todotxt-list-actions>svg.todotxt-action-btn {
-    padding: 0.1rem;
+.todotxt-item-actions svg.todotxt-action-btn {
+    vertical-align: text-top;
     margin-left: 0.15rem;
     margin-right: -0.15rem;
-    vertical-align: text-bottom;
     height: var(--icon-s);
     width: var(--icon-s);
+    padding: 0.1rem;
 }
 
 svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
