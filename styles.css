@@ -77,7 +77,7 @@ select.todotxt-priority {
     text-align-last: center;
 }
 
-.is-phone select.todotxt-priority:focus {
+.is-mobile select.todotxt-priority:focus {
     box-shadow: none;
 }
 
@@ -193,7 +193,7 @@ svg.todotxt-action-btn {
     padding: 0.1rem;
 }
 
-:not(.is-phone) .todotxt-item-actions svg.todotxt-action-btn[action-type="edit"] {
+body:not(.is-mobile) .todotxt-item-actions svg.todotxt-action-btn[action-type="edit"] {
     display: none;
 }
 
@@ -346,20 +346,32 @@ button.todotxt-modal-cancel:hover {
     text-decoration: var(--checklist-done-decoration);
 }
 
-:not(.is-phone) .theme-dark .project-group-container label:hover {
+.theme-dark .project-group-container label:hover {
     background: var(--todotxt-color-slate-700);
 }
 
-:not(.is-phone) .theme-light .project-group-container label:hover {
+.theme-light .project-group-container label:hover {
     background: var(--todotxt-color-gray-100);
 }
 
-:not(.is-phone) .theme-dark .project-group-checkbox:focus+label {
-    background: var(--todotxt-color-gray-600) !important;
+.theme-dark .project-group-checkbox:focus+label {
+    background: var(--todotxt-color-gray-600);
 }
 
-:not(.is-phone) .theme-light .project-group-checkbox:focus+label {
-    background: var(--todotxt-color-gray-200) !important;
+.theme-light .project-group-checkbox:focus+label {
+    background: var(--todotxt-color-gray-200);
+}
+
+.theme-light input[type="checkbox"].project-group-checkbox:checked+label {
+    background: var(--todotxt-color-gray-100) !important;
+}
+
+.theme-dark input[type="checkbox"].project-group-checkbox:checked+label {
+    background: var(--todotxt-color-slate-700) !important;
+}
+
+.is-mobile .project-group-container label {
+    background: none !important;
 }
 
 .project-group-container input[type="checkbox"].project-group-checkbox {
@@ -378,14 +390,6 @@ input[type="checkbox"].project-group-checkbox:checked~.project-group-list,
     transform-origin: top;
     transition: transform 0.05s ease-out;
     transform: scaleY(1);
-}
-
-.theme-light input[type="checkbox"].project-group-checkbox:checked+label {
-    background: var(--todotxt-color-gray-100);
-}
-
-.theme-dark input[type="checkbox"].project-group-checkbox:checked+label {
-    background: var(--todotxt-color-slate-700);
 }
 
 .markdown-reading-view label {

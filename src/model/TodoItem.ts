@@ -106,6 +106,36 @@ export default class TodoItem extends Item implements ViewModel {
 		processExtensions(this);
 	}
 
+	getDueInfo(): { htmlCls: string, priority: number } | undefined {
+		const val = this.getExtensionValuesAndBodyIndices('due').first()?.value;
+		if (!val) {
+			return;
+		}
+
+		let htmlCls;
+		let priority;
+		const due = moment(val);
+		const now = moment();
+		if (due.isSame(now, 'd')) {
+			htmlCls = 'todotxt-due-today';
+			priority = 3
+		} else if (due.isBefore(now, 'd')) {
+			htmlCls = 'todotxt-overdue';
+			priority = 4;
+		} else if (due.diff(now, 'd') <= 7) {
+			htmlCls = 'todotxt-due-week';
+			priority = 2;
+		} else if (due.diff(now, 'd') <= 30) {
+			htmlCls = 'todotxt-due-month';
+			priority = 1
+		} else {
+			htmlCls = 'todotxt-due-later';
+			priority = 0;
+		}
+
+		return { htmlCls, priority };
+	}
+
 	// Invalidate by postfixing key with '*'
 	invalidateExtensions(key: string, value?: string, indices?: number[]): number {
 		let count = 0;
@@ -180,10 +210,11 @@ export default class TodoItem extends Item implements ViewModel {
 				}
 			});
 			description.addEventListener('keydown', e => {
-				console.log(e.key)
 				if (e.key === 'Enter') {
+					e.preventDefault();
 					description.blur();
 				} else if (e.key === 'Escape') {
+					e.preventDefault();
 					description.textContent = this.getBody();
 					description.blur();
 				}
@@ -201,18 +232,9 @@ export default class TodoItem extends Item implements ViewModel {
 			const span = document.createElement('span');
 			span.setText(str);
 			span.addClass('todotxt-due-ext');
-			const due = moment(split.at(1));
-			const now = moment();
-			if (due.isSame(now, 'd')) {
-				span.addClass('todotxt-due-today');
-			} else if (due.isBefore(now, 'd')) {
-				span.addClass('todotxt-overdue');
-			} else if (due.diff(now, 'd') <= 7) {
-				span.addClass('todotxt-due-week');
-			} else if (due.diff(now, 'd') <= 30) {
-				span.addClass('todotxt-due-month');
-			} else {
-				span.addClass('todotxt-due-later');
+			const dueInfo = this.getDueInfo();
+			if (dueInfo) {
+				span.addClass(dueInfo.htmlCls);
 			}
 
 			return span;
