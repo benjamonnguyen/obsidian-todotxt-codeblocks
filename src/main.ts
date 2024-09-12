@@ -43,10 +43,9 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 					}
 				}
 
+				// TODO refactor to remove this pattern. Use per element event handlers instead.
 				const handled =
 					clickLink(event, mdView) ||
-					// TODO refactor to remove this pattern. Use per element event handlers instead.
-					// see ProjectGroupContainer.render for examples
 					toggleCheckbox(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
@@ -57,7 +56,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 					autoArchive(mdView);
 				}
 			}
-		});
+		}, true); // execute on capture phase
 		// TODO configurable sync interval (0 = never)
 		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
 		this.registerInterval(

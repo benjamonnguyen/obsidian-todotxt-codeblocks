@@ -37,6 +37,7 @@ export function link(srcPath: string, listId: string) {
 }
 
 export async function synchronize(): Promise<boolean> {
+	// TODO SOURCEPATH_TO_LISTIDS should be Map<string, string[]>
 	for (const [src, id] of SOURCEPATH_TO_LISTID) {
 		const el = document.getElementById(id);
 		if (!el) return false;
