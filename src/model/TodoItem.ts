@@ -55,7 +55,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 		itemContent.append(
 			this.buildDescriptionHtml(),
-			this.buildActions(),
+			this.buildActionsHtml(),
 		);
 
 		return div;
@@ -154,6 +154,7 @@ export default class TodoItem extends Item implements ViewModel {
 	private buildDescriptionHtml(): HTMLElement {
 		const description = document.createElement('span');
 		description.className = 'todotxt-item-description';
+
 		// Word or Markdown link
 		const REGEX = /\[[^[\]()\n]*\]\([^[\]()\n]*\)|\S+/g;
 		const bodyItr = this.getBody().matchAll(REGEX);
@@ -167,6 +168,28 @@ export default class TodoItem extends Item implements ViewModel {
 			}
 			description.appendText(' ');
 			next = bodyItr.next();
+		}
+
+		// @ts-ignore
+		if (!app.isMobile && !this.complete()) {
+			// WYSIWYG editting
+			description.setAttr('tabindex', 0);
+			description.contentEditable = 'true';
+			description.addEventListener('blur', e => {
+				if (description.textContent !== this.getBody()) {
+					this.setBody(description.textContent!);
+					updateTodoItemFromEl(description, this);
+				}
+			});
+			description.addEventListener('keydown', e => {
+				console.log(e.key)
+				if (e.key === 'Enter') {
+					description.blur();
+				} else if (e.key === 'Escape') {
+					description.textContent = this.getBody();
+					description.blur();
+				}
+			});
 		}
 
 		return description;
@@ -237,7 +260,7 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildActions(): HTMLSpanElement {
+	private buildActionsHtml(): HTMLSpanElement {
 		const actions = document.createElement('span');
 		actions.className = 'todotxt-item-actions';
 
@@ -248,6 +271,7 @@ export default class TodoItem extends Item implements ViewModel {
 			).render();
 			actions.append(prioritizeBtn);
 		}
+
 		actions.append(
 			new ActionButton(ActionType.EDIT, EditItemModal.ID, this.id).render(),
 			new ActionButton(ActionType.DEL, 'todotxt-delete-item', this.id).render(),
