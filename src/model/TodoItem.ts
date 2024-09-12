@@ -33,32 +33,30 @@ export default class TodoItem extends Item implements ViewModel {
 	render(): HTMLElement {
 		if (!this.#id) throw 'No id!';
 
-		const div = document.createElement('div');
-		div.addClass(this.getHtmlCls());
-		div.id = this.#id;
+		const itemDiv = document.createElement('div');
+		itemDiv.addClass(this.getHtmlCls());
+		itemDiv.id = this.#id;
 		if (this.complete()) {
-			div.setAttr('checked', true);
+			itemDiv.setAttr('checked', true);
 		}
 
-		const checkbox = div.createEl('input', {
+		const checkbox = itemDiv.createEl('input', {
 			type: 'checkbox',
 			cls: 'task-list-item-checkbox',
 		});
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
-		const itemContent = div.createSpan();
-
 		const prio = this.priority();
 		if (prio && !this.complete()) {
-			itemContent.append(this.buildPriorityDropDownBadgeHtml());
+			itemDiv.append(this.buildPriorityDropDownBadgeHtml());
 		}
 
-		itemContent.append(
+		itemDiv.append(
 			this.buildDescriptionHtml(),
 			this.buildActionsHtml(),
 		);
 
-		return div;
+		return itemDiv;
 	}
 
 	asInputText(): string {
@@ -283,13 +281,16 @@ export default class TodoItem extends Item implements ViewModel {
 	private buildPriorityDropDownBadgeHtml(): HTMLSelectElement {
 		const select = document.createElement('select');
 		select.addClasses(this.getPriorityHtmlClasses());
-		const opts = [['none', '(-)'], ['A'], ['B'], ['C'], ['D']];
+		const opts = ['none', 'A', 'B', 'C', 'D'];
+		const prio = this.priority();
+		if (prio !== null && prio > 'D') {
+			opts.push(prio);
+		}
 		opts.forEach(opt => {
-			if (opt.length == 2) {
-				select.add(new Option(opt[1], opt[0], true, !this.priority()));
+			if (opt === 'none') {
+				select.add(new Option('(-)', opt, true, !this.priority()));
 			} else {
-				const p = opt[0];
-				select.add(new Option(p, p, false, this.priority() === p));
+				select.add(new Option(opt, opt, false, this.priority() === opt));
 			}
 		})
 
