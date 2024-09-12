@@ -33,32 +33,30 @@ export default class TodoItem extends Item implements ViewModel {
 	render(): HTMLElement {
 		if (!this.#id) throw 'No id!';
 
-		const div = document.createElement('div');
-		div.addClass(this.getHtmlCls());
-		div.id = this.#id;
+		const itemDiv = document.createElement('div');
+		itemDiv.addClass(this.getHtmlCls());
+		itemDiv.id = this.#id;
 		if (this.complete()) {
-			div.setAttr('checked', true);
+			itemDiv.setAttr('checked', true);
 		}
 
-		const checkbox = div.createEl('input', {
+		const checkbox = itemDiv.createEl('input', {
 			type: 'checkbox',
 			cls: 'task-list-item-checkbox',
 		});
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
 
-		const itemContent = div.createSpan();
-
 		const prio = this.priority();
 		if (prio && !this.complete()) {
-			itemContent.append(this.buildPriorityDropDownBadgeHtml());
+			itemDiv.append(this.buildPriorityDropDownBadgeHtml());
 		}
 
-		itemContent.append(
+		itemDiv.append(
 			this.buildDescriptionHtml(),
-			this.buildActions(),
+			this.buildActionsHtml(),
 		);
 
-		return div;
+		return itemDiv;
 	}
 
 	asInputText(): string {
@@ -108,6 +106,36 @@ export default class TodoItem extends Item implements ViewModel {
 		processExtensions(this);
 	}
 
+	getDueInfo(): { htmlCls: string, priority: number } | undefined {
+		const val = this.getExtensionValuesAndBodyIndices('due').first()?.value;
+		if (!val) {
+			return;
+		}
+
+		let htmlCls;
+		let priority;
+		const due = moment(val);
+		const now = moment();
+		if (due.isSame(now, 'd')) {
+			htmlCls = 'todotxt-due-today';
+			priority = 3
+		} else if (due.isBefore(now, 'd')) {
+			htmlCls = 'todotxt-overdue';
+			priority = 4;
+		} else if (due.diff(now, 'd') <= 7) {
+			htmlCls = 'todotxt-due-week';
+			priority = 2;
+		} else if (due.diff(now, 'd') <= 30) {
+			htmlCls = 'todotxt-due-month';
+			priority = 1
+		} else {
+			htmlCls = 'todotxt-due-later';
+			priority = 0;
+		}
+
+		return { htmlCls, priority };
+	}
+
 	// Invalidate by postfixing key with '*'
 	invalidateExtensions(key: string, value?: string, indices?: number[]): number {
 		let count = 0;
@@ -154,6 +182,7 @@ export default class TodoItem extends Item implements ViewModel {
 	private buildDescriptionHtml(): HTMLElement {
 		const description = document.createElement('span');
 		description.className = 'todotxt-item-description';
+
 		// Word or Markdown link
 		const REGEX = /\[[^[\]()\n]*\]\([^[\]()\n]*\)|\S+/g;
 		const bodyItr = this.getBody().matchAll(REGEX);
@@ -169,6 +198,32 @@ export default class TodoItem extends Item implements ViewModel {
 			next = bodyItr.next();
 		}
 
+		// @ts-ignore
+		if (!app.isMobile && !this.complete()) {
+			// WYSIWYG editting
+			description.setAttr('tabindex', 0);
+			description.contentEditable = 'true';
+			description.addEventListener('blur', e => {
+				if (description.textContent !== this.getBody()) {
+					this.setBody(description.textContent!.trimEnd());
+					updateTodoItemFromEl(description, this);
+				}
+			});
+			description.addEventListener('keydown', e => {
+				// console.log(e.key)
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					description.blur();
+				} else if (e.key === 'Escape') {
+					e.preventDefault();
+					description.textContent = this.getBody();
+					description.blur();
+				} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+					e.preventDefault();
+				}
+			});
+		}
+
 		return description;
 	}
 
@@ -180,18 +235,9 @@ export default class TodoItem extends Item implements ViewModel {
 			const span = document.createElement('span');
 			span.setText(str);
 			span.addClass('todotxt-due-ext');
-			const due = moment(split.at(1));
-			const now = moment();
-			if (due.isSame(now, 'd')) {
-				span.addClass('todotxt-due-today');
-			} else if (due.isBefore(now, 'd')) {
-				span.addClass('todotxt-overdue');
-			} else if (due.diff(now, 'd') <= 7) {
-				span.addClass('todotxt-due-week');
-			} else if (due.diff(now, 'd') <= 30) {
-				span.addClass('todotxt-due-month');
-			} else {
-				span.addClass('todotxt-due-later');
+			const dueInfo = this.getDueInfo();
+			if (dueInfo) {
+				span.addClass(dueInfo.htmlCls);
 			}
 
 			return span;
@@ -237,7 +283,7 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildActions(): HTMLSpanElement {
+	private buildActionsHtml(): HTMLSpanElement {
 		const actions = document.createElement('span');
 		actions.className = 'todotxt-item-actions';
 
@@ -248,6 +294,7 @@ export default class TodoItem extends Item implements ViewModel {
 			).render();
 			actions.append(prioritizeBtn);
 		}
+
 		actions.append(
 			new ActionButton(ActionType.EDIT, EditItemModal.ID, this.id).render(),
 			new ActionButton(ActionType.DEL, 'todotxt-delete-item', this.id).render(),
@@ -259,13 +306,16 @@ export default class TodoItem extends Item implements ViewModel {
 	private buildPriorityDropDownBadgeHtml(): HTMLSelectElement {
 		const select = document.createElement('select');
 		select.addClasses(this.getPriorityHtmlClasses());
-		const opts = [['none', '(-)'], ['A'], ['B'], ['C'], ['D']];
+		const opts = ['none', 'A', 'B', 'C', 'D'];
+		const prio = this.priority();
+		if (prio !== null && prio > 'D') {
+			opts.push(prio);
+		}
 		opts.forEach(opt => {
-			if (opt.length == 2) {
-				select.add(new Option(opt[1], opt[0], true, !this.priority()));
+			if (opt === 'none') {
+				select.add(new Option('(-)', opt, true, !this.priority()));
 			} else {
-				const p = opt[0];
-				select.add(new Option(p, p, false, this.priority() === p));
+				select.add(new Option(opt, opt, false, this.priority() === opt));
 			}
 		})
 

@@ -55,11 +55,3 @@ export function updateTodoItemFromEl(childEl: Element, updatedItem: TodoItem): E
 	todoList.add(updatedItem);
 	update(from, to, todoList);
 }
-
-// TODO can wrap this logic
-// function update(todoItemEl: HTMLElement, newItem: TodoItem) {
-// 	const el = todoItemEl!.matchParent('.' + TodoList.HTML_CLS);
-// 	const { todoList, from, to } = TodoList.from(el!);
-// 	todoList.edit(newItem); // TODO check guarentees of idx
-// 	update(from, to, todoList);
-// }

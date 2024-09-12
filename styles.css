@@ -77,7 +77,7 @@ select.todotxt-priority {
     text-align-last: center;
 }
 
-select.todotxt-priority:focus {
+.is-mobile select.todotxt-priority:focus {
     box-shadow: none;
 }
 
@@ -117,6 +117,14 @@ input[type="checkbox"]:checked~.todotxt-item-description,
 input[type="checkbox"]:checked~.todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
+}
+
+input[type="checkbox"]:not(:checked)~.todotxt-item-description:focus {
+    background-color: var(--background-modifier-hover);
+}
+
+.todotxt-item-description:focus span {
+    color: var(--text-normal);
 }
 
 .theme-light.todotxt-due-later {
@@ -183,6 +191,10 @@ svg.todotxt-action-btn {
     height: var(--icon-s);
     width: var(--icon-s);
     padding: 0.1rem;
+}
+
+body:not(.is-mobile) .todotxt-item-actions svg.todotxt-action-btn[action-type="edit"] {
+    display: none;
 }
 
 svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
@@ -334,12 +346,32 @@ button.todotxt-modal-cancel:hover {
     text-decoration: var(--checklist-done-decoration);
 }
 
-:not(.is-phone) .theme-dark .project-group-container label:hover {
+.theme-dark .project-group-container label:hover {
     background: var(--todotxt-color-slate-700);
 }
 
-:not(.is-phone) .theme-light .project-group-container label:hover {
+.theme-light .project-group-container label:hover {
     background: var(--todotxt-color-gray-100);
+}
+
+.theme-dark .project-group-checkbox:focus+label {
+    background: var(--todotxt-color-gray-600);
+}
+
+.theme-light .project-group-checkbox:focus+label {
+    background: var(--todotxt-color-gray-200);
+}
+
+.theme-light input[type="checkbox"].project-group-checkbox:checked+label {
+    background: var(--todotxt-color-gray-100) !important;
+}
+
+.theme-dark input[type="checkbox"].project-group-checkbox:checked+label {
+    background: var(--todotxt-color-slate-700) !important;
+}
+
+.is-mobile .project-group-container label {
+    background: none !important;
 }
 
 .project-group-container input[type="checkbox"].project-group-checkbox {
@@ -358,14 +390,6 @@ input[type="checkbox"].project-group-checkbox:checked~.project-group-list,
     transform-origin: top;
     transition: transform 0.05s ease-out;
     transform: scaleY(1);
-}
-
-.theme-light input[type="checkbox"].project-group-checkbox:checked+label {
-    background: var(--todotxt-color-gray-100);
-}
-
-.theme-dark input[type="checkbox"].project-group-checkbox:checked+label {
-    background: var(--todotxt-color-slate-700);
 }
 
 .markdown-reading-view label {

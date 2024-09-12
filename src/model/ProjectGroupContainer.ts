@@ -38,11 +38,24 @@ export default class ProjectGroupContainer implements ViewModel {
 		});
 		checkbox.id = checkboxId;
 		checkbox.setAttr(!this.isCollapsed ? 'checked' : 'unchecked', true);
+
 		const label = container
 			.createEl('label', {
 				attr: { for: checkboxId },
 			});
-		label.setText(`+${this.name} (${this.items.filter(i => i.complete()).length}/${this.items.length})`)
+
+		//
+		const textSpan = label.createSpan();
+		textSpan.setText(`+${this.name}`);
+		const dueHtmlCls = this.items.reduce((a, b) => {
+			const aPrio = a.getDueInfo()?.priority ?? -1;
+			const bPrio = b.getDueInfo()?.priority ?? -1;
+			return (aPrio >= bPrio) ? a : b;
+		})?.getDueInfo()?.htmlCls;
+		const counterSpan = textSpan.createSpan(dueHtmlCls);
+		counterSpan.setText(` (${this.items.filter(i => i.complete()).length}/${this.items.length})`);
+
+		//
 		label.addEventListener('click', e => {
 			const todoListEl = container.matchParent('.' + TodoList.HTML_CLS)!;
 			this.toggleProjectCollapse(label as HTMLLabelElement, todoListEl);
@@ -104,7 +117,7 @@ export default class ProjectGroupContainer implements ViewModel {
 
 	private toggleProjectCollapse(label: HTMLLabelElement, todoListEl: Element) {
 		const { todoList, from, to } = TodoList.from(todoListEl);
-		const project = /\+(\S+)/.exec(label.getText())![1];
+		const project = /\+(\S+)/.exec(label.firstChild!.textContent!)![1];
 
 		const langLine = todoList.languageLine();
 		if (langLine.collapsedProjectGroups.has(project)) {
