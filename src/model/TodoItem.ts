@@ -205,11 +205,12 @@ export default class TodoItem extends Item implements ViewModel {
 			description.contentEditable = 'true';
 			description.addEventListener('blur', e => {
 				if (description.textContent !== this.getBody()) {
-					this.setBody(description.textContent!);
+					this.setBody(description.textContent!.trimEnd());
 					updateTodoItemFromEl(description, this);
 				}
 			});
 			description.addEventListener('keydown', e => {
+				// console.log(e.key)
 				if (e.key === 'Enter') {
 					e.preventDefault();
 					description.blur();
@@ -217,6 +218,8 @@ export default class TodoItem extends Item implements ViewModel {
 					e.preventDefault();
 					description.textContent = this.getBody();
 					description.blur();
+				} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+					e.preventDefault();
 				}
 			});
 		}
