@@ -15,7 +15,6 @@ import { synchronize } from './link';
 import { TodoList } from './model';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
-
 export default class TodotxtCodeblocksPlugin extends Plugin {
 	static NAME = 'Todo.txt Codeblocks';
 	settings: PluginSettings;
@@ -37,9 +36,12 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			if (mdView) {
 				if ((target as Element).matchParent('.' + TodoList.HTML_CLS)) {
 					try {
-						if (await synchronize()) return;
-					} catch (_) {
-						/* empty */
+						if (await synchronize()) {
+							event.preventDefault();
+							return;
+						}
+					} catch (e) {
+						console.error(e);
 					}
 				}
 
@@ -58,7 +60,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		}, true); // execute on capture phase
 		// TODO configurable sync interval (0 = never)
-		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
+		this.registerInterval(window.setInterval(() => synchronize().catch(console.error), 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

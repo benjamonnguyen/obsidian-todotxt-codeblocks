@@ -2,7 +2,6 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
 import { LanguageLine, TodoList, TodoItem } from './model';
 import { notice, Level } from './notice';
-import { link } from './link';
 
 export function todotxtBlockProcessor(
 	source: string,
@@ -30,9 +29,4 @@ export function todotxtBlockProcessor(
 	const items = lines.filter((line) => line.trim().length).map((line) => new TodoItem(line));
 	const todoList = new TodoList(langLine, items);
 	el.appendChild(todoList.render());
-
-	// Register links
-	if (langLine.sourcePath) {
-		link(langLine.sourcePath, todoList.id);
-	}
 }
