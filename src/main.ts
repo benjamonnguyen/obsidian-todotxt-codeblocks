@@ -40,9 +40,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 							event.preventDefault();
 							return;
 						}
-					} catch (e) {
-						console.error(e);
-					}
+					} catch (_) { }
 				}
 
 				// TODO refactor to remove this pattern. Use per element event handlers instead.
@@ -60,7 +58,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			}
 		}, true); // execute on capture phase
 		// TODO configurable sync interval (0 = never)
-		this.registerInterval(window.setInterval(() => synchronize().catch(console.error), 5000));
+		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),

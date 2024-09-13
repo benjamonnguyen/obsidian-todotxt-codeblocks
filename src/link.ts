@@ -35,8 +35,7 @@ export async function synchronize(): Promise<boolean> {
 	const listEls = document.querySelectorAll(`div.block-language-todotxt .${TodoList.HTML_CLS}`);
 	listEls.forEach(el => {
 		const { todoList } = TodoList.from(el);
-		const { sourcePath, title } = todoList.languageLine();
-		console.log(sourcePath, title)
+		const { sourcePath } = todoList.languageLine();
 		if (!srcPathToTodoListEls.has(sourcePath)) {
 			srcPathToTodoListEls.set(sourcePath, []);
 		}
@@ -52,7 +51,6 @@ export async function synchronize(): Promise<boolean> {
 		}
 		for (const el of todoListEls) {
 			const { from, to, todoList } = TodoList.from(el);
-			const langLine = todoList.languageLine();
 			const codeblock = todoList
 				.items()
 				.map((item) => item.toString())
@@ -60,7 +58,7 @@ export async function synchronize(): Promise<boolean> {
 			if (codeblock !== fileRes) {
 				synced = true;
 				const newTodoList: TodoList = new TodoList(
-					langLine,
+					todoList.languageLine(),
 					fileRes
 						.split('\n')
 						.filter((line) => !!line)
@@ -68,7 +66,7 @@ export async function synchronize(): Promise<boolean> {
 				);
 				newTodoList.sort();
 				update(from, to, newTodoList, UpdateOption.NO_WRITE);
-				notice(`synchronized ${langLine.title} with linked file: ${srcPath}`, Level.INFO);
+				notice(`synchronized ${newTodoList.languageLine().title} with linked file: ${srcPath}`, Level.INFO);
 			}
 		}
 	}
