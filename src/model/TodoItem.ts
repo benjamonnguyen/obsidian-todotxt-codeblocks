@@ -181,6 +181,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 	private buildDescriptionHtml(): HTMLElement {
 		const description = document.createElement('span');
+		description.spellcheck = false;
 		description.className = 'todotxt-item-description';
 
 		// Word or Markdown link
@@ -203,12 +204,22 @@ export default class TodoItem extends Item implements ViewModel {
 			// WYSIWYG editting
 			description.setAttr('tabindex', 0);
 			description.contentEditable = 'true';
+
+			description.addEventListener('focus', e => {
+				description.spellcheck = true;
+			});
+
 			description.addEventListener('blur', e => {
+				description.spellcheck = false;
+				if (description.textContent) {
+					description.textContent = description.textContent.trimEnd();
+				}
 				if (description.textContent !== this.getBody()) {
-					this.setBody(description.textContent!.trimEnd());
+					this.setBody(description.textContent ?? '');
 					updateTodoItemFromEl(description, this);
 				}
 			});
+
 			description.addEventListener('keydown', e => {
 				// console.log(e.key)
 				if (e.key === 'Enter') {

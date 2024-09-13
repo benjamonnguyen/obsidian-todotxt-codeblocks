@@ -15,7 +15,6 @@ import { synchronize } from './link';
 import { TodoList } from './model';
 
 export let SETTINGS_READ_ONLY: PluginSettings;
-
 export default class TodotxtCodeblocksPlugin extends Plugin {
 	static NAME = 'Todo.txt Codeblocks';
 	settings: PluginSettings;
@@ -37,16 +36,16 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			if (mdView) {
 				if ((target as Element).matchParent('.' + TodoList.HTML_CLS)) {
 					try {
-						if (await synchronize()) return;
-					} catch (_) {
-						/* empty */
-					}
+						if (await synchronize()) {
+							event.preventDefault();
+							return;
+						}
+					} catch (_) { }
 				}
 
+				// TODO refactor to remove this pattern. Use per element event handlers instead.
 				const handled =
 					clickLink(event, mdView) ||
-					// TODO refactor to remove this pattern. Use per element event handlers instead.
-					// see ProjectGroupContainer.render for examples
 					toggleCheckbox(event, mdView) ||
 					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
@@ -57,7 +56,7 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 					autoArchive(mdView);
 				}
 			}
-		});
+		}, true); // execute on capture phase
 		// TODO configurable sync interval (0 = never)
 		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
 		this.registerInterval(
