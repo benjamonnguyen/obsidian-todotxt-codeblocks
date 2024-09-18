@@ -8,6 +8,8 @@ import {
 import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
+const rPrio = /^\(([A-Z])\) /;
+
 export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'todotxt-edit-item-modal';
 
@@ -59,10 +61,11 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.submit.addButton((btn) =>
 			btn
 				.setButtonText(this.getSubmitButtonText())
-				.setDisabled(!this.item.asInputText().length)
+				.setDisabled(!(this.textComponent && this.textComponent.getValue().length))
 				.setCta()
 				.onClick(() => {
 					this.close();
+					this.item.updateFromInputText(this.textComponent.getValue());
 					this.onSubmit(this.item);
 				}),
 		);
@@ -77,7 +80,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
 				this.suggest(text, textComponent);
-				this.persistInput(text)
+				const matches = rPrio.exec(text);
+				this.item.setPriority(matches?.at(1));
+				this.updateInputs(text)
 			});
 			textComponent.setValue(this.item.asInputText());
 		};
@@ -99,9 +104,16 @@ export default class EditItemModal extends AutoCompleteableModal {
 					} else if (this.item.priority() !== null && val === 'none') {
 						this.cursorPos = Math.max(this.cursorPos - 4, 0);
 					}
-					this.updatePriorityDropDown(val);
-					this.textComponent.setValue(this.item.asInputText());
-					this.persistInput(this.item.asInputText(), this.cursorPos);
+					this.item.setPriority(val);
+					const replace = val === null ? '' : `(${val}) `;
+					const hasPrio = rPrio.test(this.textComponent.getValue());
+					let text: string;
+					if (replace && !hasPrio) {
+						text = replace + this.textComponent.getValue();
+					} else {
+						text = this.textComponent.getValue().replace(/^\([A-Z]\) /, replace);
+					}
+					this.updateInputs(text, this.cursorPos);
 				});
 			this.updatePriorityDropDown(this.item.priority());
 		};
@@ -118,9 +130,8 @@ export default class EditItemModal extends AutoCompleteableModal {
 		return 'Edit';
 	}
 
-	persistInput(text: string, cursorPos: number | null = null) {
+	updateInputs(text: string, cursorPos: number | null = null) {
 		this.textComponent.setValue(text);
-		this.item.updateFromInputText(text);
 		this.updatePriorityDropDown(this.item.priority());
 		if (cursorPos !== null) {
 			this.textComponent.inputEl.focus();

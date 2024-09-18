@@ -65,7 +65,15 @@ export async function synchronize(): Promise<boolean> {
 						.map((line) => new TodoItem(line)),
 				);
 				newTodoList.sort();
-				update(from, to, newTodoList, UpdateOption.NO_WRITE);
+				const newCodeblock = newTodoList
+					.items()
+					.map((item) => item.toString())
+					.join('\n');
+				if (newCodeblock !== codeblock) {
+					update(from, to, newTodoList);
+				} else {
+					update(from, to, newTodoList, UpdateOption.NO_WRITE);
+				}
 				notice(`synchronized ${newTodoList.languageLine().title} with linked file: ${srcPath}`, Level.INFO);
 			}
 		}
