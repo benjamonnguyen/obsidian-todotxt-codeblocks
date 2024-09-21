@@ -9,6 +9,7 @@ import AutoCompleteableModal from './AutoCompleteableModal';
 import { TodoItem, TodoList } from 'src/model';
 
 const rPrio = /^\(([A-Z])\) /;
+const prioLength = 4;
 
 export default class EditItemModal extends AutoCompleteableModal {
 	static ID = 'todotxt-edit-item-modal';
@@ -79,7 +80,6 @@ export default class EditItemModal extends AutoCompleteableModal {
 				this.submit.components
 					.find((component) => component instanceof ButtonComponent)
 					?.setDisabled(!text);
-				this.suggest(text, textComponent);
 				const matches = rPrio.exec(text);
 				this.item.setPriority(matches?.at(1));
 				this.updateInputs(text)
@@ -99,23 +99,9 @@ export default class EditItemModal extends AutoCompleteableModal {
 			dropDown
 				.addOptions(opts)
 				.onChange((val) => {
-					if (this.item.priority() === null && val !== 'none') {
-						this.cursorPos += 4;
-					} else if (this.item.priority() !== null && val === 'none') {
-						this.cursorPos = Math.max(this.cursorPos - 4, 0);
-					}
-					this.item.setPriority(val);
-					const replace = val === null ? '' : `(${val}) `;
-					const hasPrio = rPrio.test(this.textComponent.getValue());
-					let text: string;
-					if (replace && !hasPrio) {
-						text = replace + this.textComponent.getValue();
-					} else {
-						text = this.textComponent.getValue().replace(/^\([A-Z]\) /, replace);
-					}
-					this.updateInputs(text, this.cursorPos);
+					this.updateInputs('', val);
 				});
-			this.updatePriorityDropDown(this.item.priority());
+			this.updatePriorityDropDown();
 		};
 		// @ts-ignore
 		if (this.app.isMobile) {
@@ -124,21 +110,55 @@ export default class EditItemModal extends AutoCompleteableModal {
 			this.input.addDropdown(addPriorityDropDown);
 			this.input.addText(handleText);
 		}
+		const updateCursorPos = (e: Event) => {
+			e.stopPropagation();
+			let x;
+			if (x = this.textComponent.inputEl.selectionEnd) {
+				this.cursorPos = x;
+			}
+		};
+		this.textComponent.inputEl
+			.addEventListener('click', updateCursorPos);
+		this.textComponent.inputEl
+			.addEventListener('keyup', (e: KeyboardEvent) => {
+				if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+					updateCursorPos(e);
+				}
+			});
 	}
 
 	getSubmitButtonText(): string {
 		return 'Edit';
 	}
 
-	updateInputs(text: string, cursorPos: number | null = null) {
-		this.textComponent.setValue(text);
-		this.updatePriorityDropDown(this.item.priority());
-		if (cursorPos !== null) {
+	updateInputs(text: string, prio: string | null = null) {
+		if (prio !== null) {
+			const replace = prio === 'none' ? '' : `(${prio}) `;
+			if (replace && !this.item.priority()) {
+				this.textComponent.setValue(replace + this.textComponent.getValue());
+				this.cursorPos += prioLength;
+			} else {
+				this.textComponent.setValue(this.textComponent.getValue().replace(/^\([A-Z]\) /, replace));
+				if (!replace) {
+					this.cursorPos -= prioLength;
+				}
+			}
+			this.item.setPriority(prio === 'none' ? null : prio);
+
 			this.textComponent.inputEl.focus();
-			this.textComponent.inputEl.setSelectionRange(cursorPos, cursorPos);
+			this.textComponent.inputEl.setSelectionRange(this.cursorPos, this.cursorPos);
+			this.updatePriorityDropDown();
+			return;
 		}
 
-		this.cursorPos = cursorPos ?? this.textComponent.inputEl.selectionStart ?? 0;
+		// set dropdown from text input
+		const matches = rPrio.exec(text);
+		this.item.setPriority(matches?.at(1));
+		this.updatePriorityDropDown();
+
+		//
+		this.suggest(text, this.textComponent);
+		this.cursorPos = this.textComponent.inputEl.selectionEnd!;
 	}
 
 	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {
@@ -164,24 +184,24 @@ export default class EditItemModal extends AutoCompleteableModal {
 		}
 	}
 
-	protected updatePriorityDropDown(val: string | null) {
+	protected updatePriorityDropDown() {
 		// @ts-ignore
 		if (this.app.isMobile) {
 			return;
 		}
-		val = val ?? 'none';
-		if (val === 'none') {
+		const prio = this.item.priority();
+		if (prio === null) {
 			this.item.clearPriority();
 		} else {
-			this.item.setPriority(val);
+			this.item.setPriority(prio);
 			if (this.item.priority()! > 'D') {
 				const arr = Array.from(this._priorityDropDown.selectEl.options).map(e => e.value);
-				if (!arr.contains(val)) {
-					this._priorityDropDown.addOption(val, `(${val})`);
+				if (!arr.contains(prio)) {
+					this._priorityDropDown.addOption(prio, `(${prio})`);
 				}
 			}
 		}
 		this.handlePriorityStyle(this.item.priority(), this._priorityDropDown);
-		this._priorityDropDown.setValue(val);
+		this._priorityDropDown.setValue(prio ?? 'none');
 	}
 }
