@@ -15,25 +15,27 @@ export default abstract class AutoCompleteableModal extends TodotxtModal {
 	suggest(
 		text: string,
 		textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
-	) {
+	): boolean {
 		// Only suggest on text insertion
 		if (text.length <= this.prevTextLength) {
 			this.prevTextLength = text.length;
-			return;
+			return false;
 		}
 		this.prevTextLength = text.length;
 
 		// Only suggest on text insertion to end of word
 		const cursor = textComponent.inputEl.selectionStart;
 		if (cursor === null || (cursor !== text.length && text.charAt(cursor) !== ' ')) {
-			return;
+			return false;
 		}
 
 		const [suggestion, fragmentLength] = this.getSuggestion(cursor, text);
 		if (suggestion) {
 			textComponent.setValue(text + suggestion.slice(fragmentLength));
 			textComponent.inputEl.setSelectionRange(text.length, textComponent.getValue().length);
+			return true;
 		}
+		return false;
 	}
 
 	private getSuggestion(cursor: number, text: string): [string | null, number] {

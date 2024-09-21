@@ -113,6 +113,7 @@ export default class ProjectGroupContainer implements ViewModel {
 		addModal.textComponent.inputEl.addEventListener('blur', refocus);
 
 		addModal.updateInputs(` +${this.name}`);
+		addModal.cursorPos = 0;
 	}
 
 	private toggleProjectCollapse(label: HTMLLabelElement, todoListEl: Element) {
