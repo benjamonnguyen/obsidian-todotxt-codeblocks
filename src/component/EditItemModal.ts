@@ -21,6 +21,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 	private _priorityDropDown: DropdownComponent;
 	submit: Setting;
 	protected _cursorPos: number;
+	private _hasSuggestion = false;
 
 	constructor(
 		itemText: string,
@@ -123,6 +124,16 @@ export default class EditItemModal extends AutoCompleteableModal {
 			.addEventListener('keyup', (e: KeyboardEvent) => {
 				if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
 					updateCursorPos(e);
+					e.stopImmediatePropagation();
+				}
+			});
+		this.textComponent.inputEl
+			.addEventListener('keypress', (e: KeyboardEvent) => {
+				// accept suggestion on space
+				if (this._hasSuggestion && e.key === ' ') {
+					this._hasSuggestion = false;
+					this.textComponent.inputEl.selectionStart = this._cursorPos;
+					e.stopImmediatePropagation();
 				}
 			});
 	}
@@ -163,7 +174,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.updatePriorityDropDown();
 
 		//
-		if (!this.suggest(text, this.textComponent)) {
+		if (!(this._hasSuggestion = this.suggest(text, this.textComponent))) {
 			this.textComponent.setValue(text);
 		};
 		this._cursorPos = this.textComponent.inputEl.selectionEnd!;
