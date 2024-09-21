@@ -20,7 +20,8 @@ export default class EditItemModal extends AutoCompleteableModal {
 	textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>;
 	private _priorityDropDown: DropdownComponent;
 	submit: Setting;
-	protected cursorPos: number;
+	protected _cursorPos: number;
+	private _hasSuggestion = false;
 
 	constructor(
 		itemText: string,
@@ -35,7 +36,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 			]),
 		);
 		this.item = new TodoItem(itemText);
-		this.cursorPos = itemText.length;
+		this._cursorPos = itemText.length;
 		this.onSubmit = onSubmit;
 
 		const { contentEl } = this;
@@ -114,7 +115,7 @@ export default class EditItemModal extends AutoCompleteableModal {
 			e.stopPropagation();
 			let x;
 			if (x = this.textComponent.inputEl.selectionEnd) {
-				this.cursorPos = x;
+				this._cursorPos = x;
 			}
 		};
 		this.textComponent.inputEl
@@ -123,8 +124,24 @@ export default class EditItemModal extends AutoCompleteableModal {
 			.addEventListener('keyup', (e: KeyboardEvent) => {
 				if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
 					updateCursorPos(e);
+					e.stopImmediatePropagation();
 				}
 			});
+		this.textComponent.inputEl
+			.addEventListener('keypress', (e: KeyboardEvent) => {
+				// accept suggestion on space
+				if (this._hasSuggestion && e.key === ' ') {
+					this._hasSuggestion = false;
+					this.textComponent.inputEl.selectionStart = this._cursorPos;
+					e.stopImmediatePropagation();
+				}
+			});
+	}
+
+	set cursorPos(pos: number) {
+		this._cursorPos = pos;
+		this.textComponent.inputEl.focus();
+		this.textComponent.inputEl.setSelectionRange(this.cursorPos, this.cursorPos);
 	}
 
 	getSubmitButtonText(): string {
@@ -136,17 +153,17 @@ export default class EditItemModal extends AutoCompleteableModal {
 			const replace = prio === 'none' ? '' : `(${prio}) `;
 			if (replace && !this.item.priority()) {
 				this.textComponent.setValue(replace + this.textComponent.getValue());
-				this.cursorPos += prioLength;
+				this._cursorPos += prioLength;
 			} else {
 				this.textComponent.setValue(this.textComponent.getValue().replace(/^\([A-Z]\) /, replace));
 				if (!replace) {
-					this.cursorPos -= prioLength;
+					this._cursorPos -= prioLength;
 				}
 			}
 			this.item.setPriority(prio === 'none' ? null : prio);
 
 			this.textComponent.inputEl.focus();
-			this.textComponent.inputEl.setSelectionRange(this.cursorPos, this.cursorPos);
+			this.textComponent.inputEl.setSelectionRange(this._cursorPos, this._cursorPos);
 			this.updatePriorityDropDown();
 			return;
 		}
@@ -157,8 +174,10 @@ export default class EditItemModal extends AutoCompleteableModal {
 		this.updatePriorityDropDown();
 
 		//
-		this.suggest(text, this.textComponent);
-		this.cursorPos = this.textComponent.inputEl.selectionEnd!;
+		if (!(this._hasSuggestion = this.suggest(text, this.textComponent))) {
+			this.textComponent.setValue(text);
+		};
+		this._cursorPos = this.textComponent.inputEl.selectionEnd!;
 	}
 
 	protected handlePriorityStyle(priority: string | null, dropDown: DropdownComponent) {

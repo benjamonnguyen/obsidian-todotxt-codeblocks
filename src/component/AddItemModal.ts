@@ -5,7 +5,6 @@ import {
 	TextComponent,
 } from 'obsidian';
 import EditItemModal from './EditItemModal';
-import { SETTINGS_READ_ONLY } from 'src/main';
 import { TodoItem } from 'src/model';
 
 export default class AddItemModal extends EditItemModal {
