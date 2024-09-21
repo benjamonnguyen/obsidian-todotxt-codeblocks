@@ -16,26 +16,35 @@ export default abstract class AutoCompleteableModal extends TodotxtModal {
 		text: string,
 		textComponent: AbstractTextComponent<HTMLInputElement | HTMLTextAreaElement>,
 	): boolean {
-		// Only suggest on text insertion
-		if (text.length <= this.prevTextLength) {
+		const res = (() => {
+			// Only suggest on text insertion
+			if (text.length <= this.prevTextLength) {
+				this.prevTextLength = text.length;
+				return false;
+			}
 			this.prevTextLength = text.length;
-			return false;
-		}
-		this.prevTextLength = text.length;
 
-		// Only suggest on text insertion to end of word
-		const cursor = textComponent.inputEl.selectionStart;
-		if (cursor === null || (cursor !== text.length && text.charAt(cursor) !== ' ')) {
+			// Only suggest on text insertion to end of word
+			const cursor = textComponent.inputEl.selectionStart;
+			if (cursor === null || (cursor !== text.length && text.charAt(cursor) !== ' ')) {
+				return false;
+			}
+
+			const [suggestion, fragmentLength] = this.getSuggestion(cursor, text);
+			if (suggestion) {
+				textComponent.setValue(text + suggestion.slice(fragmentLength));
+				textComponent.inputEl.setSelectionRange(text.length, textComponent.getValue().length);
+				return true;
+			}
 			return false;
+		})();
+
+		// reset suggestions
+		if (!res) {
+			this.filteredSuggestions = null;
 		}
 
-		const [suggestion, fragmentLength] = this.getSuggestion(cursor, text);
-		if (suggestion) {
-			textComponent.setValue(text + suggestion.slice(fragmentLength));
-			textComponent.inputEl.setSelectionRange(text.length, textComponent.getValue().length);
-			return true;
-		}
-		return false;
+		return res;
 	}
 
 	private getSuggestion(cursor: number, text: string): [string | null, number] {
