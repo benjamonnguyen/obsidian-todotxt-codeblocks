@@ -7,6 +7,7 @@ import { processExtensions, ExtensionType } from 'src/extension';
 import { updateTodoItemFromEl } from 'src/stateEditor';
 import { ActionButtonV2 } from './ActionButtonV2';
 import { DEFAULT_SETTINGS } from 'src/settings';
+import { SETTINGS_READ_ONLY } from 'src/main';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
@@ -347,7 +348,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 	private prioritize(e: MouseEvent) {
 		const t = e.target as SVGElement;
-		this.setPriority(DEFAULT_SETTINGS.defaultPriority ?? 'A');
+		this.setPriority(SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority);
 		updateTodoItemFromEl(t, this);
 	}
 }
