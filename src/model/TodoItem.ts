@@ -1,19 +1,24 @@
 import { v4 as randomUUID } from 'uuid';
-import { ActionButton, ActionType, type ViewModel } from '.';
+import { ActionButton, ActionType, TodoList, type ViewModel } from '.';
 import { Item } from './Item';
 import { EditItemModal } from 'src/component';
 import { moment } from 'obsidian';
 import { processExtensions, ExtensionType } from 'src/extension';
-import { updateTodoItemFromEl } from 'src/stateEditor';
+import { update, updateTodoItemFromEl } from 'src/stateEditor';
 import { ActionButtonV2 } from './ActionButtonV2';
 import { DEFAULT_SETTINGS } from 'src/settings';
 import { SETTINGS_READ_ONLY } from 'src/main';
+
+const DOUBLE_TAP_DELAY_MS = 300;
+const LONG_PRESS_THRESHOLD_MS = 600;
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
 	static ID_REGEX = /^item-\S+-(\d+)$/;
 
 	#id: string;
+	private _lastTap: number;
+	private _longPressTimer: NodeJS.Timeout;
 
 	constructor(text: string) {
 		super(text);
@@ -54,7 +59,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 		itemDiv.append(
 			this.buildDescriptionHtml(),
-			this.buildActionsHtml(),
+			this.buildActionsHtml(itemDiv),
 		);
 
 		return itemDiv;
@@ -201,39 +206,43 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 
 		// @ts-ignore
-		if (!app.isMobile && !this.complete()) {
-			// WYSIWYG editting
-			description.setAttr('tabindex', 0);
-			description.contentEditable = 'true';
+		if (app.isMobile) {
+			this.addMobileEventListeners(description);
+		} else {
+			if (!this.complete()) {
+				// WYSIWYG editting
+				description.setAttr('tabindex', 0);
+				description.contentEditable = 'true';
 
-			description.addEventListener('focus', e => {
-				description.spellcheck = true;
-			});
+				description.addEventListener('focus', e => {
+					description.spellcheck = true;
+				});
 
-			description.addEventListener('blur', e => {
-				description.spellcheck = false;
-				if (description.textContent) {
-					description.textContent = description.textContent.trimEnd();
-				}
-				if (description.textContent !== this.getBody()) {
-					this.setBody(description.textContent ?? '');
-					updateTodoItemFromEl(description, this);
-				}
-			});
+				description.addEventListener('blur', e => {
+					description.spellcheck = false;
+					if (description.textContent) {
+						description.textContent = description.textContent.trimEnd();
+					}
+					if (description.textContent !== this.getBody()) {
+						this.setBody(description.textContent ?? '');
+						updateTodoItemFromEl(description, this);
+					}
+				});
 
-			description.addEventListener('keydown', e => {
-				// console.log(e.key)
-				if (e.key === 'Enter') {
-					e.preventDefault();
-					description.blur();
-				} else if (e.key === 'Escape') {
-					e.preventDefault();
-					description.textContent = this.getBody();
-					description.blur();
-				} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-					e.preventDefault();
-				}
-			});
+				description.addEventListener('keydown', e => {
+					// console.log(e.key)
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						description.blur();
+					} else if (e.key === 'Escape') {
+						e.preventDefault();
+						description.textContent = this.getBody();
+						description.blur();
+					} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+						e.preventDefault();
+					}
+				});
+			}
 		}
 
 		return description;
@@ -295,20 +304,11 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildActionsHtml(): HTMLSpanElement {
+	private buildActionsHtml(el: HTMLElement): HTMLSpanElement {
 		const actions = document.createElement('span');
 		actions.className = 'todotxt-item-actions';
 
-		if (this.priority() === null && !this.complete()) {
-			const prioritizeBtn = new ActionButtonV2(
-				ActionType.STAR,
-				e => this.prioritize(e),
-			).render();
-			actions.append(prioritizeBtn);
-		}
-
 		actions.append(
-			new ActionButton(ActionType.EDIT, EditItemModal.ID, this.id).render(),
 			new ActionButton(ActionType.DEL, 'todotxt-delete-item', this.id).render(),
 		);
 
@@ -346,9 +346,45 @@ export default class TodoItem extends Item implements ViewModel {
 		return select;
 	}
 
-	private prioritize(e: MouseEvent) {
+	private prioritize(e: Event) {
 		const t = e.target as SVGElement;
 		this.setPriority(SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority);
 		updateTodoItemFromEl(t, this);
+	}
+
+	private addMobileEventListeners(el: HTMLElement) {
+		const prioritizeOnDoubleTap = (e: Event) => {
+			const currentTime = new Date().getTime();
+			const tapLength = currentTime - this._lastTap;
+			if (tapLength < DOUBLE_TAP_DELAY_MS && tapLength > 0) {
+				e.preventDefault();
+				if (!this.priority()) {
+					this.prioritize(e);
+				}
+			}
+			this._lastTap = currentTime;
+		};
+		el.addEventListener('touchend', prioritizeOnDoubleTap);
+
+		// edit on long press
+		el.addEventListener('touchend', () => clearTimeout(this._longPressTimer));
+		el.addEventListener('touchstart', () => {
+			this._longPressTimer = setTimeout(() => {
+				this.openEditModal(el);
+			}, LONG_PRESS_THRESHOLD_MS);
+		});
+	};
+
+	private openEditModal(el: HTMLElement) {
+		const editModal = new EditItemModal(this.asInputText(), el, (result) => {
+			const { todoList, from, to } = TodoList.from(el);
+			if (this.toString() === result.toString()) return;
+			todoList.removeItem(this.idx!);
+			todoList.add(result);
+			update(from, to, todoList);
+		});
+		editModal.open();
+		editModal.textComponent.inputEl.select();
+		editModal.textComponent.inputEl.selectionStart = editModal.item.asInputText().length;
 	}
 }
