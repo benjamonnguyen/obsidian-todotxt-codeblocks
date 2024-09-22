@@ -222,22 +222,6 @@ svg.todotxt-action-btn {
     padding: 0.1rem;
 }
 
-body:not(.is-mobile) .todotxt-item-actions svg.todotxt-action-btn[action-type="edit"] {
-    display: none;
-}
-
-svg.todotxt-action-btn[action="todotxt-edit-list-options-modal"] {
-    padding: 0.1rem;
-    margin-left: 0.25rem;
-    vertical-align: text-bottom;
-    height: calc(var(--icon-size) * 1.35);
-    width: calc(var(--icon-size) * 1.35);
-}
-
-.todotxt-item[checked] svg.todotxt-action-btn[action="todotxt-edit-item-modal"] {
-    display: none;
-}
-
 span.todotxt-list-actions {
     position: absolute;
     top: var(--size-2-2);
@@ -255,8 +239,7 @@ span.todotxt-list-actions {
     padding: var(--size-2-2) var(--size-2-3);
 }
 
-.markdown-source-view .todotxt-item:hover svg.todotxt-action-btn,
-.markdown-source-view .todotxt-language-line:hover svg.todotxt-action-btn {
+.markdown-source-view .todotxt-item:hover svg.todotxt-action-btn {
     color: var(--text-muted);
     transition: all .15s ease;
 }

@@ -1,7 +1,6 @@
 import { v4 as randomUUID } from 'uuid';
 import { moment } from 'obsidian';
-import { ActionButton, ActionType, type ViewModel } from '.';
-import { EditListOptionsModal } from 'src/component';
+import ViewModel from './ViewModel';
 
 export default class LanguageLine implements ViewModel {
 	private static REGEX = /^```todotxt(?: "([^"]*)")?/;
@@ -90,11 +89,7 @@ export default class LanguageLine implements ViewModel {
 		title.addClass(LanguageLine.TITLE_HTML_CLS);
 		title.id = this._id;
 		title.setText(this.title);
-
-		header.append(
-			title,
-			new ActionButton(ActionType.EDIT, EditListOptionsModal.ID, this._id).render(),
-		);
+		header.append(title);
 
 		return header;
 	}

@@ -3,12 +3,14 @@ import { TodoItem, ProjectGroupContainer, ActionButton, ActionType } from '.';
 import { v4 as randomUUID } from 'uuid';
 import { LanguageLine } from '.';
 import type { ViewModel } from '.';
-import { AddItemModal } from 'src/component';
+import { AddItemModal, EditListOptionsModal } from 'src/component';
 import { MarkdownView, moment } from 'obsidian';
 import { ExtensionType } from 'src/extension';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 import { findLine } from 'src/documentUtil';
+import { ActionButtonV2 } from './ActionButtonV2';
+import { UpdateOption, update } from 'src/stateEditor';
 
 export default class TodoList implements ViewModel {
 	// "n/c" will respresent order for items with no context (ex. sort:ctx:a,b,n/c,c)
@@ -95,6 +97,10 @@ export default class TodoList implements ViewModel {
 				new ActionButton(ActionType.ARCHIVE, 'todotxt-delete-items', list.id).render(),
 			);
 		}
+		actions.append(new ActionButtonV2(
+			ActionType.SETTINGS,
+			() => this.openEditListModal(list)).render());
+
 		list.appendChild(this.#langLine.render());
 
 		this.#items
@@ -437,5 +443,37 @@ export default class TodoList implements ViewModel {
 			.sort();
 
 		return contextOrder.concat(remainingContexts);
+	}
+
+	private openEditListModal(el: HTMLElement) {
+		const { todoList } = TodoList.from(el);
+		const currLangLine = todoList.languageLine();
+		new EditListOptionsModal(currLangLine, (result) => {
+			const { todoList, from, to } = TodoList.from(el);
+			const res = LanguageLine.from(currLangLine.toString());
+			if (res instanceof Error) {
+				console.log('ERROR: clickEdit:', res.message);
+				return true;
+			}
+			const newLangLine = res.langLine;
+			newLangLine.title = result.title;
+			newLangLine.source = result.source;
+			newLangLine.sortFieldToOrder.clear();
+			result.sortOrders
+				.split(' ')
+				.map((sortOrder) => LanguageLine.handleSort(sortOrder))
+				.forEach((res) => {
+					if (!(res instanceof Error)) {
+						newLangLine.sortFieldToOrder.set(res.field, res.order);
+					}
+				});
+			todoList.setLanguageLine(newLangLine);
+			todoList.sort();
+			const opts: UpdateOption[] = [UpdateOption.FORCE_RENDER];
+			if (!currLangLine.sourcePath && newLangLine.sourcePath) {
+				opts.push(UpdateOption.NO_WRITE);
+			}
+			update(from, to, todoList, ...opts);
+		}).open();
 	}
 }

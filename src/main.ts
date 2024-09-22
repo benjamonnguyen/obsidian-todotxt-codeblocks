@@ -2,7 +2,6 @@ import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
 import {
 	toggleCheckbox,
-	clickEdit,
 	clickAdd,
 	clickDelete,
 	clickLink,
@@ -47,7 +46,6 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 				const handled =
 					clickLink(event, mdView) ||
 					toggleCheckbox(event, mdView) ||
-					clickEdit(event, mdView) ||
 					clickAdd(target, mdView) ||
 					clickDelete(event, mdView) ||
 					clickArchive(event, mdView);

@@ -52,6 +52,8 @@ export function updateTodoItemFromEl(childEl: Element, updatedItem: TodoItem): E
 
 	const { todoList, from, to } = TodoList.from(todoListEl);
 	todoList.removeItem(updatedItem.idx);
-	todoList.add(updatedItem);
+	if (updatedItem.getBody()) {
+		todoList.add(updatedItem);
+	}
 	update(from, to, todoList);
 }
