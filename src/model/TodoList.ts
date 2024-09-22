@@ -448,7 +448,7 @@ export default class TodoList implements ViewModel {
 	private openEditListModal(el: HTMLElement) {
 		const { todoList } = TodoList.from(el);
 		const currLangLine = todoList.languageLine();
-		new EditListOptionsModal(currLangLine, (result) => {
+		const modal = new EditListOptionsModal(currLangLine, (result) => {
 			const { todoList, from, to } = TodoList.from(el);
 			const res = LanguageLine.from(currLangLine.toString());
 			if (res instanceof Error) {
@@ -474,6 +474,11 @@ export default class TodoList implements ViewModel {
 				opts.push(UpdateOption.NO_WRITE);
 			}
 			update(from, to, todoList, ...opts);
-		}).open();
+		});
+		modal.open();
+		modal.contentEl.getElementsByClassName('setting-item').item(0)
+			?.getElementsByClassName('setting-item-control').item(0)
+			?.getElementsByTagName('input').item(0)
+			?.focus();
 	}
 }
