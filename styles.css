@@ -48,9 +48,21 @@ If your plugin does not need CSS, delete this file.
     margin-block-end: var(--p-spacing);
 }
 
+.is-phone .todotxt-language-line {
+    margin-block-end: 0;
+}
+
 h2.todotxt-list-title {
     margin-block-start: 0;
     margin-block-end: 0;
+}
+
+.todotxt-list>.todotxt-item:nth-child(even) {
+    background-color: var(--background-modifier-hover);
+}
+
+.project-group-list>.todotxt-item:nth-child(even) {
+    background-color: var(--background-modifier-hover);
 }
 
 .todotxt-item {
@@ -59,6 +71,11 @@ h2.todotxt-list-title {
     /* for multiline */
     text-indent: -24px;
     padding-inline-start: 28px;
+}
+
+.is-phone .todotxt-item {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
 }
 
 .todotxt-item .todotxt-priority {
@@ -111,6 +128,14 @@ select.todotxt-priority {
 
 input.task-list-item-checkbox {
     margin-inline-end: 0.35rem !important;
+    margin-inline-start: 0 !important;
+}
+
+.is-phone input.task-list-item-checkbox {
+    width: calc(var(--checkbox-size)*1.1) !important;
+    height: calc(var(--checkbox-size)*1.1) !important;
+    margin-inline-start: 0.2rem !important;
+    margin-inline-end: 0.6rem !important;
 }
 
 input[type="checkbox"]:checked~.todotxt-item-description,
@@ -268,6 +293,10 @@ button.mod-cta:disabled:hover {
 .is-phone .todotxt-modal-input input[type="text"] {
     width: 100%;
     max-width: 100%;
+}
+
+.todotxt-modal-input textarea {
+    min-height: 4rem;
 }
 
 .is-phone .todotxt-modal-input textarea {
