@@ -377,6 +377,7 @@ export default class TodoItem extends Item implements ViewModel {
 
 		// edit on long press
 		el.addEventListener('touchend', () => clearTimeout(this._longPressTimer));
+		el.addEventListener('touchmove', () => clearTimeout(this._longPressTimer));
 		el.addEventListener('touchstart', () => {
 			this._longPressTimer = setTimeout(() => {
 				this.openEditModal(el);
