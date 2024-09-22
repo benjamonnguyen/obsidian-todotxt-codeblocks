@@ -195,11 +195,14 @@ export default class TodoItem extends Item implements ViewModel {
 		const bodyItr = this.getBody().matchAll(REGEX);
 		let next = bodyItr.next();
 		while (!next.done) {
-			const span = this.buildDueExtensionHtml(next.value[0]) || this.buildLink(next.value[0]);
+			const val = next.value[0];
+			const span = this.buildDueExtensionHtml(val) || this.buildLink(val);
 			if (span) {
 				description.appendChild(span);
+			} else if (val.length > 1 && val.startsWith('@')) {
+				description.appendChild(this.buildContextSpan(val));
 			} else {
-				description.appendText(next.value[0]);
+				description.appendText(val);
 			}
 			description.appendText(' ');
 			next = bodyItr.next();
@@ -263,6 +266,14 @@ export default class TodoItem extends Item implements ViewModel {
 
 			return span;
 		}
+	}
+
+	private buildContextSpan(str: string): HTMLSpanElement {
+		const span = document.createElement('span');
+		span.setText(str);
+		span.addClass('todotxt-context');
+
+		return span;
 	}
 
 	private buildLink(str: string): HTMLSpanElement | undefined {

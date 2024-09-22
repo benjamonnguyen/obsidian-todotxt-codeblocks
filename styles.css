@@ -152,6 +152,10 @@ input[type="checkbox"]:not(:checked)~.todotxt-item-description:focus {
     color: var(--text-normal);
 }
 
+.todotxt-item-description .todotxt-context {
+    color: var(--checkbox-color);
+}
+
 .theme-light.todotxt-due-later {
     color: #264653;
 }
