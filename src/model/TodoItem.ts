@@ -1,5 +1,5 @@
 import { v4 as randomUUID } from 'uuid';
-import { ActionButton, ActionType, TodoList, type ViewModel } from '.';
+import { ActionType, TodoList, type ViewModel } from '.';
 import { Item } from './Item';
 import { EditItemModal } from 'src/component';
 import { moment } from 'obsidian';
@@ -8,17 +8,13 @@ import { update, updateTodoItemFromEl } from 'src/stateEditor';
 import { ActionButtonV2 } from './ActionButtonV2';
 import { DEFAULT_SETTINGS } from 'src/settings';
 import { SETTINGS_READ_ONLY } from 'src/main';
-
-const DOUBLE_TAP_DELAY_MS = 300;
-const LONG_PRESS_THRESHOLD_MS = 600;
+import { SwipeActionButton } from './SwipeActionButton';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
 	static ID_REGEX = /^item-\S+-(\d+)$/;
 
 	#id: string;
-	private _lastTap: number;
-	private _longPressTimer: NodeJS.Timeout;
 
 	constructor(text: string) {
 		super(text);
@@ -46,7 +42,11 @@ export default class TodoItem extends Item implements ViewModel {
 			itemDiv.setAttr('checked', true);
 		}
 
-		const checkbox = itemDiv.createEl('input', {
+		const content = itemDiv.createEl('div', {
+			cls: 'todotxt-item-content',
+		});
+
+		const checkbox = content.createEl('input', {
 			type: 'checkbox',
 			cls: 'task-list-item-checkbox',
 		});
@@ -54,14 +54,25 @@ export default class TodoItem extends Item implements ViewModel {
 
 		const prio = this.priority();
 		if (prio && !this.complete()) {
-			itemDiv.append(this.buildPriorityDropDownBadgeHtml());
+			content.append(this.buildPriorityDropDownBadgeHtml());
 		}
 
-		itemDiv.append(
-			this.buildDescriptionHtml(),
-			this.buildActionsHtml(itemDiv),
-		);
+		const description = this.buildDescriptionHtml();
+		content.append(description);
+		// @ts-ignore
+		if (app.isMobile) {
+			description.addEventListener('touchend', () => {
+				if (!this.complete()) {
+					const active = itemDiv.getAttr('active') !== null;
+					Array.from(document.getElementsByClassName(this.htmlCls)).forEach(el => {
+						el.toggleAttribute('active', false);
+					});
+					itemDiv.toggleAttribute('active', !active);
+				}
+			});
+		}
 
+		content.append(this.buildActionsHtml());
 		return itemDiv;
 	}
 
@@ -209,9 +220,7 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 
 		// @ts-ignore
-		if (app.isMobile) {
-			this.addMobileEventListeners(description);
-		} else {
+		if (!app.isMobile) {
 			if (!this.complete()) {
 				// WYSIWYG editting
 				description.setAttr('tabindex', 0);
@@ -315,22 +324,43 @@ export default class TodoItem extends Item implements ViewModel {
 		}
 	}
 
-	private buildActionsHtml(el: HTMLElement): HTMLSpanElement {
+	private buildActionsHtml(): HTMLSpanElement {
 		const actions = document.createElement('span');
 		actions.className = 'todotxt-item-actions';
 
 		// @ts-ignore
-		if (!app.isMobile && this.priority() === null && !this.complete()) {
-			const prioritizeBtn = new ActionButtonV2(
+		if (app.isMobile) {
+			actions.append(new SwipeActionButton(
+				ActionType.EDIT,
+				'Edit',
+				() => this.openEditModal(actions),
+			).render());
+
+			actions.append(new SwipeActionButton(
 				ActionType.STAR,
+				'Prioritize',
 				e => this.prioritize(e),
-			).render();
-			actions.append(prioritizeBtn);
+			).render());
+
+			actions.append(new SwipeActionButton(
+				ActionType.DEL,
+				'Delete',
+				() => this.handleDelete(actions),
+			).render());
+
+			return actions;
 		}
 
-		actions.append(
-			new ActionButton(ActionType.DEL, 'todotxt-delete-item', this.id).render(),
-		);
+		if (this.priority() === null && !this.complete()) {
+			actions.append(new ActionButtonV2(
+				ActionType.STAR,
+				e => this.prioritize(e),
+			).render());
+		}
+		actions.append(new ActionButtonV2(
+			ActionType.DEL,
+			() => this.handleDelete(actions),
+		).render());
 
 		return actions;
 	}
@@ -368,33 +398,10 @@ export default class TodoItem extends Item implements ViewModel {
 
 	private prioritize(e: Event) {
 		const t = e.target as SVGElement;
-		this.setPriority(SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority);
+		this.setPriority(this.priority() ? null
+			: SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority);
 		updateTodoItemFromEl(t, this);
 	}
-
-	private addMobileEventListeners(el: HTMLElement) {
-		const prioritizeOnDoubleTap = (e: Event) => {
-			const currentTime = new Date().getTime();
-			const tapLength = currentTime - this._lastTap;
-			if (tapLength < DOUBLE_TAP_DELAY_MS && tapLength > 0) {
-				e.preventDefault();
-				if (!this.priority()) {
-					this.prioritize(e);
-				}
-			}
-			this._lastTap = currentTime;
-		};
-		el.addEventListener('touchend', prioritizeOnDoubleTap);
-
-		// edit on long press
-		el.addEventListener('touchend', () => clearTimeout(this._longPressTimer));
-		el.addEventListener('touchmove', () => clearTimeout(this._longPressTimer));
-		el.addEventListener('touchstart', () => {
-			this._longPressTimer = setTimeout(() => {
-				this.openEditModal(el);
-			}, LONG_PRESS_THRESHOLD_MS);
-		});
-	};
 
 	private openEditModal(el: HTMLElement) {
 		const editModal = new EditItemModal(this.asInputText(), el, (result) => {
@@ -407,5 +414,11 @@ export default class TodoItem extends Item implements ViewModel {
 		editModal.open();
 		editModal.textComponent.inputEl.select();
 		editModal.textComponent.inputEl.selectionStart = editModal.item.asInputText().length;
+	}
+
+	private handleDelete(el: HTMLElement) {
+		const { from, to, todoList } = TodoList.from(el);
+		todoList.removeItem(this.idx!);
+		update(from, to, todoList);
 	}
 }

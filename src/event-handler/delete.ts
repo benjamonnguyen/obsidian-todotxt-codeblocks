@@ -34,12 +34,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 			todoList.removeItem(parseInt(itemIdx));
 			update(from, to, todoList);
 		};
-		// @ts-ignore
-		if (app.isMobile) {
-			new ConfirmModal('Delete task?', '', deleteItem).open();
-		} else {
-			deleteItem();
-		}
+		deleteItem();
 	} else if (action === 'todotxt-delete-list') {
 		new ConfirmModal('Remove Todo.txt codeblock?', '', () => {
 			const listEl = newTarget.matchParent('.' + TodoList.HTML_CLS);
@@ -53,7 +48,7 @@ export function clickDelete(event: MouseEvent, mdView: MarkdownView): boolean {
 			return;
 		}).open();
 	} else {
-		console.error('ActionType.DEL has no implementation for action:', action);
+		// console.error('ActionType.DEL has no implementation for action:', action);
 	}
 
 	return true;

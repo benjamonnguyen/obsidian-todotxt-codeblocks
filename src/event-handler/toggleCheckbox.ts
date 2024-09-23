@@ -10,7 +10,7 @@ export default function toggleCheckbox(event: MouseEvent, mdView: MarkdownView):
 	if (!target || !(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
 		return false;
 	}
-	const itemEl = target.parentElement;
+	const itemEl = target.matchParent('.' + TodoItem.HTML_CLS);
 	if (!itemEl || !(itemEl instanceof HTMLDivElement) || itemEl.className !== TodoItem.HTML_CLS) {
 		return false;
 	}

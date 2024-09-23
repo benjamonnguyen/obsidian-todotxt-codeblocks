@@ -36,6 +36,9 @@ export async function synchronize(): Promise<boolean> {
 	listEls.forEach(el => {
 		const { todoList } = TodoList.from(el);
 		const { sourcePath } = todoList.languageLine();
+		if (!sourcePath) {
+			return;
+		}
 		if (!srcPathToTodoListEls.has(sourcePath)) {
 			srcPathToTodoListEls.set(sourcePath, []);
 		}

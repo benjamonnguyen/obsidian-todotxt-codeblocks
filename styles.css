@@ -68,14 +68,15 @@ h2.todotxt-list-title {
 .todotxt-item {
     padding-top: var(--list-spacing);
     padding-bottom: var(--list-spacing);
-    /* for multiline */
-    text-indent: -24px;
-    padding-inline-start: 28px;
 }
 
-.is-phone .todotxt-item {
+.is-mobile .todotxt-item {
+    display: flex;
+    position: relative;
     padding-top: 0.8rem;
     padding-bottom: 0.8rem;
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
 }
 
 .todotxt-item .todotxt-priority {
@@ -138,6 +139,36 @@ input.task-list-item-checkbox {
     margin-inline-end: 0.6rem !important;
 }
 
+.todotxt-item-content {
+    display: contents;
+    padding-right: 0.3rem;
+    /* for multiline */
+    text-indent: -24px;
+    padding-inline-start: 28px;
+}
+
+.is-mobile .todotxt-item-content {
+    display: inline;
+    width: 100%;
+}
+
+.todotxt-swipe-action {
+    background-color: var(--checkbox-color);
+    width: 0;
+    font-size: small;
+    text-align: center;
+    color: white;
+    line-height: 2.95rem;
+}
+
+.todotxt-swipe-action.star {
+    background-color: var(--todotxt-color-amber-300);
+}
+
+.todotxt-swipe-action.delete {
+    background-color: var(--todotxt-color-red-600);
+}
+
 input[type="checkbox"]:checked~.todotxt-item-description,
 input[type="checkbox"]:checked~.todotxt-item-description * {
     color: var(--checklist-done-color);
@@ -180,26 +211,6 @@ input[type="checkbox"]:not(:checked)~.todotxt-item-description:focus {
     color: #09C269
 }
 
-/* .todo-tag {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    margin-left: 0.5rem;
-    padding: 0.125rem 0.25rem;
-    border-radius: 9999px;
-    color: var(--todotxt-color-gray-700);
-    background-color: var(--todotxt-color-blue-200);
-} */
-
-/* .todo-ctx {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    margin-left: 0.5rem;
-    padding: 0.125rem 0.25rem;
-    border-radius: 9999px;
-    color: var(--todotxt-color-gray-700);
-    background-color: var(--todotxt-color-indigo-200);
-} */
-
 /* BUTTONS */
 svg.todotxt-action-btn {
     display: inline;
@@ -213,10 +224,32 @@ svg.todotxt-action-btn {
     width: var(--icon-size);
 }
 
+.todotxt-item[active] .todotxt-swipe-action {
+    width: 4rem;
+}
+
+.is-mobile .todotxt-item-actions {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: -100px;
+    height: 100%;
+    transition: transform 0.3s ease;
+    margin-right: 0;
+    text-indent: 0.1px;
+}
+
+.todotxt-item-actions {
+    margin-right: 0.2rem;
+}
+
+.is-mobile .todotxt-item[active] .todotxt-item-actions {
+    transform: translateX(-100px);
+}
+
 .todotxt-item-actions svg.todotxt-action-btn {
     vertical-align: text-top;
-    margin-left: 0.15rem;
-    margin-right: -0.15rem;
+    margin-right: 0.15rem;
     height: var(--icon-s);
     width: var(--icon-s);
     padding: 0.1rem;
