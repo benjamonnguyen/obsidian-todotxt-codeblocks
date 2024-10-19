@@ -1,12 +1,6 @@
 import { MarkdownView, Plugin } from 'obsidian';
 import { todotxtBlockProcessor } from './todotxtBlockMdProcessor';
-import {
-	toggleCheckbox,
-	clickAdd,
-	clickDelete,
-	clickLink,
-	clickArchive,
-} from './event-handler';
+import { clickAdd, clickDelete, clickLink, clickArchive } from './event-handler';
 import { createNewTaskCmd, newCodeblockAtCursorCmd } from './command';
 import { PluginSettings, SettingsTab, DEFAULT_SETTINGS } from './settings';
 import { autoArchive } from './event-handler/archive';
@@ -27,36 +21,50 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 			/* empty */
 		}
 		this.registerMarkdownCodeBlockProcessor('todotxt', todotxtBlockProcessor);
-		this.registerDomEvent(document, 'click', async (event: MouseEvent) => {
-			const { target } = event;
-			if (!target) return;
+		this.registerDomEvent(
+			document,
+			'click',
+			async (event: MouseEvent) => {
+				const { target } = event;
+				if (!target) return;
 
-			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
-			if (mdView) {
-				if ((target as Element).matchParent('.' + TodoList.HTML_CLS)) {
-					try {
-						if (await synchronize()) {
-							event.preventDefault();
-							return;
+				const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (mdView) {
+					if ((target as Element).matchParent('.' + TodoList.HTML_CLS)) {
+						try {
+							if (await synchronize()) {
+								event.preventDefault();
+								return;
+							}
+						} catch (_) {
+							//
 						}
-					} catch (_) { }
-				}
+					}
 
-				// TODO refactor to remove this pattern. Use per element event handlers instead.
-				const handled =
-					clickLink(event, mdView) ||
-					toggleCheckbox(event, mdView) ||
-					clickAdd(target, mdView) ||
-					clickDelete(event, mdView) ||
-					clickArchive(event, mdView);
+					// TODO refactor to remove this pattern. Use per element event handlers instead.
+					const handled =
+						clickLink(event, mdView) ||
+						clickAdd(target, mdView) ||
+						clickDelete(event, mdView) ||
+						clickArchive(event, mdView);
 
-				if (handled) {
-					autoArchive(mdView);
+					if (handled) {
+						autoArchive(mdView);
+					}
 				}
-			}
-		}, true); // execute on capture phase
+			},
+			true,
+		); // execute on capture phase
 		// TODO configurable sync interval (0 = never)
-		this.registerInterval(window.setInterval(() => synchronize().catch(() => { }), 5000));
+		this.registerInterval(
+			window.setInterval(
+				() =>
+					synchronize().catch(() => {
+						//
+					}),
+				5000,
+			),
+		);
 		this.registerInterval(
 			window.setInterval(
 				() => autoArchive(this.app.workspace.getActiveViewOfType(MarkdownView)),
@@ -67,7 +75,9 @@ export default class TodotxtCodeblocksPlugin extends Plugin {
 		this.addCommand(newCodeblockAtCursorCmd);
 	}
 
-	onunload() { }
+	onunload() {
+		//
+	}
 
 	async loadSettings() {
 		/*

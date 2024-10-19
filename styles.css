@@ -128,27 +128,27 @@ select.todotxt-priority {
 }
 
 input.task-list-item-checkbox {
-    margin-inline-end: 0.35rem !important;
+    margin-inline-end: 0.5rem !important;
     margin-inline-start: 0 !important;
 }
 
 .is-phone input.task-list-item-checkbox {
     width: calc(var(--checkbox-size)*1.1) !important;
     height: calc(var(--checkbox-size)*1.1) !important;
-    margin-inline-start: 0.2rem !important;
-    margin-inline-end: 0.6rem !important;
+    margin-inline-start: -0.5rem !important;
 }
 
 .todotxt-item-content {
-    display: contents;
+    display: inline-block;
     padding-right: 0.3rem;
-    /* for multiline */
-    text-indent: -24px;
-    padding-inline-start: 28px;
+    margin-left: 1.3rem;
+    text-indent: -16px;
 }
 
-.is-mobile .todotxt-item-content {
+.is-phone .todotxt-item-content {
     display: inline;
+    text-indent: 0;
+    margin-left: 1rem;
     width: 100%;
 }
 
@@ -156,9 +156,11 @@ input.task-list-item-checkbox {
     background-color: var(--checkbox-color);
     width: 0;
     font-size: small;
-    text-align: center;
     color: white;
-    line-height: 2.95rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .todotxt-swipe-action.star {

@@ -16,22 +16,9 @@ export class SwipeActionButton implements ViewModel {
 	render(): HTMLElement {
 		const div = document.createElement('div');
 		div.addClasses([this.htmlCls, this.type.name]);
-		div.setText(this.text);
 
-		// const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		// svg.addClass(this.htmlCls, this.type.name);
-		// svg.setAttrs({
-		// 	viewBox: this.type.viewBox,
-		// 	stroke: 'currentColor',
-		// });
-		// this.type.pathAttrs.forEach(attrs => {
-		// 	const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		// 	path.setAttrs(attrs);
-		// 	svg.appendChild(path);
-		// });
-		// div.append(svg);
+		div.createSpan().setText(this.text);
 
-		// div.createSpan().setText(this.text);
 		div.addEventListener('click', this.clickHandler);
 
 		return div;

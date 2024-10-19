@@ -20,7 +20,7 @@ export class ActionButtonV2 implements ViewModel {
 			'action-type': this.type.name,
 			'target-id': this.id,
 		});
-		this.type.pathAttrs.forEach(attrs => {
+		this.type.pathAttrs.forEach((attrs) => {
 			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			path.setAttrs(attrs);
 			svg.appendChild(path);

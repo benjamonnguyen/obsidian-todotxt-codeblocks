@@ -9,12 +9,19 @@ import { ActionButtonV2 } from './ActionButtonV2';
 import { DEFAULT_SETTINGS } from 'src/settings';
 import { SETTINGS_READ_ONLY } from 'src/main';
 import { SwipeActionButton } from './SwipeActionButton';
+import { calculateDate } from 'src/dateUtil';
+import { notice, Level } from 'src/notice';
 
 export default class TodoItem extends Item implements ViewModel {
 	static HTML_CLS = 'todotxt-item';
 	static ID_REGEX = /^item-\S+-(\d+)$/;
 
 	#id: string;
+
+	lastTap = 0;
+	startTime = 0;
+	startX = 0;
+	startY = 0;
 
 	constructor(text: string) {
 		super(text);
@@ -46,11 +53,7 @@ export default class TodoItem extends Item implements ViewModel {
 			cls: 'todotxt-item-content',
 		});
 
-		const checkbox = content.createEl('input', {
-			type: 'checkbox',
-			cls: 'task-list-item-checkbox',
-		});
-		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
+		this.buildCheckbox(content);
 
 		const prio = this.priority();
 		if (prio && !this.complete()) {
@@ -61,18 +64,41 @@ export default class TodoItem extends Item implements ViewModel {
 		content.append(description);
 		// @ts-ignore
 		if (app.isMobile) {
-			description.addEventListener('touchend', () => {
-				if (!this.complete()) {
-					const active = itemDiv.getAttr('active') !== null;
-					Array.from(document.getElementsByClassName(this.htmlCls)).forEach(el => {
-						el.toggleAttribute('active', false);
-					});
-					itemDiv.toggleAttribute('active', !active);
-				}
+			content.addEventListener('touchstart', (e) => {
+				this.startTime = Date.now();
+				this.startX = e.touches[0].clientX;
+				this.startY = e.touches[0].clientY;
 			});
+
+			content.addEventListener('touchend', (e) => {
+				// Prevent double tap
+				const currentTime = Date.now();
+				const tapLength = currentTime - this.startTime;
+
+				if (tapLength > 200) return; // too slow
+
+				const deltaX = Math.abs(e.changedTouches[0].clientX - this.startX);
+				const deltaY = Math.abs(e.changedTouches[0].clientY - this.startY);
+
+				if (deltaX > 10 || deltaY > 10) return; // moved too much
+
+				if (currentTime - this.lastTap < 300) return; // double tap
+
+				e.preventDefault();
+				this.lastTap = currentTime;
+
+				const active = itemDiv.getAttr('active') !== null;
+				Array.from(document.getElementsByClassName(this.htmlCls)).forEach((el) => {
+					el.toggleAttribute('active', false);
+				});
+				itemDiv.toggleAttribute('active', !active);
+			});
+
+			itemDiv.append(this.buildActionsHtml());
+		} else {
+			content.append(this.buildActionsHtml());
 		}
 
-		content.append(this.buildActionsHtml());
 		return itemDiv;
 	}
 
@@ -123,7 +149,7 @@ export default class TodoItem extends Item implements ViewModel {
 		processExtensions(this);
 	}
 
-	getDueInfo(): { htmlCls: string, priority: number } | undefined {
+	getDueInfo(): { htmlCls: string; priority: number } | undefined {
 		const val = this.getExtensionValuesAndBodyIndices('due').first()?.value;
 		if (!val) {
 			return;
@@ -135,7 +161,7 @@ export default class TodoItem extends Item implements ViewModel {
 		const now = moment();
 		if (due.isSame(now, 'd')) {
 			htmlCls = 'todotxt-due-today';
-			priority = 3
+			priority = 3;
 		} else if (due.isBefore(now, 'd')) {
 			htmlCls = 'todotxt-overdue';
 			priority = 4;
@@ -144,7 +170,7 @@ export default class TodoItem extends Item implements ViewModel {
 			priority = 2;
 		} else if (due.diff(now, 'd') <= 30) {
 			htmlCls = 'todotxt-due-month';
-			priority = 1
+			priority = 1;
 		} else {
 			htmlCls = 'todotxt-due-later';
 			priority = 0;
@@ -226,11 +252,11 @@ export default class TodoItem extends Item implements ViewModel {
 				description.setAttr('tabindex', 0);
 				description.contentEditable = 'true';
 
-				description.addEventListener('focus', e => {
+				description.addEventListener('focus', (e) => {
 					description.spellcheck = true;
 				});
 
-				description.addEventListener('blur', e => {
+				description.addEventListener('blur', (e) => {
 					description.spellcheck = false;
 					if (description.textContent) {
 						description.textContent = description.textContent.trimEnd();
@@ -241,7 +267,7 @@ export default class TodoItem extends Item implements ViewModel {
 					}
 				});
 
-				description.addEventListener('keydown', e => {
+				description.addEventListener('keydown', (e) => {
 					// console.log(e.key)
 					if (e.key === 'Enter') {
 						e.preventDefault();
@@ -330,37 +356,29 @@ export default class TodoItem extends Item implements ViewModel {
 
 		// @ts-ignore
 		if (app.isMobile) {
-			actions.append(new SwipeActionButton(
-				ActionType.EDIT,
-				'Edit',
-				() => this.openEditModal(actions),
-			).render());
+			if (!this.complete()) {
+				actions.append(
+					new SwipeActionButton(ActionType.EDIT, 'Edit', () =>
+						this.openEditModal(actions),
+					).render(),
+				);
 
-			actions.append(new SwipeActionButton(
-				ActionType.STAR,
-				'Prioritize',
-				e => this.prioritize(e),
-			).render());
+				actions.append(
+					new SwipeActionButton(ActionType.STAR, 'Prioritize', (e) => this.prioritize(e)).render(),
+				);
+			}
 
-			actions.append(new SwipeActionButton(
-				ActionType.DEL,
-				'Delete',
-				() => this.handleDelete(actions),
-			).render());
+			actions.append(
+				new SwipeActionButton(ActionType.DEL, 'Delete', () => this.handleDelete(actions)).render(),
+			);
 
 			return actions;
 		}
 
 		if (this.priority() === null && !this.complete()) {
-			actions.append(new ActionButtonV2(
-				ActionType.STAR,
-				e => this.prioritize(e),
-			).render());
+			actions.append(new ActionButtonV2(ActionType.STAR, (e) => this.prioritize(e)).render());
 		}
-		actions.append(new ActionButtonV2(
-			ActionType.DEL,
-			() => this.handleDelete(actions),
-		).render());
+		actions.append(new ActionButtonV2(ActionType.DEL, () => this.handleDelete(actions)).render());
 
 		return actions;
 	}
@@ -373,15 +391,15 @@ export default class TodoItem extends Item implements ViewModel {
 		if (prio !== null && prio > 'D') {
 			opts.push(prio);
 		}
-		opts.forEach(opt => {
+		opts.forEach((opt) => {
 			if (opt === 'none') {
 				select.add(new Option('(-)', opt, true, !this.priority()));
 			} else {
 				select.add(new Option(opt, opt, false, this.priority() === opt));
 			}
-		})
+		});
 
-		select.addEventListener('change', e => {
+		select.addEventListener('change', (e) => {
 			const t = e.target as HTMLSelectElement;
 			if (t.value === 'none') {
 				this.clearPriority();
@@ -398,8 +416,11 @@ export default class TodoItem extends Item implements ViewModel {
 
 	private prioritize(e: Event) {
 		const t = e.target as SVGElement;
-		this.setPriority(this.priority() ? null
-			: SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority);
+		this.setPriority(
+			this.priority()
+				? null
+				: SETTINGS_READ_ONLY.defaultPriority ?? DEFAULT_SETTINGS.defaultPriority,
+		);
 		updateTodoItemFromEl(t, this);
 	}
 
@@ -420,5 +441,68 @@ export default class TodoItem extends Item implements ViewModel {
 		const { from, to, todoList } = TodoList.from(el);
 		todoList.removeItem(this.idx!);
 		update(from, to, todoList);
+	}
+
+	private buildCheckbox(parentEl: HTMLElement): HTMLInputElement {
+		const checkbox = parentEl.createEl('input', {
+			type: 'checkbox',
+			cls: 'task-list-item-checkbox',
+		}) as HTMLInputElement;
+		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
+		checkbox.addEventListener('touchend', (e) => {
+			const { from, to, todoList } = TodoList.from(checkbox);
+			if (this.complete()) {
+				this.clearCompleted();
+				this.setComplete(false);
+			} else {
+				this.setCompleted(new Date());
+				// if rec extension exists, automatically add new item with due and rec ext
+				const recExt = this.getExtensionValuesAndBodyIndices(ExtensionType.RECURRING);
+				if (recExt.at(0)) {
+					const recurringTask = this.createRecurringTask(recExt[0].value, this);
+					if (recurringTask) {
+						todoList.add(recurringTask);
+					}
+				}
+			}
+			todoList.removeItem(this.idx!);
+			todoList.add(this);
+			update(from, to, todoList);
+			e.preventDefault();
+			e.stopPropagation();
+		});
+
+		return checkbox;
+	}
+
+	private createRecurringTask(rec: string, originalItem: TodoItem): TodoItem | undefined {
+		try {
+			const hasPlusPrefix = rec.startsWith('+');
+			const { date, details } = calculateDate(
+				rec,
+				hasPlusPrefix
+					? moment(originalItem.getExtensionValuesAndBodyIndices(ExtensionType.DUE).first()?.value)
+					: null,
+			);
+			const newItem = new TodoItem('');
+			newItem.setPriority(originalItem.priority());
+			newItem.setBody(originalItem.getBody());
+			newItem.setExtension(ExtensionType.DUE, date);
+
+			let msg = 'Created recurring task due: ' + date;
+			if (details) {
+				let deets = details;
+				if (hasPlusPrefix) {
+					deets += ', + option';
+				}
+				msg += `\n(${deets})`;
+			}
+			notice(msg, Level.INFO, 10000);
+
+			return newItem;
+		} catch (e) {
+			console.error(e);
+			notice('Failed to create recurring task', Level.ERR);
+		}
 	}
 }
