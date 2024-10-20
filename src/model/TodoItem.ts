@@ -49,17 +49,20 @@ export default class TodoItem extends Item implements ViewModel {
 			itemDiv.setAttr('checked', true);
 		}
 
-		const content = itemDiv.createEl('div', {
-			cls: 'todotxt-item-content',
+		const row = itemDiv.createEl('div', {
+			cls: 'todotxt-item-row',
 		});
 
-		this.buildCheckbox(content);
+		this.buildCheckbox(row);
 
 		const prio = this.priority();
 		if (prio && !this.complete()) {
-			content.append(this.buildPriorityDropDownBadgeHtml());
+			row.append(this.buildPriorityDropDownBadgeHtml());
 		}
 
+		const content = row.createEl('span', {
+			cls: 'todotxt-item-content',
+		});
 		const description = this.buildDescriptionHtml();
 		content.append(description);
 		// @ts-ignore
@@ -94,7 +97,7 @@ export default class TodoItem extends Item implements ViewModel {
 				itemDiv.toggleAttribute('active', !active);
 			});
 
-			itemDiv.append(this.buildActionsHtml());
+			row.append(this.buildActionsHtml());
 		} else {
 			content.append(this.buildActionsHtml());
 		}

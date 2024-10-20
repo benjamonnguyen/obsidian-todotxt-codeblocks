@@ -66,23 +66,31 @@ h2.todotxt-list-title {
 }
 
 .todotxt-item {
-    padding-top: var(--list-spacing);
-    padding-bottom: var(--list-spacing);
+    padding: 0.3rem;
 }
 
 .is-mobile .todotxt-item {
     display: flex;
     position: relative;
-    padding-top: 0.8rem;
-    padding-bottom: 0.8rem;
+    padding: 0.6rem;
     margin-right: -0.5rem;
     margin-left: -0.5rem;
 }
 
 .todotxt-item .todotxt-priority {
+    border-radius: var(--radius-s);
+}
+
+body:not(.is-phone) .todotxt-item .todotxt-priority {
     top: -0.1em;
     position: relative;
-    border-radius: var(--radius-s);
+}
+
+.is-phone .todotxt-item .todotxt-priority {
+    margin-right: 0.5rem;
+    /* TODO temporary measure until implement putting a bottom bar
+     * for prio, due/rec date
+     */
 }
 
 select.todotxt-priority {
@@ -136,19 +144,24 @@ input.task-list-item-checkbox {
     width: calc(var(--checkbox-size)*1.1) !important;
     height: calc(var(--checkbox-size)*1.1) !important;
     margin-inline-start: -0.5rem !important;
-}
-
-.todotxt-item-content {
-    display: inline-block;
-    padding-right: 0.3rem;
-    margin-left: 1.3rem;
-    text-indent: -16px;
+    top: 0 !important;
 }
 
 .is-phone .todotxt-item-content {
-    display: inline;
+    width: 100%;
+}
+
+.todotxt-item-row {
+    padding-right: 0.3rem;
+    margin-left: 0.8rem;
+    text-indent: -10px;
+}
+
+.is-phone .todotxt-item-row {
+    display: flex;
+    align-items: center;
     text-indent: 0;
-    margin-left: 1rem;
+    margin-left: 0.4rem;
     width: 100%;
 }
 
@@ -171,8 +184,8 @@ input.task-list-item-checkbox {
     background-color: var(--todotxt-color-red-600);
 }
 
-input[type="checkbox"]:checked~.todotxt-item-description,
-input[type="checkbox"]:checked~.todotxt-item-description * {
+input[type="checkbox"]:checked~.todotxt-item-content .todotxt-item-description,
+input[type="checkbox"]:checked~.todotxt-item-content .todotxt-item-description * {
     color: var(--checklist-done-color);
     text-decoration: var(--checklist-done-decoration);
 }
