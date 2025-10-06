@@ -452,7 +452,7 @@ export default class TodoItem extends Item implements ViewModel {
 			cls: 'task-list-item-checkbox',
 		}) as HTMLInputElement;
 		checkbox.setAttr(this.complete() ? 'checked' : 'unchecked', true);
-		checkbox.addEventListener('touchend', (e) => {
+		checkbox.addEventListener('click', (e) => {
 			const { from, to, todoList } = TodoList.from(checkbox);
 			if (this.complete()) {
 				this.clearCompleted();
